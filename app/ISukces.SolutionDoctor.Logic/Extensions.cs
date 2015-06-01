@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ISukces.SolutionDoctor.Logic
 {
@@ -27,5 +28,13 @@ namespace ISukces.SolutionDoctor.Logic
         }
 
         #endregion Static Methods
+
+        public static void CheckValidForRead(this FileInfo file)
+        {
+            if (file == null) 
+                throw new ArgumentNullException("file");
+            if (!file.Exists)
+                throw new FileNotFoundException(string.Format("File {0} doesn't exist", file.FullName));
+        }
     }
 }

@@ -20,7 +20,19 @@ namespace ISukces.SolutionDoctor
             try
             {
                 var options = CommandLineOptions.Parse(args);
-                if (options == null || options.Directories.Count < 1)
+                if (options == null)
+                {
+                    ShowHelp();
+                    return;                    
+                }
+                if (options.Directories.Any())
+                    Directory.SetCurrentDirectory(options.Directories.First());
+                if (!string.IsNullOrEmpty(options.SaveConfigFileName))
+                {
+                    options.Save(new FileInfo( options.SaveConfigFileName));
+                    Console.WriteLine("Config saved into file {0}.", options.SaveConfigFileName);
+                }
+                if (options.Directories.Count < 1)
                 {
                     ShowHelp();
                     return;
@@ -57,9 +69,13 @@ namespace ISukces.SolutionDoctor
             Console.WriteLine("use:");
             Console.WriteLine("    SolutionDoctor {options} {folder name}");
             Console.WriteLine("    options:");
-            Console.WriteLine("    -fix      Try to fix errors if possible");
-            Console.WriteLine("    -onlyBig  Show only big problems");
-            Console.WriteLine("    -exclude {solution name} Exclude solution. This option can be used multiple times.");            
+            Console.WriteLine("    -fix                     Try to fix errors if possible");
+            Console.WriteLine("    -onlyBig                 Show only big problems");
+            Console.WriteLine("    -exclude {solution name} Exclude solution. This option can be used multiple times.");
+            Console.WriteLine("    -saveOptions {file name} Save parsed command line options into file");
+            Console.WriteLine("    -cfg {file name}         Load options from file");
+        
+        
         }
 
         #endregion Static Methods

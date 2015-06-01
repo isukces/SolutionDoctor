@@ -1,6 +1,7 @@
 using System.Xml.Linq;
+using ISukces.SolutionDoctor.Logic.Vs;
 
-namespace ISukces.SolutionDoctor.Logic.Vs
+namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class NugetPackage
     {

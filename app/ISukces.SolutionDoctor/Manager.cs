@@ -71,7 +71,7 @@ static internal class Manager
     public static async Task Process(string dir, CommandLineOptions options)
     {
         var doctor = new Doctor();
-        await doctor.ScanSolutionsAsync(new DirectoryInfo(dir), options.Exclude);
+        await doctor.ScanSolutionsAsync(new DirectoryInfo(dir), options.ExcludeSolutions);
         var problems = doctor.CheckAll().ToList();
         if (problems.Count == 0)
         {

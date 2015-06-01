@@ -1,6 +1,6 @@
 using System;
 
-namespace ISukces.SolutionDoctor.Logic.Vs
+namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class NugetVersion : IEquatable<NugetVersion>, IComparable<NugetVersion>
     {
@@ -21,6 +21,9 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         public static NugetVersion Parse(string ver)
         {
             if (ver == null) throw new ArgumentNullException("ver");
+            ver = ver.Trim();
+            if (ver.StartsWith("[") && ver.EndsWith("]"))
+                ver = ver.Substring(1, ver.Length - 2).Trim();
             var i = ver.IndexOf("-");
             var result = new NugetVersion();
             if (i >= 0)

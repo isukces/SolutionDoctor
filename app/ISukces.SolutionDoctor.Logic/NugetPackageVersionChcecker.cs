@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;
 

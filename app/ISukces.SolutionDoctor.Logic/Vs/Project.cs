@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using ISukces.SolutionDoctor.Logic.NuGet;
 
 namespace ISukces.SolutionDoctor.Logic.Vs
 {

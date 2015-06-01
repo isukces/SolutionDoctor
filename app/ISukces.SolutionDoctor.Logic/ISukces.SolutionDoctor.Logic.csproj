@@ -35,6 +35,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,11 +52,13 @@
     <Compile Include="Vs\AppConfig.cs" />
     <Compile Include="Vs\AssemblyBinding.cs" />
     <Compile Include="Doctor.cs" />
-    <Compile Include="Vs\NugetVersion.cs" />
-    <Compile Include="Vs\NugetPackage.cs" />
+    <Compile Include="NuGet\NugetDependency.cs" />
+    <Compile Include="NuGet\NugetVersion.cs" />
+    <Compile Include="NuGet\NugetPackage.cs" />
     <Compile Include="Problems\Problem.cs" />
     <Compile Include="Problems\SolutionsInManyFoldersProblem.cs" />
     <Compile Include="Problems\WrongBindingRedirectProblem.cs" />
+    <Compile Include="NuGet\Nuspec.cs" />
     <Compile Include="Vs\Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Vs\Solution.cs" />

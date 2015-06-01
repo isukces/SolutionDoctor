@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;
 
@@ -15,6 +16,7 @@ namespace ISukces.SolutionDoctor.Logic
         public Doctor()
         {
             Solutions = new List<Solution>();
+            LocalNugetRepositiories = new Dictionary<string, Dictionary<string, Nuspec>>(StringComparer.OrdinalIgnoreCase);
         }
 
         #endregion Constructors
@@ -33,7 +35,7 @@ namespace ISukces.SolutionDoctor.Logic
                 yield return new SolutionsInManyFoldersProblem
                 {
                     ProjectFilename = projectGroup.Filename,
-                    Folders = projectGroup.Projects.Select(a=>a.Solution.SolutionFile.FullName).ToArray(),
+                    Folders = projectGroup.Projects.Select(a => a.Solution.SolutionFile.FullName).ToArray(),
                     ProjectHasNugetPackages = projectGroup.Projects.First().Project.NugetPackages.Any()
                 };
             }
@@ -114,6 +116,8 @@ namespace ISukces.SolutionDoctor.Logic
 
         public List<Solution> Solutions { get; set; }
 
+        public Dictionary<string, Dictionary<string, Nuspec>> LocalNugetRepositiories { get; private set; }
+
         #endregion Properties
 
         public async Task ScanSolutionsAsync(DirectoryInfo di, string[] excludeItems)
@@ -123,11 +127,33 @@ namespace ISukces.SolutionDoctor.Logic
                 foreach (var i in di.GetFiles("*.sln"))
                 {
                     if (!Exlude(i, excludeItems))
-                        Solutions.Add(new Solution(i));
+                    {
+                        try
+                        {
+                            var sol = new Solution(i);
+                            Solutions.Add(sol);
+                            ScanLocalNugets(i.Directory);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("solution {0} can't be parsed", i.FullName);
+                        }
+
+                    }
                 }
                 foreach (var i in di.GetDirectories())
                     await ScanSolutionsAsync(i, excludeItems);
             }
+        }
+
+        private void ScanLocalNugets(DirectoryInfo directory)
+        {
+            directory = new DirectoryInfo(Path.Combine(directory.FullName, "packages"));
+            if (LocalNugetRepositiories.ContainsKey(directory.FullName))
+                return;
+            var repositories = Nuspec.GetRepositories(directory);
+            LocalNugetRepositiories[directory.FullName] = repositories.ToDictionary(
+                nuspec => nuspec.FullId, nuspec => nuspec);
         }
     }
 
