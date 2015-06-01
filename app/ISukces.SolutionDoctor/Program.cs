@@ -59,7 +59,7 @@ namespace ISukces.SolutionDoctor
             Console.WriteLine("    options:");
             Console.WriteLine("    -fix      Try to fix errors if possible");
             Console.WriteLine("    -onlyBig  Show only big problems");
-            
+            Console.WriteLine("    -exclude {solution name} Exclude solution. This option can be used multiple times.");            
         }
 
         #endregion Static Methods

@@ -19,17 +19,24 @@ namespace ISukces.SolutionDoctor.Logic
 
         #endregion Constructors
 
-        #region Methods
+        #region Static Methods
 
-        // Public Methods 
+        // Private Methods 
 
-        public IEnumerable<Problem> CheckAll()
+        private static IEnumerable<Problem> Check1(IList<ProjectGroup> groupedProjects)
         {
-            var groupedProjects = GetGroupedProjects();
-            var p1 = Check1(groupedProjects);
-            var p2 = CheckNugetPackageAssemblyBinding(groupedProjects);
-            var p3 = NugetPackageVersionChcecker.Check(groupedProjects);
-            return p1.Concat(p2).Concat(p3);
+            foreach (var projectGroup in groupedProjects)
+            {
+                var tmp = projectGroup.Projects.Select(a => a.Solution.SolutionFile.Directory.FullName).ToArray();
+                var unique = tmp.Select(a => a.ToLowerInvariant()).Distinct().ToArray();
+                if (unique.Length < 2) continue;
+                yield return new SolutionsInManyFoldersProblem
+                {
+                    ProjectFilename = projectGroup.Filename,
+                    Folders = projectGroup.Projects.Select(a=>a.Solution.SolutionFile.FullName).ToArray(),
+                    ProjectHasNugetPackages = projectGroup.Projects.First().Project.NugetPackages.Any()
+                };
+            }
         }
 
         private static IEnumerable<Problem> CheckNugetPackageAssemblyBinding(IList<ProjectGroup> groupedProjects)
@@ -59,23 +66,27 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
-        // Private Methods 
-
-        private static IEnumerable<Problem> Check1(IList<ProjectGroup> groupedProjects)
+        private static bool Exlude(FileInfo fileInfo, string[] excludeItems)
         {
-            foreach (var projectGroup in groupedProjects)
-            {
-                var tmp = projectGroup.Projects.Select(a => a.Solution.SolutionFile.Directory.FullName).ToArray();
-                var unique = tmp.Select(a => a.ToLowerInvariant()).Distinct().ToArray();
-                if (unique.Length < 2) continue;                
-                yield return new SolutionsInManyFoldersProblem
-                {
-                    ProjectFilename = projectGroup.Filename,
-                    Folders = unique,
-                    ProjectHasNugetPackages = projectGroup.Projects.First().Project.NugetPackages.Any()
-                };
-            }
+            var n = fileInfo.FullName.ToLower();
+            return excludeItems.Any(i => n.EndsWith(i));
         }
+
+        #endregion Static Methods
+
+        #region Methods
+
+        // Public Methods 
+
+        public IEnumerable<Problem> CheckAll()
+        {
+            var groupedProjects = GetGroupedProjects();
+            var p1 = Check1(groupedProjects);
+            var p2 = CheckNugetPackageAssemblyBinding(groupedProjects);
+            var p3 = NugetPackageVersionChcecker.Check(groupedProjects);
+            return p1.Concat(p2).Concat(p3);
+        }
+        // Private Methods 
 
         private List<ProjectGroup> GetGroupedProjects()
         {
@@ -105,14 +116,17 @@ namespace ISukces.SolutionDoctor.Logic
 
         #endregion Properties
 
-        public async Task ScanSolutionsAsync(DirectoryInfo di)
+        public async Task ScanSolutionsAsync(DirectoryInfo di, string[] excludeItems)
         {
             if (di.Exists)
             {
                 foreach (var i in di.GetFiles("*.sln"))
-                    Solutions.Add(new Solution(i));
+                {
+                    if (!Exlude(i, excludeItems))
+                        Solutions.Add(new Solution(i));
+                }
                 foreach (var i in di.GetDirectories())
-                    await ScanSolutionsAsync(i);
+                    await ScanSolutionsAsync(i, excludeItems);
             }
         }
     }

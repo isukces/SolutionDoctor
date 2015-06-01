@@ -32,7 +32,16 @@ namespace ISukces.SolutionDoctor.Logic
             {
                 if (!string.IsNullOrEmpty(optionName))
                 {
-                    result._options[optionName] = item;
+                    if (IsListOption(optionName))
+                    {
+                        string current;
+                        if (result._options.TryGetValue(optionName, out current))
+                            result._options[optionName] = current + "|" + item.Trim();
+                        else
+                            result._options[optionName] = item;
+                    }
+                    else
+                        result._options[optionName] = item;
                     optionName = null;
                     continue;
                 }
@@ -49,8 +58,16 @@ namespace ISukces.SolutionDoctor.Logic
                 }
                 result.Directories.Add(item);
             }
+            {
+                string current;
+                result._options.TryGetValue("exclude", out current);
+                result.Exclude = (current ?? "").Split('|').Select(a => a.ToLower()).Distinct().ToArray();
+            }
             return result;
         }
+
+        public string[] Exclude { get; private set; }
+
         // Private Methods 
 
         private static bool IsBoolOption(string optionName)
@@ -58,6 +75,13 @@ namespace ISukces.SolutionDoctor.Logic
             return
                 String.Equals(optionName, "fix", StringComparison.CurrentCultureIgnoreCase)
                 || String.Equals(optionName, "onlyBig", StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        private static bool IsListOption(string optionName)
+        {
+            return
+                String.Equals(optionName, "exclude", StringComparison.CurrentCultureIgnoreCase);
+
         }
 
         #endregion Static Methods
