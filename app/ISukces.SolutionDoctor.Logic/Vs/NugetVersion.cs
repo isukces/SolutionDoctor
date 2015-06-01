@@ -2,7 +2,7 @@ using System;
 
 namespace ISukces.SolutionDoctor.Logic.Vs
 {
-    public class NugetVersion : IEquatable<NugetVersion>
+    public class NugetVersion : IEquatable<NugetVersion>, IComparable<NugetVersion>
     {
         #region Static Methods
 
@@ -42,6 +42,19 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         #region Methods
 
         // Public Methods 
+
+        public int CompareTo(NugetVersion other)
+        {
+            if (other == null)
+                return 1;
+            var a = NormalizedVersion.CompareTo(other.NormalizedVersion);
+            if (a != 0) return a;
+            var tmp1 = !string.IsNullOrEmpty(Suffix);
+            var tmp2 = !string.IsNullOrEmpty(other.Suffix);
+            a = tmp1.CompareTo(tmp2);
+            if (a != 0) return a;
+            return (Suffix ?? "").CompareTo(other.Suffix ?? "");
+        }
 
         public bool Equals(NugetVersion other)
         {
