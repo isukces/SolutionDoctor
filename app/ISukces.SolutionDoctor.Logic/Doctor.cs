@@ -28,7 +28,8 @@ namespace ISukces.SolutionDoctor.Logic
             var groupedProjects = GetGroupedProjects();
             var p1 = Check1(groupedProjects);
             var p2 = CheckNugetPackageAssemblyBinding(groupedProjects);
-            return p1.Concat(p2);
+            var p3 = NugetPackageVersionChcecker.Check(groupedProjects);
+            return p1.Concat(p2).Concat(p3);
         }
 
         private static IEnumerable<Problem> CheckNugetPackageAssemblyBinding(IList<ProjectGroup> groupedProjects)
@@ -47,8 +48,7 @@ namespace ISukces.SolutionDoctor.Logic
                     if (redirect == null) continue;
                     if (redirect.NewVersion != package.Version)
                     {
-                        yield return new WrongBindingRedirectProblem(
-                            )
+                        yield return new WrongBindingRedirectProblem
                         {
                             ProjectFilename = sampleProject.File.FullName,
                             Redirect = redirect,
@@ -117,7 +117,7 @@ namespace ISukces.SolutionDoctor.Logic
         }
     }
 
-    internal class ProjectGroup
+    public class ProjectGroup
     {
         #region Properties
 
@@ -128,7 +128,7 @@ namespace ISukces.SolutionDoctor.Logic
         #endregion Properties
     }
 
-    internal class ProjectPlusSolution
+    public class ProjectPlusSolution
     {
         #region Properties
 

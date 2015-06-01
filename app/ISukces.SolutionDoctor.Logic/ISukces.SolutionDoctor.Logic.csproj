@@ -44,7 +44,9 @@
   <ItemGroup>
     <Compile Include="CommandLineOptions.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="NugetPackageVersionChcecker.cs" />
     <Compile Include="Problems\ProblemFix.cs" />
+    <Compile Include="Problems\OldNugetVersionProblem.cs" />
     <Compile Include="Vs\AppConfig.cs" />
     <Compile Include="Vs\AssemblyBinding.cs" />
     <Compile Include="Doctor.cs" />

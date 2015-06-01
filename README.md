@@ -62,3 +62,10 @@ for example
 ``` 
 
 This problem can be solved automatically.
+
+
+## Nuget package versions inconsistency
+
+Problem occurs when two or more projects refers to different version of the same NuGet package.
+
+This problem can't be solved automatically.

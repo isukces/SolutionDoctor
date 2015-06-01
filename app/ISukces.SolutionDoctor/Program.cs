@@ -36,6 +36,14 @@ namespace ISukces.SolutionDoctor
                 task.Wait();
 
             }
+            catch (AggregateException e)
+            {
+                foreach (var i in e.InnerExceptions)
+                {
+                    Console.WriteLine("Error: " + i.Message);
+                }
+                ShowHelp();
+            }
             catch (Exception e)
             {
                 Console.WriteLine("Error: " + e.Message);
