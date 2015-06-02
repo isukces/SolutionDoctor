@@ -7,9 +7,9 @@ using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;
 using JetBrains.Annotations;
 
-namespace ISukces.SolutionDoctor.Logic
+namespace ISukces.SolutionDoctor.Logic.Checkers
 {
-    class CheckReferencesWithoutNugets
+    class ReferencesWithoutNugetsChecker
     {
         #region Static Methods
 
@@ -19,7 +19,7 @@ namespace ISukces.SolutionDoctor.Logic
         {
             // var aa = localNugetRepositiories.GetUnique(a => a.Location.FullName.ToLower(), a => a);
 
-            var checker = new CheckReferencesWithoutNugets
+            var checker = new ReferencesWithoutNugetsChecker
             {
                 _projects = projects.ToList(), // .Select(a => a.Projects.First()).ToList()
                 _nuspecs = (from nuspec in localNugetRepositiories

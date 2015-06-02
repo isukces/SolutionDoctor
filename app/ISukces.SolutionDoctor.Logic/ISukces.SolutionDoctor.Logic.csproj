@@ -44,16 +44,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CheckReferencesWithoutNugets.cs" />
+    <Compile Include="Checkers\ReferencesWithoutNugetsChecker.cs" />
     <Compile Include="CommandLineOptions.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FileName.cs" />
+    <Compile Include="Checkers\NugetPackageAssemblyBindingChecker.cs" />
     <Compile Include="NuGet\NugetVersionRange.cs" />
     <Compile Include="NuGet\RangeEdge.cs" />
     <Compile Include="Problems\NuGetPackageShouldBeReferencedProblem.cs" />
-    <Compile Include="NugetPackageVersionChcecker.cs" />
+    <Compile Include="Checkers\NugetPackageVersionChcecker.cs" />
     <Compile Include="Problems\ProblemFix.cs" />
     <Compile Include="Problems\OldNugetVersionProblem.cs" />
+    <Compile Include="Checkers\SolutionsInManyFoldersChecker.cs" />
     <Compile Include="Vs\AppConfig.cs" />
     <Compile Include="Vs\AssemblyBinding.cs" />
     <Compile Include="Doctor.cs" />

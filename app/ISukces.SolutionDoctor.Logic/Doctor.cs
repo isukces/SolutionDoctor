@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ISukces.SolutionDoctor.Logic.Checkers;
 using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;
@@ -25,49 +26,6 @@ namespace ISukces.SolutionDoctor.Logic
 
         // Private Methods 
 
-        private static IEnumerable<Problem> Check1(IList<ProjectGroup> groupedProjects)
-        {
-            foreach (var projectGroup in groupedProjects)
-            {
-                var tmp = projectGroup.Projects.Select(a => a.Solution.SolutionFile.Directory.FullName).ToArray();
-                var unique = tmp.Select(a => a.ToLowerInvariant()).Distinct().ToArray();
-                if (unique.Length < 2) continue;
-                yield return new SolutionsInManyFoldersProblem
-                {
-                    ProjectFilename = projectGroup.Filename,
-                    Folders = projectGroup.Projects.Select(a => a.Solution.SolutionFile.FullName).ToArray(),
-                    ProjectHasNugetPackages = projectGroup.Projects.First().Project.NugetPackages.Any()
-                };
-            }
-        }
-
-        private static IEnumerable<Problem> CheckNugetPackageAssemblyBinding(IList<ProjectGroup> groupedProjects)
-        {
-            foreach (var i in groupedProjects)
-            {
-                var sampleProject = i.Projects.First().Project;
-                var assemblyBindings = sampleProject.AssemblyBindings;
-                var packageVersion = sampleProject.NugetPackages;
-                if (!assemblyBindings.Any() || !packageVersion.Any()) continue;
-                foreach (var package in packageVersion)
-                {
-                    var redirect =
-                        assemblyBindings.FirstOrDefault(
-                            a => String.Equals(a.Name, package.Id, StringComparison.OrdinalIgnoreCase));
-                    if (redirect == null) continue;
-                    if (redirect.NewVersion != package.Version)
-                    {
-                        yield return new WrongBindingRedirectProblem
-                        {
-                            ProjectFilename = sampleProject.Location,
-                            Redirect = redirect,
-                            Package = package
-                        };
-                    }
-                }
-            }
-        }
-
         private static bool Exlude(FileInfo fileInfo, string[] excludeItems)
         {
             var n = fileInfo.FullName.ToLower();
@@ -83,11 +41,12 @@ namespace ISukces.SolutionDoctor.Logic
         public IEnumerable<Problem> CheckAll()
         {
             var groupedProjects = GetGroupedProjects();
-            var p1 = Check1(groupedProjects);
-            var p2 = CheckNugetPackageAssemblyBinding(groupedProjects);
-            var p3 = NugetPackageVersionChcecker.Check(groupedProjects);  
-            var p4 = CheckReferencesWithoutNugets.Check(
-                groupedProjects.Select(a => a.Projects.First().Project), 
+            var uniqueProjects = groupedProjects.Select(a => a.Projects.First().Project).ToList();
+            var p1 = SolutionsInManyFoldersChecker.Check(groupedProjects);
+            var p2 = NugetPackageAssemblyBindingChecker.Check(uniqueProjects);
+            var p3 = NugetPackageVersionChcecker.Check(uniqueProjects);  
+            var p4 = ReferencesWithoutNugetsChecker.Check(
+                uniqueProjects, 
                 LocalNugetRepositiories.Values.SelectMany(a=>a.Values));
             return p1.Concat(p2).Concat(p3).Concat(p4);
         }

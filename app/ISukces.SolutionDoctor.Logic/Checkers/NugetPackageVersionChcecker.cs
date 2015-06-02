@@ -5,7 +5,7 @@ using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;
 
-namespace ISukces.SolutionDoctor.Logic
+namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     public class NugetPackageVersionChcecker
     {
@@ -13,11 +13,11 @@ namespace ISukces.SolutionDoctor.Logic
 
         // Private Methods 
 
-        public static IEnumerable<Problem> Check(IList<ProjectGroup> groupedProjects)
+        public static IEnumerable<Problem> Check(IList<Project> projects)
         {
             var a = new NugetPackageVersionChcecker()
             {
-                _groupedProjects = groupedProjects
+                _projects = projects
             };
             return a.Check();
         }
@@ -28,7 +28,7 @@ namespace ISukces.SolutionDoctor.Logic
 
         // Private Methods 
 
-        private void Add(NugetPackage nugetPackage, FileName projectFile)
+        private void Add(FileName projectFile, NugetPackage nugetPackage)
         {
             PackageUsages ee;
             if (!_packages.TryGetValue(nugetPackage.Id, out ee))
@@ -38,25 +38,21 @@ namespace ISukces.SolutionDoctor.Logic
 
         private IEnumerable<Problem> Check()
         {
-            foreach (var i in _groupedProjects)
-            {
-                var project = i.Projects.First().Project;
+            foreach (var project in _projects)
                 foreach (var p in project.NugetPackages)
-                {
-                    Add(p, project.Location);
-                }
-            }
+                    Add(project.Location, p);
+            
             foreach (var usages in _packages.Values)
             {
                 var tmp = usages.Versions
                     .GroupBy(a => a.Value)
-                    .Select(a => new { Ver = a.Key, Projects = a.ToArray() })
-                    .OrderBy(a => a.Ver)
+                    .Select(a => new { PackageVersion = a.Key, Projects = a.ToArray() })
+                    .OrderBy(a => a.PackageVersion)
                     .ToArray();
                 if (tmp.Length < 2) continue;
-                var t = tmp.Last().Ver;
-                var newest = t.Version;
-                var wrong = tmp.Where(a => a.Ver.Version != newest).ToArray();
+                var acceptedVersion = tmp.Last().PackageVersion;
+                var newest = acceptedVersion.Version;
+                var wrong = tmp.Where(a => a.PackageVersion.Version != newest).ToArray();
                 foreach (var i in wrong)
                 {
                     foreach (var j in i.Projects)
@@ -64,7 +60,7 @@ namespace ISukces.SolutionDoctor.Logic
                         {
                             ProjectFilename = j.Key,
                             ReferencedVersion = j.Value ,
-                            NewestVersion = t   ,
+                            NewestVersion = acceptedVersion   ,
                             PackageId = usages.PackageId                            
                         };
                 }
@@ -77,7 +73,7 @@ namespace ISukces.SolutionDoctor.Logic
 
         #region Fields
 
-        IList<ProjectGroup> _groupedProjects;
+        IList<Project> _projects;
         readonly Dictionary<string, PackageUsages> _packages = new Dictionary<string, PackageUsages>(StringComparer.OrdinalIgnoreCase);
 
         #endregion Fields
