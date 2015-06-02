@@ -59,7 +59,7 @@ namespace ISukces.SolutionDoctor.Logic
                     {
                         yield return new WrongBindingRedirectProblem
                         {
-                            ProjectFilename = sampleProject.File.FullName,
+                            ProjectFilename = sampleProject.Location,
                             Redirect = redirect,
                             Package = package
                         };
@@ -85,21 +85,27 @@ namespace ISukces.SolutionDoctor.Logic
             var groupedProjects = GetGroupedProjects();
             var p1 = Check1(groupedProjects);
             var p2 = CheckNugetPackageAssemblyBinding(groupedProjects);
-            var p3 = NugetPackageVersionChcecker.Check(groupedProjects);
-            return p1.Concat(p2).Concat(p3);
+            var p3 = NugetPackageVersionChcecker.Check(groupedProjects);  
+            var p4 = CheckReferencesWithoutNugets.Check(
+                groupedProjects.Select(a => a.Projects.First().Project), 
+                LocalNugetRepositiories.Values.SelectMany(a=>a.Values));
+            return p1.Concat(p2).Concat(p3).Concat(p4);
         }
+
+     
+
         // Private Methods 
 
         private List<ProjectGroup> GetGroupedProjects()
         {
             var liqQuery = from solution in Solutions
                            from project in solution.Projects
-                           group new ProjectPlusSolution
-                           {
-                               Project = project,
-                               Solution = solution
-                           }
-                               by project.File.FullName.ToLowerInvariant()
+                               group new ProjectPlusSolution
+                               {
+                                   Project = project,
+                                   Solution = solution
+                               }
+                               by project.Location
                                into projectGroup
                                select new ProjectGroup
                                {
@@ -159,9 +165,14 @@ namespace ISukces.SolutionDoctor.Logic
 
     public class ProjectGroup
     {
+        public override string ToString()
+        {
+            return string.Format("project {0} in {1} solution(s)", Filename.Name, Projects.Length);
+        }
+
         #region Properties
 
-        public string Filename { get; set; }
+        public FileName Filename { get; set; }
 
         public ProjectPlusSolution[] Projects { get; set; }
 

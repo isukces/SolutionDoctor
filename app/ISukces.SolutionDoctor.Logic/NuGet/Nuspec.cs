@@ -43,6 +43,10 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         #region Static Methods
 
         // Public Methods 
+        public override string ToString()
+        {
+            return string.Format("nuspec: {0}", FullId);
+        }
 
         public static IEnumerable<Nuspec> GetRepositories(DirectoryInfo directory)
         {

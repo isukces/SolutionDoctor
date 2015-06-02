@@ -44,8 +44,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckReferencesWithoutNugets.cs" />
     <Compile Include="CommandLineOptions.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="FileName.cs" />
+    <Compile Include="NuGet\NugetVersionRange.cs" />
+    <Compile Include="NuGet\RangeEdge.cs" />
+    <Compile Include="Problems\NuGetPackageShouldBeReferencedProblem.cs" />
     <Compile Include="NugetPackageVersionChcecker.cs" />
     <Compile Include="Problems\ProblemFix.cs" />
     <Compile Include="Problems\OldNugetVersionProblem.cs" />
@@ -61,6 +66,7 @@
     <Compile Include="NuGet\Nuspec.cs" />
     <Compile Include="Vs\Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Vs\ProjectReference.cs" />
     <Compile Include="Vs\Solution.cs" />
   </ItemGroup>
   <ItemGroup>

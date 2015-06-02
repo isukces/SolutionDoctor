@@ -15,7 +15,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             var txt = string.Format(
                 "Project {0} refers to old package {1} version ({2} instead of {3})",
-                new FileInfo(ProjectFilename).Name,
+                ProjectFilename.Name,
                 PackageId,
                 ReferencedVersion,
                 NewestVersion

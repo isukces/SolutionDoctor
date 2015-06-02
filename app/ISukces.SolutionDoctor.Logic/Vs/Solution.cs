@@ -12,7 +12,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         public Solution(FileInfo solutionFile)
         {
             Projects = new List<Project>();
-            SolutionFile = solutionFile;
+            SolutionFile = new FileName(solutionFile);
             var lines = File.ReadAllLines(SolutionFile.FullName);
 
             var inProject = false;
@@ -41,6 +41,12 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         #region Methods
 
+        // Public Methods 
+
+        public override string ToString()
+        {
+            return string.Format("Solution {0}", SolutionFile.Name);
+        }
         // Private Methods 
 
         private Project TryParseProject(string line)
@@ -48,15 +54,16 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             var match = ProjectRegex.Match(line);
             if (!match.Success)
                 return null;
+            var fi = new FileInfo(Path.Combine(SolutionFile.Directory.FullName, match.Groups[3].Value));
             var project = new Project
             {
-                LocationUid = Guid.Parse(match.Groups[1].Value),
-                Name = match.Groups[2].Value,
+                // LocationUid = Guid.Parse(match.Groups[1].Value),
+                // Name = match.Groups[2].Value,
                 // ReSharper disable once PossibleNullReferenceException
-                File = new FileInfo(Path.Combine(SolutionFile.Directory.FullName, match.Groups[3].Value)),
-                ProjectUid = Guid.Parse(match.Groups[4].Value)
+                Location = new FileName(fi),
+                // ProjectUid = Guid.Parse(match.Groups[4].Value)
             };
-            return project.File.Exists
+            return project.Location.Exists
                 ? project
                 : null;
         }
@@ -71,12 +78,13 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         #region Fields
 
-        public FileInfo SolutionFile { get; private set; }
         const string ProjectRegexFilter = @"^Project\(\s*\""*{([^}]+)\}\""\s*\)\s*=\s*\""([^\""]+)\""\s*,\s*\""([^\""]+)\""\s*,\s*\s*\""*{([^}]+)\}\""\s*(.*)$";
 
         #endregion Fields
 
         #region Properties
+
+        public FileName SolutionFile { get; private set; }
 
         public List<Project> Projects { get; private set; }
 

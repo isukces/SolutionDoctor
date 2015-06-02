@@ -31,13 +31,13 @@ namespace ISukces.SolutionDoctor.Logic.Problems
                 string.Format("Set redirection to {0} for {1} package in project {2}", 
                     Package.Version.Version, 
                     Package.Id,
-                    new FileInfo(ProjectFilename).Name),
+                    ProjectFilename.Name),
                 FixMethod);
         }
 
         void FixMethod()
         {
-            var fn = new FileInfo(ProjectFilename).GetAppConfigFile();
+            var fn = ProjectFilename.GetAppConfigFile();
             var xml = new AppConfig(fn);
             if (!xml.Exists)
                 throw new Exception(string.Format("Config file {0} doesn't exist", fn.FullName));
@@ -58,11 +58,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         #region Properties
 
-        public string ConfigFile
+        public FileName ConfigFile
         {
             get
             {
-                return new FileInfo(ProjectFilename).GetPackagesConfigFile().FullName;
+                return ProjectFilename.GetPackagesConfigFile();
             }
         }
 

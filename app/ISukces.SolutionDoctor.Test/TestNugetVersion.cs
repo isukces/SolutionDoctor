@@ -83,4 +83,6 @@ namespace ISukces.SolutionDoctor.Test
 
         #endregion Static Methods
     }
+
+    
 }

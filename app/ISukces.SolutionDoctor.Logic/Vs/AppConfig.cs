@@ -11,17 +11,17 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 {
     public class AppConfig
     {
-        private readonly FileInfo _fileInfo;
+        private readonly FileName _fileName;
 
         #region Constructors
 
-        public AppConfig([NotNull] FileInfo fileInfo)
+        public AppConfig([NotNull] FileName fileName)
         {
-            _fileInfo = fileInfo;
-            if (fileInfo == null)
-                throw new ArgumentNullException("fileInfo");
-            if (fileInfo.Exists)
-                _xml = XDocument.Load(fileInfo.FullName);
+            _fileName = fileName;
+            if (fileName == null)
+                throw new ArgumentNullException("fileName");
+            if (fileName.Exists)
+                _xml = XDocument.Load(fileName.FullName);
         }
 
         #endregion Constructors
@@ -113,7 +113,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         public void Save()
         {
-            _xml.Save(_fileInfo.FullName);
+            _xml.Save(_fileName.FullName);
         }
     }
 

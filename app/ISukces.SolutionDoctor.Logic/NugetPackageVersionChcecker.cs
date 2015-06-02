@@ -28,12 +28,12 @@ namespace ISukces.SolutionDoctor.Logic
 
         // Private Methods 
 
-        private void Add(NugetPackage nugetPackage, string projectFullFilename)
+        private void Add(NugetPackage nugetPackage, FileName projectFile)
         {
             PackageUsages ee;
             if (!_packages.TryGetValue(nugetPackage.Id, out ee))
                 _packages[nugetPackage.Id] = ee = new PackageUsages(nugetPackage.Id);
-            ee.Add(projectFullFilename, nugetPackage);
+            ee.Add(projectFile, nugetPackage);
         }
 
         private IEnumerable<Problem> Check()
@@ -43,7 +43,7 @@ namespace ISukces.SolutionDoctor.Logic
                 var project = i.Projects.First().Project;
                 foreach (var p in project.NugetPackages)
                 {
-                    Add(p, project.File.FullName);
+                    Add(p, project.Location);
                 }
             }
             foreach (var usages in _packages.Values)
@@ -92,7 +92,7 @@ namespace ISukces.SolutionDoctor.Logic
 
             public PackageUsages(string packageId)
             {
-                Versions = new Dictionary<string, NugetVersion>(StringComparer.OrdinalIgnoreCase);
+                Versions = new Dictionary<FileName, NugetVersion>( );
                 PackageId = packageId;
             }
 
@@ -102,7 +102,7 @@ namespace ISukces.SolutionDoctor.Logic
 
             // Public Methods 
 
-            public void Add(string projectFullFilename, NugetPackage nugetPackage)
+            public void Add(FileName projectFullFilename, NugetPackage nugetPackage)
             {
                 Versions[projectFullFilename] = nugetPackage.Version;
             }
@@ -113,7 +113,7 @@ namespace ISukces.SolutionDoctor.Logic
 
             public string PackageId { get; set; }
 
-            public Dictionary<string, NugetVersion> Versions { get; private set; }
+            public Dictionary<FileName, NugetVersion> Versions { get; private set; }
 
             #endregion Properties
         }

@@ -56,6 +56,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestCommandLineOptions.cs" />
+    <Compile Include="TestFileName.cs" />
     <Compile Include="TestNugetVersion.cs" />
   </ItemGroup>
   <ItemGroup>

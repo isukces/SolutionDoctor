@@ -41,7 +41,7 @@ static internal class Manager
 
     private static List<ProblemFix> ShowProblems(CommandLineOptions options, IEnumerable<Problem> problems)
     {
-        var problemsByProject = problems.GroupBy(a => a.ProjectFilename.ToLower());
+        var problemsByProject = problems.GroupBy(a => a.ProjectFilename);
         var i = 0;
         var fixes = new List<ProblemFix>();
         foreach (var projectProblems in problemsByProject.OrderBy(a => a.Key))

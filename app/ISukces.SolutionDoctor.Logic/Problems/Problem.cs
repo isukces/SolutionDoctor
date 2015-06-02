@@ -27,7 +27,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             }
         }
 
-        public string ProjectFilename { get; set; }
+        public FileName ProjectFilename { get; set; }
 
         #endregion Properties
     }
