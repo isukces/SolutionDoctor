@@ -5,7 +5,7 @@ using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;
 using JetBrains.Annotations;
 
-namespace ISukces.SolutionDoctor.Logic
+namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     static class NugetPackageAssemblyBindingChecker
     {
