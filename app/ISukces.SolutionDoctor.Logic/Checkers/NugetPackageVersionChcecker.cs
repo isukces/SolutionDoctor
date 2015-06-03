@@ -11,15 +11,15 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
     {
         #region Static Methods
 
-        // Private Methods 
+        // Public Methods 
 
-        public static IEnumerable<Problem> Check(IList<Project> projects)
+        public static IList<Problem> Check(IList<Project> projects)
         {
             var a = new NugetPackageVersionChcecker()
             {
                 _projects = projects
             };
-            return a.Check();
+            return a.Check().ToList();
         }
 
         #endregion Static Methods
@@ -30,10 +30,10 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         private void Add(FileName projectFile, NugetPackage nugetPackage)
         {
-            PackageUsages ee;
-            if (!_packages.TryGetValue(nugetPackage.Id, out ee))
-                _packages[nugetPackage.Id] = ee = new PackageUsages(nugetPackage.Id);
-            ee.Add(projectFile, nugetPackage);
+            PackageUsages packageUsages;
+            if (!_packages.TryGetValue(nugetPackage.Id, out packageUsages))
+                _packages[nugetPackage.Id] = packageUsages = new PackageUsages(nugetPackage.Id);
+            packageUsages.Add(projectFile, nugetPackage);
         }
 
         private IEnumerable<Problem> Check()
@@ -41,7 +41,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             foreach (var project in _projects)
                 foreach (var p in project.NugetPackages)
                     Add(project.Location, p);
-            
+
             foreach (var usages in _packages.Values)
             {
                 var tmp = usages.Versions
@@ -59,22 +59,22 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                         yield return new OldNugetVersionProblem
                         {
                             ProjectFilename = j.Key,
-                            ReferencedVersion = j.Value ,
-                            NewestVersion = acceptedVersion   ,
-                            PackageId = usages.PackageId                            
+                            ReferencedVersion = j.Value,
+                            NewestVersion = acceptedVersion,
+                            PackageId = usages.PackageId
                         };
                 }
 
             }
-           
+
         }
 
         #endregion Methods
 
         #region Fields
 
-        IList<Project> _projects;
         readonly Dictionary<string, PackageUsages> _packages = new Dictionary<string, PackageUsages>(StringComparer.OrdinalIgnoreCase);
+        IList<Project> _projects;
 
         #endregion Fields
 
@@ -85,10 +85,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         {
             #region Constructors
 
-
             public PackageUsages(string packageId)
             {
-                Versions = new Dictionary<FileName, NugetVersion>( );
+                Versions = new Dictionary<FileName, NugetVersion>();
                 PackageId = packageId;
             }
 

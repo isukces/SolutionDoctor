@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ISukces.SolutionDoctor.Logic;
 using ISukces.SolutionDoctor.Logic.Problems;
@@ -71,7 +72,10 @@ static internal class Manager
     public static async Task Process(string dir, CommandLineOptions options)
     {
         var doctor = new Doctor();
-        await doctor.ScanSolutionsAsync(new DirectoryInfo(dir), options.ExcludeSolutions);
+        //doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions);
+        await Task.Run(
+            () => doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions));
+
         var problems = doctor.CheckAll().ToList();
         if (problems.Count == 0)
         {

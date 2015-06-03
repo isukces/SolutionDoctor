@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ISukces.SolutionDoctor.Logic.Checkers;
 using ISukces.SolutionDoctor.Logic.NuGet;
@@ -12,6 +15,16 @@ namespace ISukces.SolutionDoctor.Logic
 {
     public class Doctor
     {
+
+        static Doctor()
+        {
+#if PLATFORM_UNIX
+            c = StringComparer.Ordinal;
+#else
+            c = StringComparer.OrdinalIgnoreCase;
+#endif
+        }
+        static StringComparer c;
         #region Constructors
 
         public Doctor()
@@ -42,16 +55,17 @@ namespace ISukces.SolutionDoctor.Logic
         {
             var groupedProjects = GetGroupedProjects();
             var uniqueProjects = groupedProjects.Select(a => a.Projects.First().Project).ToList();
-            var p1 = SolutionsInManyFoldersChecker.Check(groupedProjects);
-            var p2 = NugetPackageAssemblyBindingChecker.Check(uniqueProjects);
-            var p3 = NugetPackageVersionChcecker.Check(uniqueProjects);  
-            var p4 = ReferencesWithoutNugetsChecker.Check(
-                uniqueProjects, 
-                LocalNugetRepositiories.Values.SelectMany(a=>a.Values));
-            return p1.Concat(p2).Concat(p3).Concat(p4);
+            var p1 = Task.Run(() => SolutionsInManyFoldersChecker.Check(groupedProjects));
+            var p2 = Task.Run(() => NugetPackageAssemblyBindingChecker.Check(uniqueProjects));
+            var p3 = Task.Run(() => NugetPackageVersionChcecker.Check(uniqueProjects));
+            var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
+                uniqueProjects,
+                LocalNugetRepositiories.Values.SelectMany(a => a.Values)));
+            Task.WaitAll(p1, p2, p3, p4);
+            return p1.Result.Concat(p2.Result).Concat(p3.Result).Concat(p4.Result);
         }
 
-     
+
 
         // Private Methods 
 
@@ -59,12 +73,12 @@ namespace ISukces.SolutionDoctor.Logic
         {
             var liqQuery = from solution in Solutions
                            from project in solution.Projects
-                               group new ProjectPlusSolution
-                               {
-                                   Project = project,
-                                   Solution = solution
-                               }
-                               by project.Location
+                           group new ProjectPlusSolution
+                           {
+                               Project = project,
+                               Solution = solution
+                           }
+                           by project.Location
                                into projectGroup
                                select new ProjectGroup
                                {
@@ -79,46 +93,82 @@ namespace ISukces.SolutionDoctor.Logic
 
         #region Properties
 
-        public List<Solution> Solutions { get; set; }
+        public IList<Solution> Solutions { get; private set; }
 
         public Dictionary<string, Dictionary<string, Nuspec>> LocalNugetRepositiories { get; private set; }
 
         #endregion Properties
 
-        public async Task ScanSolutionsAsync(DirectoryInfo di, string[] excludeItems)
+        public void ScanSolutions(DirectoryInfo di, string[] excludeItems)
         {
-            if (di.Exists)
-            {
-                foreach (var i in di.GetFiles("*.sln"))
-                {
-                    if (!Exlude(i, excludeItems))
-                    {
-                        try
-                        {
-                            var sol = new Solution(i);
-                            Solutions.Add(sol);
-                            ScanLocalNugets(i.Directory);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("solution {0} can't be parsed", i.FullName);
-                        }
+            if (!di.Exists)
+                return;
+            IObservable<FileInfo> filesStream = DiscFileScanner.MakeObservable(di,
+                "*.sln",
+                i => !Exlude(i, excludeItems));
+            // .Publish();
 
-                    }
-                }
-                foreach (var i in di.GetDirectories())
-                    await ScanSolutionsAsync(i, excludeItems);
-            }
+
+
+            var solutions =
+                filesStream
+                .ObserveOn(NewThreadScheduler.Default)
+                .Select(
+                 i =>
+                 {
+                     Solution s = null;
+                     try
+                     {
+                         s = new Solution(i);
+                     }
+                     catch (Exception e)
+                     {
+                         Console.WriteLine(Thread.CurrentThread.ManagedThreadId + " solution {0} can't be parsed", i.FullName);
+                     }
+                     return s;
+                 }
+                )
+                .Where(i => i != null)
+                .Publish();
+
+
+
+
+            var scanPackagesEventSlim = new ManualResetEventSlim(false);
+            var addSolutionsToListEventSlim = new ManualResetEventSlim(false);
+
+            solutions
+                .ObserveOn(NewThreadScheduler.Default)
+                .Subscribe(
+                    solution => Solutions.Add(solution),
+                    () => addSolutionsToListEventSlim.Set());
+
+            solutions
+                .Select(a => a.SolutionFile.Directory.FullName)
+                .Distinct(c)
+                .ObserveOn(NewThreadScheduler.Default)
+                .Subscribe(
+                    dir => ScanLocalNugets(new DirectoryInfo(dir)),
+                    () => scanPackagesEventSlim.Set());
+
+
+            solutions.Connect();
+            scanPackagesEventSlim.Wait();
+            addSolutionsToListEventSlim.Wait();
         }
+
 
         private void ScanLocalNugets(DirectoryInfo directory)
         {
-            directory = new DirectoryInfo(Path.Combine(directory.FullName, "packages"));
-            if (LocalNugetRepositiories.ContainsKey(directory.FullName))
-                return;
-            var repositories = Nuspec.GetRepositories(directory);
-            LocalNugetRepositiories[directory.FullName] = repositories.ToDictionary(
-                nuspec => nuspec.FullId, nuspec => nuspec);
+            lock (LocalNugetRepositiories)
+            {
+                directory = new DirectoryInfo(Path.Combine(directory.FullName, "packages"));
+                if (LocalNugetRepositiories.ContainsKey(directory.FullName))
+                    return;
+                var repositories = Nuspec.GetRepositories(directory);
+                LocalNugetRepositiories[directory.FullName] = repositories.ToDictionary(
+                    nuspec => nuspec.FullId, nuspec => nuspec);
+            }
         }
     }
 

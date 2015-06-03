@@ -15,7 +15,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         // Public Methods 
 
-        public static IEnumerable<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories)
+        public static IList<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories)
         {
             // var aa = localNugetRepositiories.GetUnique(a => a.Location.FullName.ToLower(), a => a);
 
@@ -44,7 +44,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         // Private Methods 
 
-        private IEnumerable<Problem> Check()
+        private IList<Problem> Check()
         {
             return _projects.SelectMany(CheckProj).ToList();
         }

@@ -13,10 +13,10 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         // Public Methods 
 
-        public static IEnumerable<Problem> Check([NotNull] IList<Project> projects)
+        public static IList<Problem> Check([NotNull] IList<Project> projects)
         {
             if (projects == null) throw new ArgumentNullException("projects");
-            return projects.SelectMany(ScanProject);
+            return projects.SelectMany(ScanProject).ToList();
         }
 
         // Private Methods 
