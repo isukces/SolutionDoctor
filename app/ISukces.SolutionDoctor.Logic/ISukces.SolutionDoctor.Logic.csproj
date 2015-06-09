@@ -56,14 +56,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Problems\NugetRepositoryDependencyProblem.cs" />
     <Compile Include="Checkers\ReferencesWithoutNugetsChecker.cs" />
     <Compile Include="CommandLineOptions.cs" />
     <Compile Include="DiscFileScanner.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FileName.cs" />
     <Compile Include="Checkers\NugetPackageAssemblyBindingChecker.cs" />
+    <Compile Include="Checkers\NugetRepositoryDependencies.cs" />
     <Compile Include="NuGet\NugetVersionRange.cs" />
     <Compile Include="NuGet\RangeEdge.cs" />
+    <Compile Include="NuGet\VersionCheckResult.cs" />
     <Compile Include="Problems\NuGetPackageShouldBeReferencedProblem.cs" />
     <Compile Include="Checkers\NugetPackageVersionChcecker.cs" />
     <Compile Include="Problems\ProblemFix.cs" />

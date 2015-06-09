@@ -61,10 +61,10 @@ namespace ISukces.SolutionDoctor.Logic
             var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
                 uniqueProjects,
                 LocalNugetRepositiories.Values.SelectMany(a => a.Values)));
-            Task.WaitAll(p1, p2, p3, p4);
-            return p1.Result.Concat(p2.Result).Concat(p3.Result).Concat(p4.Result);
+            var p5 = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects)); 
+            Task.WaitAll(p1, p2, p3, p4, p5);
+            return p1.Result.Concat(p2.Result).Concat(p3.Result).Concat(p4.Result).Concat(p5.Result);
         }
-
 
 
         // Private Methods 
