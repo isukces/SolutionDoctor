@@ -5,8 +5,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class NugetVersionRange
     {
-        public bool _matchAnyVersion;
-
         #region Static Methods
 
         // Public Methods 
@@ -65,6 +63,24 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         // Public Methods 
 
+        public VersionCheckResult CheckVersion(NugetVersion x)
+        {
+            if (_matchAnyVersion)
+                return VersionCheckResult.Ok;
+            if (x < VersionMin)
+                return VersionCheckResult.TooLow;
+            if (x <= VersionMin && MinEdge == RangeEdge.Exclusive)
+                return VersionCheckResult.TooLow;
+
+            if (x > VersionMax)
+                return VersionCheckResult.TooHigh;
+            if (x >= VersionMax && MaxEdge == RangeEdge.Exclusive)
+                return VersionCheckResult.TooHigh;
+
+            return VersionCheckResult.Ok;
+
+        }
+
         public override string ToString()
         {
             if (_matchAnyVersion)
@@ -83,15 +99,13 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         #endregion Methods
 
-        #region Properties
+        #region Fields
 
-        public NugetVersion VersionMin { get; set; }
+        private bool _matchAnyVersion;
 
-        public NugetVersion VersionMax { get; set; }
+        #endregion Fields
 
-        public RangeEdge MinEdge { get; set; }
-
-        public RangeEdge MaxEdge { get; set; }
+        #region Static Properties
 
         public static NugetVersionRange Any
         {
@@ -103,6 +117,18 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                 };
             }
         }
+
+        #endregion Static Properties
+
+        #region Properties
+
+        public NugetVersion VersionMin { get; set; }
+
+        public NugetVersion VersionMax { get; set; }
+
+        public RangeEdge MinEdge { get; set; }
+
+        public RangeEdge MaxEdge { get; set; }
 
         #endregion Properties
     }
