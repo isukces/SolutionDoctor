@@ -8,16 +8,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         // Public Methods 
 
-        public static bool operator !=(NugetVersion left, NugetVersion right)
-        {
-            return !Equals(left, right);
-        }
-
-        public static bool operator ==(NugetVersion left, NugetVersion right)
-        {
-            return Equals(left, right);
-        }
-
         public static NugetVersion Parse(string ver)
         {
             if (ver == null) throw new ArgumentNullException("ver");
@@ -108,5 +98,39 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         public string Suffix { get; set; }
 
         #endregion Properties
+
+        #region Operators
+
+        public static bool operator !=(NugetVersion left, NugetVersion right)
+        {
+            return !Equals(left, right);
+        }
+
+        public static bool operator ==(NugetVersion left, NugetVersion right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator >(NugetVersion a, NugetVersion b)
+        {
+            return a.CompareTo(b) > 0;
+        }
+
+        public static bool operator >=(NugetVersion a, NugetVersion b)
+        {
+            return a.CompareTo(b) >= 0;
+        }
+
+        public static bool operator <(NugetVersion a, NugetVersion b)
+        {
+            return a.CompareTo(b) < 0;
+        }
+
+        public static bool operator <=(NugetVersion a, NugetVersion b)
+        {
+            return a.CompareTo(b) <= 0;
+        }
+
+        #endregion
     }
 }
