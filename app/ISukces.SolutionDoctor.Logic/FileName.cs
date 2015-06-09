@@ -4,9 +4,10 @@ using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic
 {
-    public class FileName : IEquatable<FileName>
+    public class FileName : IEquatable<FileName>, IComparable<FileName>
     {
-        #region Constructors
+		#region Constructors 
+
         private FileName(string fullName)
         {
             _fullName = fullName;
@@ -17,16 +18,17 @@ namespace ISukces.SolutionDoctor.Logic
             _hash = _nameForCompare.GetHashCode();
 #endif
         }
+
         public FileName([NotNull] FileInfo fileInfo)
             : this(fileInfo.FullName)
         {
         }
 
-        #endregion Constructors
+		#endregion Constructors 
 
-        #region Static Methods
+		#region Static Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         public static bool operator !=(FileName left, FileName right)
         {
@@ -38,11 +40,24 @@ namespace ISukces.SolutionDoctor.Logic
             return Equals(left, right);
         }
 
-        #endregion Static Methods
+		#endregion Static Methods 
 
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
+
+        public int CompareTo(FileName other)
+        {
+            if (Equals(other))
+                return 0;
+            if (other == null)
+                return -1;
+#if PLATFORM_UNIX
+            return _fullName.CompareTo(other._fullName);
+#else
+            return _nameForCompare.CompareTo(other._nameForCompare);
+#endif
+        }
 
         public bool Equals(FileName other)
         {
@@ -73,16 +88,16 @@ namespace ISukces.SolutionDoctor.Logic
             return _fullName;
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Fields
+		#region Fields 
 
         readonly string _fullName;
         readonly int _hash;
 
-        #endregion Fields
+		#endregion Fields 
 
-        #region Properties
+		#region Properties 
 
         public string FullName
         {
@@ -117,7 +132,7 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
-        #endregion Properties
+		#endregion Properties 
 
 #if !PLATFORM_UNIX
         readonly string _nameForCompare;
