@@ -13,9 +13,9 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
 
 
-        public void SetRedirection([NotNull] Version version)
+        public void SetRedirection([NotNull] string version)
         {
-            if (version == null) throw new ArgumentNullException("version");
+            if (version == null) throw new ArgumentNullException(nameof(version));
             var ns = XmlElement.Name.Namespace;
             var node = XmlElement.Element(ns + "bindingRedirect");
             var ver = version.ToString();
@@ -23,6 +23,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             node.SetAttributeValue("newVersion", ver);
         }
 
+        [CanBeNull]
         public static AssemblyBinding ParseDependentAssembly(XElement dependentAssemblyXElement)
         {
             var ns = dependentAssemblyXElement.Name.Namespace;
@@ -31,7 +32,8 @@ namespace ISukces.SolutionDoctor.Logic.Vs
                 throw new NullReferenceException("assemblyIdentity");
             var bindingRedirect = dependentAssemblyXElement.Element(ns + "bindingRedirect");
             if (bindingRedirect == null)
-                throw new NullReferenceException("bindingRedirect");
+                return null;
+                // throw new NullReferenceException("bindingRedirect");
             return new AssemblyBinding
             {
                 Name = (string)assemblyIdentity.Attribute("name"),
@@ -49,7 +51,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         public override string ToString()
         {
-            return String.Format("{0} from {1} to {2}", Name, OldVersion, NewVersion);
+            return string.Format("{0} from {1} to {2}", Name, OldVersion, NewVersion);
         }
 
         #endregion Methods

@@ -56,6 +56,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             foreach (var packageRelation in packagesRelations)
             {
                 NugetPackage packageReferencedByProject;
+                if (packageRelation.ReferencedPackageName == null)
+                    continue;
                 if (!nugetVersionsForProjects.TryGetValue(packageRelation.ReferencedPackageName, out packageReferencedByProject)) continue;
                 var result = packageRelation.ReferencedPackageAcceptableVersions.CheckVersion(packageReferencedByProject.Version);
                 if (result == VersionCheckResult.Ok) continue;

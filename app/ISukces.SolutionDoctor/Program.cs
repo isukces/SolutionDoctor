@@ -25,26 +25,29 @@ namespace ISukces.SolutionDoctor
                     ShowHelp();
                     return;                    
                 }
-                if (options.Directories.Any())
-                    Directory.SetCurrentDirectory(options.Directories.First());
+                if (options.ScanDirectories.Any())
+                    Directory.SetCurrentDirectory(options.ScanDirectories.First());
                 if (!string.IsNullOrEmpty(options.SaveConfigFileName))
                 {
                     options.Save(new FileInfo( options.SaveConfigFileName));
                     Console.WriteLine("Config saved into file {0}.", options.SaveConfigFileName);
                 }
-                if (options.Directories.Count < 1)
+                if (options.ScanDirectories.Count < 1)
                 {
                     ShowHelp();
                     return;
                 }
-                var directory = new DirectoryInfo(options.Directories.First());
-                if (!directory.Exists)
+                foreach (var i in options.ScanDirectories)
                 {
-                    Console.WriteLine("Directory {0} doesn't exist", directory.FullName);
-                    ShowHelp();
-                    return;
+                    var directory = new DirectoryInfo(i);
+                    if (!directory.Exists)
+                    {
+                        Console.WriteLine("Directory {0} doesn't exist", directory.FullName);
+                        ShowHelp();
+                        return;
+                    }
                 }
-                var task = Manager.Process(directory.FullName, options);
+                var task = Manager.Process(options.ScanDirectories, options);
                 task.Wait();
 
             }
@@ -74,8 +77,6 @@ namespace ISukces.SolutionDoctor
             Console.WriteLine("    -exclude {solution name} Exclude solution. This option can be used multiple times.");
             Console.WriteLine("    -saveOptions {file name} Save parsed command line options into file");
             Console.WriteLine("    -cfg {file name}         Load options from file");
-        
-        
         }
 
         #endregion Static Methods

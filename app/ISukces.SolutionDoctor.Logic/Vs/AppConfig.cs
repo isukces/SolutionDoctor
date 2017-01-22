@@ -45,6 +45,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             var dependentAssemblyElements = GetDependentAssemblyElements(xAssemblyBinding);
             return dependentAssemblyElements
                 .Select(AssemblyBinding.ParseDependentAssembly)
+                .Where(a => a != null)
                 .ToArray();
         }
 
@@ -104,7 +105,8 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             foreach (var i in GetDependentAssemblyElements(xAssemblyBinding))
             {
                 var t = AssemblyBinding.ParseDependentAssembly(i);
-                if (t.Name == id)
+
+                if (t != null && t.Name == id)
                     return t;
             }
 

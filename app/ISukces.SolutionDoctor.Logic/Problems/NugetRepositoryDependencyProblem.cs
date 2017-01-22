@@ -4,7 +4,7 @@ using ISukces.SolutionDoctor.Logic.NuGet;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
-    internal class NugetRepositoryDependencyProblem : Problem
+    internal class NugetRepositoryDependencyProblem : Problem, IConsiderUpdatePackage
     {
         #region Methods
 
@@ -44,5 +44,10 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public DirectoryInfo CheckedPackageLocation { get; set; }
 
         #endregion Properties
+
+        public string GetPackageId()
+        {
+            return CheckedPackageId;
+        }
     }
 }

@@ -37,7 +37,7 @@ namespace ISukces.SolutionDoctor.Logic
             if (file == null)
                 throw new ArgumentNullException("file");
             if (!file.Exists)
-                throw new FileNotFoundException(String.Format("File {0} doesn't exist", file.FullName));
+                throw new FileNotFoundException(string.Format("File {0} doesn't exist", file.FullName));
         }
 
         public static IEnumerable<TOut> GetUnique<TOut, TIn>(this IEnumerable<TIn> src, Func<TIn, string> getKey, Func<TIn, TOut> map)
