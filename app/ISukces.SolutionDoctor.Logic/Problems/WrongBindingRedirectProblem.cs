@@ -19,8 +19,8 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         public override void Describe(Action<string> writeLine)
         {
-            writeLine(string.Format("{2} nuget package is {0} but config redirects to {1}",
-                Package.Version,
+            writeLine(string.Format("{2} nuget package DLL is {0} but config redirects to {1}",
+                DllVersion,
                 Redirect.NewVersion,
                 Package.Id));
         }
@@ -28,8 +28,8 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public override ProblemFix GetFix()
         {
             return new ProblemFix(
-                string.Format("Set redirection to {0} for {1} package in project {2}", 
-                    Package.Version.Version, 
+                string.Format("Set redirection to {0} for {1} package in project {2}",
+                    DllVersion, 
                     Package.Id,
                     ProjectFilename.Name),
                 FixMethod);
@@ -44,7 +44,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             var node = xml.FindByAssemblyIdentity(Package.Id);
             if (node == null)
                 throw new Exception(string.Format("Redirection for '{0}' not found", Package.Id));
-            node.SetRedirection(Package.Version.Version);
+            node.SetRedirection(DllVersion);
             xml.Save();
         }
         // Protected Methods 
@@ -69,6 +69,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public AssemblyBinding Redirect { get; set; }
 
         public NugetPackage Package { get; set; }
+        public string DllVersion { get; set; }
 
         #endregion Properties
     }

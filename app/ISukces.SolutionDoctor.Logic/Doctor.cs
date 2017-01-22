@@ -39,9 +39,13 @@ namespace ISukces.SolutionDoctor.Logic
 
         // Private Methods 
 
-        private static bool Exlude(FileInfo fileInfo, string[] excludeItems)
+        private static bool Exlude(FileInfo fileInfo, IReadOnlyList<string> excludeItems, IReadOnlyList<string> excludeDirs)
         {
             var n = fileInfo.FullName.ToLower();
+            if (excludeDirs != null)
+                foreach (var i in excludeDirs)
+                    if (n.StartsWith(i))
+                        return true;
             return excludeItems.Any(i => n.EndsWith(i));
         }
 
@@ -61,7 +65,7 @@ namespace ISukces.SolutionDoctor.Logic
             var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
                 uniqueProjects,
                 LocalNugetRepositiories.Values.SelectMany(a => a.Values)));
-            var p5 = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects)); 
+            var p5 = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects));
             Task.WaitAll(p1, p2, p3, p4, p5);
             return p1.Result.Concat(p2.Result).Concat(p3.Result).Concat(p4.Result).Concat(p5.Result);
         }
@@ -80,11 +84,11 @@ namespace ISukces.SolutionDoctor.Logic
                            }
                            by project.Location
                                into projectGroup
-                               select new ProjectGroup
-                               {
-                                   Filename = projectGroup.Key,
-                                   Projects = projectGroup.ToArray()
-                               };
+                           select new ProjectGroup
+                           {
+                               Filename = projectGroup.Key,
+                               Projects = projectGroup.ToArray()
+                           };
             var groupedProjects = liqQuery.ToList();
             return groupedProjects;
         }
@@ -99,15 +103,23 @@ namespace ISukces.SolutionDoctor.Logic
 
         #endregion Properties
 
-        public void ScanSolutions(DirectoryInfo di, string[] excludeItems)
+        public void ScanSolutions(IReadOnlyList<DirectoryInfo> dirs, IReadOnlyList<string> excludeItems, IReadOnlyList<string> excludeDirs)
         {
-            if (!di.Exists)
+            if (dirs == null)
                 return;
-            IObservable<FileInfo> filesStream = DiscFileScanner.MakeObservable(di,
+            dirs = dirs.Where(a => a.Exists).ToArray();
+            if (!dirs.Any())
+                return;
+            excludeDirs = excludeDirs?
+                              .Select(a => new DirectoryInfo(a).FullName.ToLower() + "\\")
+                              .ToList() ?? new List<string>();
+            IObservable<FileInfo> filesStream = DiscFileScanner.MakeObservable(dirs,
                 "*.sln",
-                i => !Exlude(i, excludeItems));
+                i => !Exlude(i, excludeItems, excludeDirs), 
+                excludeDirs);
             // .Publish();
 
+            var tmp = filesStream.ToEnumerable().ToArray();
 
 
             var solutions =

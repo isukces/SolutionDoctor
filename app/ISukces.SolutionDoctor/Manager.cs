@@ -40,8 +40,9 @@ static internal class Manager
         }
     }
 
-    private static List<ProblemFix> ShowProblems(CommandLineOptions options, IEnumerable<Problem> problems)
+    private static List<ProblemFix> ShowProblems(CommandLineOptions options, IEnumerable<Problem> problems1)
     {
+        var problems = problems1.ToArray();
         var problemsByProject = problems.GroupBy(a => a.ProjectFilename);
         var i = 0;
         var fixes = new List<ProblemFix>();
@@ -64,17 +65,25 @@ static internal class Manager
             }
             Console.WriteLine();
         }
+        var packagesToUpdate = problems.OfType<IConsiderUpdatePackage>().Select(a => a.GetPackageId()).Distinct().ToArray();
+        if (packagesToUpdate.Any())
+        {
+            Console.WriteLine("Consider update package(s)");
+            foreach (var ii in packagesToUpdate)
+                Console.WriteLine("    " + ii);
+        }
         return fixes;
     }
 
     #endregion Static Methods
 
-    public static async Task Process(string dir, CommandLineOptions options)
+    public static async Task Process(IEnumerable<string> dirs, CommandLineOptions options)
     {
         var doctor = new Doctor();
         //doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions);
+        var tmp = dirs.Select(dir => new DirectoryInfo(dir)).ToArray();
         await Task.Run(
-            () => doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions));
+            () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options.ExcludeDirectories));
 
         var problems = doctor.CheckAll().ToList();
         if (problems.Count == 0)

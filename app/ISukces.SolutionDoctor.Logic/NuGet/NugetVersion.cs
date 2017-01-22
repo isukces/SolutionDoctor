@@ -1,10 +1,15 @@
+#region using
+
 using System;
+using Newtonsoft.Json;
+
+#endregion
 
 namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class NugetVersion : IEquatable<NugetVersion>, IComparable<NugetVersion>
     {
-        #region Static Methods
+        #region Static Methods
 
         // Public Methods 
 
@@ -25,10 +30,41 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                 result.Suffix = "";
             }
             return result;
-
         }
 
-        #endregion Static Methods
+        #endregion
+
+        #region Instance Methods
+
+        public bool ShouldSerializeSuffix()
+        {
+            return !string.IsNullOrEmpty(Suffix);
+        }
+
+
+        #endregion
+
+        #region Properties
+
+        [JsonIgnore]
+        public Version NormalizedVersion
+        {
+            get
+            {
+                return new Version(
+                    Math.Max(0, Version.Major),
+                    Math.Max(0, Version.Minor),
+                    Math.Max(0, Version.Build),
+                    Math.Max(0, Version.Revision)
+                );
+            }
+        }
+
+        public Version Version { get; set; }
+
+        public string Suffix { get; set; }
+
+        #endregion
 
         #region Methods
 
@@ -51,7 +87,8 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(NormalizedVersion, other.NormalizedVersion) && string.Equals(Suffix, other.Suffix);
+            return Equals(NormalizedVersion, other.NormalizedVersion)
+                && string.Equals(Suffix?.Trim() ?? "", other.Suffix?.Trim() ?? "");
         }
 
         public override bool Equals(object obj)
@@ -67,7 +104,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             unchecked
             {
                 return ((NormalizedVersion != null ? NormalizedVersion.GetHashCode() : 0) * 397)
-                    ^ (Suffix != null ? Suffix.GetHashCode() : 0);
+                       ^ (Suffix != null ? Suffix.GetHashCode() : 0);
             }
         }
 
@@ -77,27 +114,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         }
 
         #endregion Methods
-
-        #region Properties
-
-        public Version NormalizedVersion
-        {
-            get
-            {
-                return new Version(
-                           Math.Max(0, Version.Major),
-                           Math.Max(0, Version.Minor),
-                           Math.Max(0, Version.Build),
-                           Math.Max(0, Version.Revision)
-                        );
-            }
-        }
-
-        public Version Version { get; set; }
-
-        public string Suffix { get; set; }
-
-        #endregion Properties
 
         #region Operators
 

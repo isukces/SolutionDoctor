@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region using
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -6,18 +8,25 @@ using System.Linq;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
+#endregion
+
 namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class Nuspec
     {
-        #region Constructors
+        #region Constructors
+
+        private Nuspec()
+        {
+            // dla serializacji
+        }
 
         private Nuspec(XDocument xml, DirectoryInfo location)
         {
             Location = location;
             var root = xml.Root;
             if (root == null) throw new NullReferenceException("xml.Root");
-            _metadata = root.Element(root.Name.Namespace + "metadata");
+            _metadata = root.Elements().First(a => a.Name.LocalName == "metadata");
             if (root == null) throw new NullReferenceException("xml.Root.metadata node");
 
             var id = GetNode("id").Value;
@@ -38,60 +47,80 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             }
         }
 
-        #endregion Constructors
+        #endregion
 
-        #region Static Methods
+        #region Static Methods
 
-        // Public Methods 
-        public override string ToString()
+        public static IReadOnlyList<Nuspec> GetRepositories(DirectoryInfo directory)
         {
-            return string.Format("nuspec: {0}", FullId);
-        }
-
-        public static IEnumerable<Nuspec> GetRepositories(DirectoryInfo directory)
-        {
-            if (directory.Exists)
-                foreach (var i in directory.GetDirectories())
+            var result = new List<Nuspec>();
+            if (!directory.Exists) return result;
+            var cache1 = NuspecCache.GetForDirectory(directory);
+            foreach (var i in directory.GetDirectories())
+            {
+                if (cache1.ContainsKey(i.Name))
                 {
-                    var fn = new FileInfo(Path.Combine(i.FullName, i.Name + ".nupkg"));
-                    if (!fn.Exists) continue;
-                    yield return Load(fn);
+                    result.Add(cache1[i.Name]);
+                    continue;
                 }
+                var fn = new FileInfo(Path.Combine(i.FullName, i.Name + ".nupkg"));
+                if (!fn.Exists) continue;
+                try
+                {
+                    var nuspec = Load(fn);
+                    result.Add(nuspec);
+                    cache1[i.Name] = nuspec;
+                }
+                catch
+                {
+                    Console.WriteLine($"File {fn.FullName} is broken");
+                }
+            }
+            NuspecCache.Save(directory, cache1);
+            return result;
         }
 
         public static Nuspec Load([NotNull] FileInfo file)
         {
             file.CheckValidForRead();
 
-
-            using (var ms = new FileStream(file.FullName, FileMode.Open))
+            using(var ms = new FileStream(file.FullName, FileMode.Open))
             {
                 // musi być wpisane do w ten sposób, bo jak zrobimy new MemoryStream(data) to wtedy strumień nie jest "expandable"
-                using (var zip = new ZipArchive(ms, ZipArchiveMode.Update, true))
+                using(var zip = new ZipArchive(ms, ZipArchiveMode.Read, false))
                 {
-
                     var e = zip.Entries
                         .Where(entry =>
-                            String.Equals(entry.FullName, entry.Name, StringComparison.OrdinalIgnoreCase)
+                            string.Equals(entry.FullName, entry.Name, StringComparison.OrdinalIgnoreCase)
                             && entry.Name.ToLower().EndsWith(".nuspec"))
                         .ToArray();
                     if (e.Length > 1)
                         throw new Exception(string.Format("Too many nuspec files in {0}", file.FullName));
                     if (e.Length == 0)
                         return null;
-                    using (var zippedStream = e.First().Open())
+                    using(var zippedStream = e.First().Open())
                     {
-
                         var xml = XDocument.Load(zippedStream);
                         return new Nuspec(xml, file.Directory);
                     }
-
                 }
             }
-
         }
 
-        #endregion Static Methods
+        #endregion
+
+        #region Instance Methods
+
+        public bool ShouldSerializeDependencies()
+        {
+            return (Dependencies != null) && Dependencies.Any();
+        }
+
+        // Public Methods 
+        public override string ToString()
+        {
+            return string.Format("nuspec: {0}", FullId);
+        }
 
         #region Methods
 
@@ -104,24 +133,26 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         #endregion Methods
 
-        #region Fields
+        #endregion
 
-        private readonly XElement _metadata;
-
-        #endregion Fields
-
-        #region Properties
-
-        public DirectoryInfo Location { get; set; }
+        #region Properties
 
         public string Id { get; set; }
 
-        public NugetVersion PackageVersion { get; set; }
-
         public string FullId { get; set; }
 
-        public List<NugetDependency> Dependencies { get; set; }
+        public DirectoryInfo Location { get; set; }
 
-        #endregion Properties
+        public NugetVersion PackageVersion { get; set; }
+
+        public List<NugetDependency> Dependencies { get; set; } = new List<NugetDependency>();
+
+        #endregion
+
+        #region Fields
+
+        private readonly XElement _metadata;
+
+        #endregion
     }
 }

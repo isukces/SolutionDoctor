@@ -12,10 +12,11 @@ namespace ISukces.SolutionDoctor.Logic
     {
         #region Constructors
 
-        public DiscFileScanner(string filter, Func<FileInfo, bool> accept)
+        public DiscFileScanner(string filter, Func<FileInfo, bool> accept, IReadOnlyList<string> excludeDirs)
         {
             _filter = filter;
             _accept = accept;
+            _excludeDirs = excludeDirs;
         }
 
         #endregion Constructors
@@ -24,15 +25,15 @@ namespace ISukces.SolutionDoctor.Logic
 
         // Public Methods 
 
-        public static IObservable<FileInfo> MakeObservable(DirectoryInfo dir, string filter, Func<FileInfo, bool> accept)
+        public static IObservable<FileInfo> MakeObservable(IReadOnlyList<DirectoryInfo> dirs, string filter, Func<FileInfo, bool> accept, IReadOnlyList<string> excludeDirs)
         {
             return Observable.Create<FileInfo>(
                 observer =>
                 {
                     try
                     {
-                        var tmp = new DiscFileScanner(filter, accept);
-                        tmp.ScanToObservable(dir, observer);
+                        var tmp = new DiscFileScanner(filter, accept, excludeDirs);
+                        tmp.ScanToObservable(dirs, observer);
                         observer.OnCompleted();
                     }
                     catch (Exception e)
@@ -64,19 +65,61 @@ namespace ISukces.SolutionDoctor.Logic
         }
         // Private Methods 
 
-        private void ScanToObservable(DirectoryInfo directory, IObserver<FileInfo> observer)
+        bool ExD(DirectoryInfo di)
         {
-            if (!directory.Exists)
+            if (di.Name.ToLower() == ".git")
+                return true;
+            var n = di.FullName.ToLower() + "\\";
+            foreach (var i in _excludeDirs)
+                if (i == n)
+                    return true;
+            return false;
+        }
+
+        private void ScanToObservable(IReadOnlyList<DirectoryInfo> directories, IObserver<FileInfo> observer)
+        {
+            if (directories == null || directories.Count == 0)
                 return;
-            var files = directory
-                .GetFiles(_filter)
+            directories = directories.Where(a => a.Exists && !ExD(a)).ToArray();
+            if (directories.Count == 0)
+                return;
+
+
+            var files = directories.SelectMany(a => GetFiles2(a, _filter))
+                //.SelectMany<DirectoryInfo, DirectoryInfo>(a => a)
+                //.GetFiles(_filter)
                 .Where(fileInfo => _accept(fileInfo));
             foreach (var fileInfo in files)
             {
                 observer.OnNext(fileInfo);
             }
-            foreach (var directoryInfo in directory.GetDirectories())
-                ScanToObservable(directoryInfo, observer);
+            foreach (var directoryInfo in directories.SelectMany(GetDirectories2))
+                ScanToObservable(new[] { directoryInfo }, observer);
+        }
+
+        private static DirectoryInfo[] GetDirectories2(DirectoryInfo dir)
+        {
+            try
+            {
+                return dir.GetDirectories();
+            }
+            catch (System.IO.PathTooLongException e)
+            {
+                return new DirectoryInfo[0];
+            }
+        }
+
+        private FileInfo[] GetFiles2(DirectoryInfo dir, string filter)
+        {
+
+            try
+            {
+                return dir.GetFiles(_filter);
+            }
+            catch (System.IO.PathTooLongException e)
+            {
+                return new FileInfo[0];
+            }
         }
 
         #endregion Methods
@@ -84,6 +127,7 @@ namespace ISukces.SolutionDoctor.Logic
         #region Fields
 
         readonly Func<FileInfo, bool> _accept;
+        private readonly IReadOnlyList<string> _excludeDirs;
         readonly string _filter;
 
         #endregion Fields
