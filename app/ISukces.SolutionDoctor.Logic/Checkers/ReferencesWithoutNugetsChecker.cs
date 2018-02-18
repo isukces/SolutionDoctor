@@ -55,8 +55,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 var tmp = ScanDll(nuspec.Item1);
                 foreach (var ii in tmp)
                 {
-                    HashSet<string> list;
-                    if (!map.TryGetValue(ii, out list))
+                    if (!map.TryGetValue(ii, out var list))
                     {
                         list = new HashSet<string>();
                         map[ii] = list;
@@ -108,9 +107,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
                 if (nuspec == null)
                 {
-                    HashSet<string> list;
-                    string depName = GetDepDll(dep);
-                    if (_map.TryGetValue(depName, out list) && list.Any())
+                    var depName = GetDepDll(dep);
+                    if (_map.TryGetValue(depName, out var list) && list.Any())
                     {
                         yield return new AddNugetToSolutionProblem
                         {
@@ -152,7 +150,23 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             var query = from nuspec in _nuspecs
                         where hintToLower.StartsWith(nuspec.Item1)
                         select nuspec.Item2;
-            return query.FirstOrDefault();
+            var a= query.FirstOrDefault();
+            if (a != null)
+                return a;
+            var d = file.Directory;
+            for (int i = 0; i < 3; i++)
+            {
+                if (d == null) return null;
+                if (string.Equals(d.Name, "packages", StringComparison.OrdinalIgnoreCase)) return null;
+                try
+                {
+                    var p = d.GetFiles("*.nupkg");
+                    if (p.Any())
+                        return Nuspec.Load(p[0]);
+                } catch {}
+                d = d.Parent;
+            }
+            return null;
         }
 
         #endregion Methods

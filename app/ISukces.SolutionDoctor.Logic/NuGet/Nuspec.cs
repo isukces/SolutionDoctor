@@ -1,6 +1,4 @@
-﻿#region using
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -8,14 +6,10 @@ using System.Linq;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
-#endregion
-
 namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class Nuspec
     {
-        #region Constructors
-
         private Nuspec()
         {
             // dla serializacji
@@ -46,10 +40,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                     Dependencies = new List<NugetDependency>();
             }
         }
-
-        #endregion
-
-        #region Static Methods
 
         public static IReadOnlyList<Nuspec> GetRepositories(DirectoryInfo directory)
         {
@@ -86,30 +76,31 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
             using(var ms = new FileStream(file.FullName, FileMode.Open))
             {
-                // musi być wpisane do w ten sposób, bo jak zrobimy new MemoryStream(data) to wtedy strumień nie jest "expandable"
-                using(var zip = new ZipArchive(ms, ZipArchiveMode.Read, false))
-                {
-                    var e = zip.Entries
-                        .Where(entry =>
-                            string.Equals(entry.FullName, entry.Name, StringComparison.OrdinalIgnoreCase)
-                            && entry.Name.ToLower().EndsWith(".nuspec"))
-                        .ToArray();
-                    if (e.Length > 1)
-                        throw new Exception(string.Format("Too many nuspec files in {0}", file.FullName));
-                    if (e.Length == 0)
-                        return null;
-                    using(var zippedStream = e.First().Open())
-                    {
-                        var xml = XDocument.Load(zippedStream);
-                        return new Nuspec(xml, file.Directory);
-                    }
-                }
+                return Load(file.Directory, ms);
             }
         }
 
-        #endregion
-
-        #region Instance Methods
+        private static Nuspec Load(DirectoryInfo dir, Stream ms)
+        {
+// musi być wpisane do w ten sposób, bo jak zrobimy new MemoryStream(data) to wtedy strumień nie jest "expandable"
+            using(var zip = new ZipArchive(ms, ZipArchiveMode.Read, false))
+            {
+                var e = zip.Entries
+                    .Where(entry =>
+                        string.Equals(entry.FullName, entry.Name, StringComparison.OrdinalIgnoreCase)
+                        && entry.Name.ToLower().EndsWith(".nuspec"))
+                    .ToArray();
+                if (e.Length > 1)
+                    throw new Exception(string.Format("Too many nuspec files in {0}", dir.FullName));
+                if (e.Length == 0)
+                    return null;
+                using(var zippedStream = e.First().Open())
+                {
+                    var xml = XDocument.Load(zippedStream);
+                    return new Nuspec(xml, dir);
+                }
+            }
+        }
 
         public bool ShouldSerializeDependencies()
         {
@@ -122,20 +113,12 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             return string.Format("nuspec: {0}", FullId);
         }
 
-        #region Methods
-
         // Private Methods 
 
         private XElement GetNode(string nodeName)
         {
             return _metadata.Element(_metadata.Name.Namespace + nodeName);
         }
-
-        #endregion Methods
-
-        #endregion
-
-        #region Properties
 
         public string Id { get; set; }
 
@@ -147,12 +130,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         public List<NugetDependency> Dependencies { get; set; } = new List<NugetDependency>();
 
-        #endregion
-
-        #region Fields
-
         private readonly XElement _metadata;
-
-        #endregion
+ 
     }
 }
