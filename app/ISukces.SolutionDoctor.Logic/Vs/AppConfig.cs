@@ -106,7 +106,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             {
                 var t = AssemblyBinding.ParseDependentAssembly(i);
 
-                if (t != null && t.Name == id)
+                if (t != null && string.Equals(t.Name, id, StringComparison.OrdinalIgnoreCase))
                     return t;
             }
 

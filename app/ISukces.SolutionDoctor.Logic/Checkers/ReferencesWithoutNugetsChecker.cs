@@ -11,17 +11,17 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     class ReferencesWithoutNugetsChecker
     {
-        #region Constructors
+        #regionÂ Constructors
 
         public ReferencesWithoutNugetsChecker()
         {
         }
 
-        #endregion Constructors
+        #endregionÂ Constructors
 
-        #region Static Methods
+        #regionÂ StaticÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public static IList<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories)
         {
@@ -45,7 +45,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return checker.Check();
 
         }
-        // Private Methods 
+        //Â PrivateÂ MethodsÂ 
 
         private static Dictionary<string, HashSet<string>> GetNuspecDllMap(Tuple<string, Nuspec>[] nuspecs)
         {
@@ -84,11 +84,11 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return result;
         }
 
-        #endregion Static Methods
+        #endregionÂ StaticÂ Methods
 
-        #region Methods
+        #regionÂ Methods
 
-        // Private Methods 
+        //Â PrivateÂ MethodsÂ 
 
         private IList<Problem> Check()
         {
@@ -155,14 +155,14 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return query.FirstOrDefault();
         }
 
-        #endregion Methods
+        #endregionÂ Methods
 
-        #region Fields
+        #regionÂ Fields
 
         private Dictionary<string, HashSet<string>> _map;
         private Tuple<string, Nuspec>[] _nuspecs;
         List<Project> _projects;
 
-        #endregion Fields
+        #endregionÂ Fields
     }
 }

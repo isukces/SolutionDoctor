@@ -7,15 +7,15 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 {
     public class WrongBindingRedirectProblem : Problem
     {
-        #region Constructors
+        #regionÂ Constructors
 
 
 
-        #endregion Constructors
+        #endregionÂ Constructors
 
-        #region Methods
+        #regionÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public override void Describe(Action<string> writeLine)
         {
@@ -47,16 +47,16 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             node.SetRedirection(DllVersion);
             xml.Save();
         }
-        // Protected Methods 
+        //Â ProtectedÂ MethodsÂ 
 
         protected override bool GetIsBigProblem()
         {
             return true;
         }
 
-        #endregion Methods
+        #endregionÂ Methods
 
-        #region Properties
+        #regionÂ Properties
 
         public FileName ConfigFile
         {
@@ -71,6 +71,6 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public NugetPackage Package { get; set; }
         public string DllVersion { get; set; }
 
-        #endregion Properties
+        #endregionÂ Properties
     }
 }

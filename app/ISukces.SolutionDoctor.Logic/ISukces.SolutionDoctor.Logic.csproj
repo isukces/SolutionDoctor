@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="NuGet\NuspecCache.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
+    <Compile Include="Problems\AssemblyRedirectionInvalidPackageId.cs" />
     <Compile Include="Problems\IConsiderUpdatePackage.cs" />
     <Compile Include="Problems\NugetRepositoryDependencyProblem.cs" />
     <Compile Include="Checkers\ReferencesWithoutNugetsChecker.cs" />

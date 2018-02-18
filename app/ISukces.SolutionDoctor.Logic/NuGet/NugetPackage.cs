@@ -5,9 +5,9 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class NugetPackage
     {
-        #region Static Methods
+        #regionÂ StaticÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public static NugetPackage Parse(XElement packageXElement)
         {
@@ -23,20 +23,20 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             };
         }
 
-        #endregion Static Methods
+        #endregionÂ StaticÂ Methods
 
-        #region Methods
+        #regionÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public override string ToString()
         {
             return string.Format("{0} {1} {2}", Id, Version, TargetFramework);
         }
 
-        #endregion Methods
+        #endregionÂ Methods
 
-        #region Properties
+        #regionÂ Properties
 
         public string TargetFramework { get; set; }
 
@@ -44,6 +44,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         public string Id { get; set; }
 
-        #endregion Properties
+        #endregionÂ Properties
     }
 }

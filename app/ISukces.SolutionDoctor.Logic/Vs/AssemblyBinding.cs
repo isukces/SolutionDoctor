@@ -7,11 +7,6 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 {
     public class AssemblyBinding
     {
-        #region Static Methods
-
-        // Public Methods 
-
-
 
         public void SetRedirection([NotNull] string version)
         {
@@ -21,6 +16,14 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             var ver = version.ToString();
             node.SetAttributeValue("oldVersion", "0.0.0.0-" + ver);
             node.SetAttributeValue("newVersion", ver);
+        }
+
+        public void SetPackageId(string name)
+        {
+            Name = name;
+            var ns   = XmlElement.Name.Namespace;
+            var node = XmlElement.Element(ns + "assemblyIdentity");
+            node.SetAttributeValue("name", name);
         }
 
         [CanBeNull]
@@ -43,20 +46,11 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             };
         }
 
-        #endregion Static Methods
-
-        #region Methods
-
-        // Public Methods 
 
         public override string ToString()
         {
             return string.Format("{0} from {1} to {2}", Name, OldVersion, NewVersion);
         }
-
-        #endregion Methods
-
-        #region Properties
 
 
         public string Name { get; private set; }
@@ -66,7 +60,5 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         public NugetVersion NewVersion { get; private set; }
 
         public XElement XmlElement { get; set; }
-
-        #endregion Properties
     }
 }
