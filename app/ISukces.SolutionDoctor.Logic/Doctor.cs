@@ -66,8 +66,9 @@ namespace ISukces.SolutionDoctor.Logic
                 uniqueProjects,
                 LocalNugetRepositiories.Values.SelectMany(a => a.Values)));
             var p5 = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects));
-            Task.WaitAll(p1, p2, p3, p4, p5);
-            return p1.Result.Concat(p2.Result).Concat(p3.Result).Concat(p4.Result).Concat(p5.Result);
+            var p6 = Task.Run(() => XamlInCsProjChecker.Check(uniqueProjects));
+            Task.WaitAll(p1, p2, p3, p4, p5, p6);
+            return p1.Result.Concat(p2.Result).Concat(p3.Result).Concat(p4.Result).Concat(p5.Result).Concat(p6.Result);
         }
 
 

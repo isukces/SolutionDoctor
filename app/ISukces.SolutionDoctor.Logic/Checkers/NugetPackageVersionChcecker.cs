@@ -9,9 +9,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     public class NugetPackageVersionChcecker
     {
-        #region Static Methods
-
-        // Public Methods 
 
         public static IList<Problem> Check(IList<Project> projects)
         {
@@ -22,11 +19,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return a.Check().ToList();
         }
 
-        #endregion Static Methods
-
-        #region Methods
-
-        // Private Methods 
 
         private void Add(FileName projectFile, NugetPackage nugetPackage)
         {
@@ -69,49 +61,26 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         }
 
-        #endregion Methods
-
-        #region Fields
-
         readonly Dictionary<string, PackageUsages> _packages = new Dictionary<string, PackageUsages>(StringComparer.OrdinalIgnoreCase);
         IList<Project> _projects;
-
-        #endregion Fields
-
-        #region Nested Classes
 
 
         class PackageUsages
         {
-            #region Constructors
-
             public PackageUsages(string packageId)
             {
                 Versions = new Dictionary<FileName, NugetVersion>();
                 PackageId = packageId;
             }
 
-            #endregion Constructors
-
-            #region Methods
-
-            // Public Methods 
-
             public void Add(FileName projectFullFilename, NugetPackage nugetPackage)
             {
                 Versions[projectFullFilename] = nugetPackage.Version;
             }
 
-            #endregion Methods
-
-            #region Properties
-
             public string PackageId { get; set; }
 
             public Dictionary<FileName, NugetVersion> Versions { get; private set; }
-
-            #endregion Properties
         }
-        #endregion Nested Classes
     }
 }

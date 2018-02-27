@@ -145,7 +145,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         private Nuspec FindNuspecByFile([NotNull] FileInfo file)
         {
             if (file == null)
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException(nameof(file));
             var hintToLower = file.FullName.ToLower();
             var query = from nuspec in _nuspecs
                         where hintToLower.StartsWith(nuspec.Item1)
