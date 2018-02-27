@@ -32,7 +32,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                 processElement(new CsprojXmlNodeWrapper(q));
         }
 
-       
+
         private void CheckDependUppon(CsprojXmlNodeWrapper wrapper, List<string> ammyFiles)
         {
             if (wrapper.NodeType != NodeType.Page)
@@ -51,12 +51,25 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                 return;
             var problem = new NotUnderAmmyProblem
             {
-                ProjectFilename = _currentProjectLocation,
-                DependentUpon = wrapper.DependentUpon,
+                ProjectFilename     = _currentProjectLocation,
+                DependentUpon       = wrapper.DependentUpon,
                 ShouldDependentUpon = suggestedAmmyParent,
-                XamlFile =include
+                XamlFile            = include
             };
             _result.Add(problem);
+        }
+
+        private void CheckGenerator(CsprojXmlNodeWrapper wrapper)
+        {
+            const string generator = "MSBuild:Compile";
+            if (wrapper.Generator == generator) return;
+            if (wrapper.NodeType == NodeType.Page)
+                _result.Add(new InvalidGeneratorProblem
+                {
+                    ProjectFilename   = _currentProjectLocation,
+                    XamlFile          = wrapper.Include,
+                    ExpectedGenerator = generator
+                });
         }
 
         private void CheckIfIsInPageNode(CsprojXmlNodeWrapper wrapper)
@@ -96,7 +109,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             if (project.Kind != CsProjectKind.Old) return;
             _currentProjectLocation = project.Location;
             var xml = XDocument.Load(_currentProjectLocation.FullName);
- 
+
             // scan for ammy Files
             var ammyFiles = new List<string>();
             XmlVisitor(xml, wrapper =>
@@ -109,27 +122,26 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             XmlVisitor(xml, wrapper =>
             {
                 if (!wrapper.HasIncludeExtension(".xaml")) return;
-                CheckSubypeDesigner(wrapper);
+                CheckSubtypeDesigner(wrapper);
+                CheckGenerator(wrapper);
                 CheckIfIsInPageNode(wrapper);
                 CheckDependUppon(wrapper, ammyFiles);
             });
         }
 
-        private void CheckSubypeDesigner(CsprojXmlNodeWrapper wrapper)
+        private void CheckSubtypeDesigner(CsprojXmlNodeWrapper wrapper)
         {
-            if (wrapper.SubType == "Designer" ) return;
-            if (wrapper.NodeType==NodeType.Page)
+            if (wrapper.SubType == "Designer") return;
+            if (wrapper.NodeType == NodeType.Page)
                 _result.Add(new NotDesignerProblem
                 {
                     ProjectFilename = _currentProjectLocation,
-                    XamlFile = wrapper.Include
+                    XamlFile        = wrapper.Include
                 });
         }
 
         private readonly List<Problem> _result = new List<Problem>();
- 
-        private          FileName      _currentProjectLocation;
 
-       
+        private FileName _currentProjectLocation;
     }
 }
