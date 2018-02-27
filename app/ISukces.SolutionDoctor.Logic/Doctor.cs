@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ISukces.SolutionDoctor.Logic.Checkers;
+using ISukces.SolutionDoctor.Logic.Checkers.Xaml;
 using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;

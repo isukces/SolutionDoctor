@@ -64,7 +64,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Checkers\XamlInCsProjChecker.cs" />
+    <Compile Include="Checkers\Xaml\XamlInCsProjChecker.cs" />
+    <Compile Include="Checkers\Xaml\XamlNotInPageNodeProblem.cs" />
     <Compile Include="NuGet\NuspecCache.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
     <Compile Include="Problems\AssemblyRedirectionInvalidPackageId.cs" />
