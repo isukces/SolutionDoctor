@@ -64,8 +64,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Checkers\Xaml\CsprojXmlNodeWrapper.cs" />
+    <Compile Include="Checkers\Xaml\NotDesignerProblem.cs" />
+    <Compile Include="Checkers\Xaml\NotUnderAmmyProblem.cs" />
     <Compile Include="Checkers\Xaml\XamlInCsProjChecker.cs" />
     <Compile Include="Checkers\Xaml\XamlNotInPageNodeProblem.cs" />
+    <Compile Include="Checkers\Xaml\XamlProblem.cs" />
     <Compile Include="NuGet\NuspecCache.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
     <Compile Include="Problems\AssemblyRedirectionInvalidPackageId.cs" />

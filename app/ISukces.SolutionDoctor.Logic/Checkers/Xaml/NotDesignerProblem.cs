@@ -1,32 +1,27 @@
 ﻿using System;
-using System.Xml.Linq;
-using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
-    internal class XamlNotInPageNodeProblem : XamlProblem
+    internal class NotDesignerProblem : XamlProblem
     {
         public override void Describe(Action<string> writeLine)
         {
-            writeLine($"File {XamlFile} should be marked as Page");
+            writeLine($"File {XamlFile} has no Subtype=Designer attribute");
         }
 
-     
         protected override void FixNode(CsprojXmlNodeWrapper wrapper)
         {
-            wrapper.WrappedElement.Name = wrapper.WrappedElement.Name.Namespace + "Page";
+            wrapper.SubType = "Designer";
         }
 
         protected override string GetFixName()
         {
-            return $"Set {XamlFile} as page";
+            return $"add Subtype attribute to {XamlFile}";
         }
 
         protected override bool GetIsBigProblem()
         {
             return true;
         }
-
-        public string DependendUppon { get; set; }
     }
 }
