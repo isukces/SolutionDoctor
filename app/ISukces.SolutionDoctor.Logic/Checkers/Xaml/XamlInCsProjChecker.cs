@@ -79,6 +79,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             {
                 case NodeType.Page:
                 case NodeType.Unknown:
+                case NodeType.Reference:
                     break;
                 case NodeType.None:
                 {
@@ -122,6 +123,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             XmlVisitor(xml, wrapper =>
             {
                 if (!wrapper.HasIncludeExtension(".xaml")) return;
+                if (wrapper.NodeType == NodeType.Reference) return;
                 CheckSubtypeDesigner(wrapper);
                 CheckGenerator(wrapper);
                 CheckIfIsInPageNode(wrapper);
