@@ -1,6 +1,4 @@
-﻿#region using
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,34 +7,27 @@ using ISukces.SolutionDoctor.Logic.NuGet;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-#endregion
-
 namespace ISukces.SolutionDoctor.Logic
 {
     public class CommandLineOptions
     {
-        #region Constructors
-
         private CommandLineOptions()
         {
-            ScanDirectories = new List<string>();
-            ExcludeSolutions = new List<string>();
+            ScanDirectories    = new List<string>();
+            ExcludeDll = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ExcludeSolutions   = new List<string>();
             ExcludeDirectories = new List<string>();
-            _options = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            PackagesVersion = new Dictionary<string, NugetVersion>(StringComparer.OrdinalIgnoreCase);
+            _options           = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            PackagesVersion    = new Dictionary<string, NugetVersion>(StringComparer.OrdinalIgnoreCase);
         }
-
-        #endregion
-
-        #region Static Methods
 
         // Public Methods 
 
         public static CommandLineOptions Parse(string[] args)
         {
-            if ((args == null) || (args.Length < 1))
+            if (args == null || args.Length < 1)
                 return null;
-            var result = new CommandLineOptions();
+            var    result     = new CommandLineOptions();
             string optionName = null;
             foreach (var item in args)
             {
@@ -46,7 +37,7 @@ namespace ISukces.SolutionDoctor.Logic
                     switch (optionName)
                     {
                         case "cfg":
-                            var fi = new FileInfo(item);
+                            var fi          = new FileInfo(item);
                             var lineOptions = Load(fi);
                             if (lineOptions == null)
                                 throw new Exception("Unable to load " + fi.FullName);
@@ -65,29 +56,35 @@ namespace ISukces.SolutionDoctor.Logic
                                 throw new Exception("-package option need parameter: {package id}={version}");
                             result.PackagesVersion[tmp[0].Trim()] = NugetVersion.Parse(tmp[1]);
                             break;
+                        case "excludedll":                            
+                            result.ExcludeDll.Add(item);
+                            break;
                         default:
                             result.SetOptionValue(optionName, item);
                             break;
                     }
+
                     optionName = null;
                     continue;
                 }
+
                 if (item.StartsWith("-"))
                 {
                     optionName = item.Substring(1).Trim();
                     if (IsBoolOption(optionName))
                     {
                         result._options[optionName] = "";
-                        optionName = null;
+                        optionName                  = null;
                     }
+
                     continue;
                 }
+
                 result.ScanDirectories.Add(item);
             }
+
             return result;
         }
-
-        // Private Methods 
 
         private static bool IsBoolOption(string optionName)
         {
@@ -125,76 +122,12 @@ namespace ISukces.SolutionDoctor.Logic
                 string.Equals(optionName, "cfg", StringComparison.CurrentCultureIgnoreCase);
         }
 
-        #endregion
-
-        #region Instance Methods
-
         public void Normalize()
         {
-            ScanDirectories = NormalizeList(ScanDirectories);
+            ScanDirectories    = NormalizeList(ScanDirectories);
             ExcludeDirectories = NormalizeList(ExcludeDirectories);
-            ExcludeSolutions = NormalizeList(ExcludeSolutions);
+            ExcludeSolutions   = NormalizeList(ExcludeSolutions);
         }
-
-        #endregion
-
-        #region Properties
-
-        public List<string> ScanDirectories { get; private set; }
-
-        public List<string> ExcludeDirectories { get; private set; }
-
-        public List<string> ExcludeSolutions { get; private set; }
-
-
-        public bool ShowOnlyBigProblems
-        {
-            get { return _options.ContainsKey("onlyBig"); }
-              set
-            {
-                if (value)
-                    _options["onlyBig"] = "";
-                else
-                    _options.Remove("onlyBig");
-            }
-        }
-
-        [JsonIgnore]
-        public string SaveConfigFileName
-        {
-            get
-            {
-                string fileName;
-                if (!_options.TryGetValue("saveOptions", out fileName) || (fileName == null))
-                    return null;
-                fileName = fileName.Trim();
-                return string.IsNullOrEmpty(fileName) ? null : fileName;
-            }
-        }
-
-        public bool Fix
-        {
-            get { return _options.ContainsKey("fix"); }
-              set
-            {
-                if (value)
-                    _options["fix"] = "";
-                else
-                    _options.Remove("fix");
-            }
-        }
-
-        public Dictionary<string, NugetVersion> PackagesVersion { get; private set; }
-
-        #endregion
-
-        #region Fields
-
-        private readonly Dictionary<string, string> _options;
-
-        #endregion
-
-        #region Methods
 
         // Public Methods 
 
@@ -215,6 +148,9 @@ namespace ISukces.SolutionDoctor.Logic
                 ExcludeSolutions.AddRange(other.ExcludeSolutions);
             if (other.ExcludeDirectories != null)
                 ExcludeDirectories.AddRange(other.ExcludeDirectories);
+            if (other.ExcludeDll != null)
+                foreach (var i in other.ExcludeDll)
+                    ExcludeDll.Add(i);
 
             foreach (var i in other._options)
                 SetOptionValue(i.Key, i.Value);
@@ -232,9 +168,58 @@ namespace ISukces.SolutionDoctor.Logic
                 if (_options.TryGetValue(optionName, out current))
                     value = current + "|" + value.Trim();
             }
+
             _options[optionName] = value;
         }
 
-        #endregion Methods
+        public HashSet<string> ExcludeDll { get; }
+
+        public List<string> ScanDirectories { get; private set; }
+
+        public List<string> ExcludeDirectories { get; private set; }
+
+        public List<string> ExcludeSolutions { get; private set; }
+
+
+        public bool ShowOnlyBigProblems
+        {
+            get { return _options.ContainsKey("onlyBig"); }
+            set
+            {
+                if (value)
+                    _options["onlyBig"] = "";
+                else
+                    _options.Remove("onlyBig");
+            }
+        }
+
+        [JsonIgnore]
+        public string SaveConfigFileName
+        {
+            get
+            {
+                string fileName;
+                if (!_options.TryGetValue("saveOptions", out fileName) || fileName == null)
+                    return null;
+                fileName = fileName.Trim();
+                return string.IsNullOrEmpty(fileName) ? null : fileName;
+            }
+        }
+
+        public bool Fix
+        {
+            get { return _options.ContainsKey("fix"); }
+            set
+            {
+                if (value)
+                    _options["fix"] = "";
+                else
+                    _options.Remove("fix");
+            }
+        }
+
+        public Dictionary<string, NugetVersion> PackagesVersion { get; private set; }
+
+        private readonly Dictionary<string, string> _options;
     }
 }

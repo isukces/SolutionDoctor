@@ -11,10 +11,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
     {
         public override void Describe(Action<string> writeLine)
         {
+            var l = SuggestedNugets.OrderBy(a => a).Last();
             writeLine.WriteFormat("projects references {0} that is in some nuspec",
                  Dependency.Name);
-            writeLine.WriteFormat("   Add nuspec, i.e. {0}", SuggestedNugets.First());
-            writeLine.WriteFormat("   Install-Package {0}", SuggestedNugets.First());
+            writeLine.WriteFormat("   Add nuspec, i.e. {0}", l);
+            writeLine.WriteFormat("   Install-Package {0}", l);
         }
 
         public override ProblemFix GetFix()

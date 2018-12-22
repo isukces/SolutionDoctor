@@ -26,6 +26,8 @@ namespace ISukces.SolutionDoctor.Logic
 #endif
         }
         static StringComparer c;
+        
+
         #region Constructors
 
         public Doctor()
@@ -65,7 +67,8 @@ namespace ISukces.SolutionDoctor.Logic
             var p3 = Task.Run(() => NugetPackageVersionChcecker.Check(uniqueProjects));
             var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
                 uniqueProjects,
-                LocalNugetRepositiories.Values.SelectMany(a => a.Values)));
+                LocalNugetRepositiories.Values.SelectMany(a => a.Values),
+                ExcludeDll));
             var p5 = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects));
             var p6 = Task.Run(() => XamlInCsProjChecker.Check(uniqueProjects));
             Task.WaitAll(p1, p2, p3, p4, p5, p6);
@@ -102,10 +105,12 @@ namespace ISukces.SolutionDoctor.Logic
         public IList<Solution> Solutions { get; private set; }
 
         public Dictionary<string, Dictionary<string, Nuspec>> LocalNugetRepositiories { get; private set; }
+        public HashSet<string> ExcludeDll { get; set; }
 
         #endregion Properties
 
-        public void ScanSolutions(IReadOnlyList<DirectoryInfo> dirs, IReadOnlyList<string> excludeItems, IReadOnlyList<string> excludeDirs)
+        public void ScanSolutions(IReadOnlyList<DirectoryInfo> dirs, IReadOnlyList<string> excludeItems,
+            IReadOnlyList<string> excludeDirs, HashSet<string> excludeDll)
         {
             if (dirs == null)
                 return;

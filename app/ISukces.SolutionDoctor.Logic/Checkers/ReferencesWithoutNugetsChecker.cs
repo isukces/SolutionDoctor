@@ -23,12 +23,14 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         // Public Methods 
 
-        public static IList<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories)
+        public static IList<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories,
+            HashSet<string> excludeDll)
         {
             // var aa = localNugetRepositiories.GetUnique(a => a.Location.FullName.ToLower(), a => a);
 
             var checker = new ReferencesWithoutNugetsChecker
             {
+                _excludeDll = excludeDll??new HashSet<string>(),
                 _projects = projects.ToList(), // .Select(a => a.Projects.First()).ToList()
                 _nuspecs = (from nuspec in localNugetRepositiories
                             let dir =
@@ -108,6 +110,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 if (nuspec == null)
                 {
                     var depName = GetDepDll(dep);
+                    if (_excludeDll.Contains(depName))
+                        continue;
                     if (_map.TryGetValue(depName, out var list) && list.Any())
                     {
                         yield return new AddNugetToSolutionProblem
@@ -176,6 +180,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         private Dictionary<string, HashSet<string>> _map;
         private Tuple<string, Nuspec>[] _nuspecs;
         List<Project> _projects;
+        public HashSet<string> _excludeDll;
 
         #endregion Fields
     }

@@ -10,9 +10,9 @@ using JetBrains.Annotations;
 
 static internal class Manager
 {
-    #region Static Methods
+    #regionÂ StaticÂ Methods
 
-    // Private Methods 
+    //Â PrivateÂ MethodsÂ 
 
     private static void FixProblems([NotNull] CommandLineOptions options, [NotNull] List<ProblemFix> fixes)
     {
@@ -75,7 +75,7 @@ static internal class Manager
         return fixes;
     }
 
-    #endregion Static Methods
+    #endregionÂ StaticÂ Methods
 
     public static async Task Process(IEnumerable<string> dirs, CommandLineOptions options)
     {
@@ -83,8 +83,8 @@ static internal class Manager
         //doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions);
         var tmp = dirs.Select(dir => new DirectoryInfo(dir)).ToArray();
         await Task.Run(
-            () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options.ExcludeDirectories));
-
+            () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options.ExcludeDirectories, options.ExcludeDll));
+        doctor.ExcludeDll = options.ExcludeDll;
         var problems = doctor.CheckAll().ToList();
         if (problems.Count == 0)
         {
