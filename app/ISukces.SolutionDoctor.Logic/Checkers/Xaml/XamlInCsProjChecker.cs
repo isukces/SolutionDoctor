@@ -129,6 +129,16 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                 CheckIfIsInPageNode(wrapper);
                 CheckDependUppon(wrapper, ammyFiles);
             });
+            XmlVisitor(xml, wrapper =>
+            {
+                if (!wrapper.HasIncludeExtension(".ammy")) return;
+                if (wrapper.NodeType == NodeType.None) return;
+                _result.Add(new AmmyProblem
+                {
+                    ProjectFilename = _currentProjectLocation,
+                    Wrapper = wrapper
+                });
+            });
         }
 
         private void CheckSubtypeDesigner(CsprojXmlNodeWrapper wrapper)
@@ -145,5 +155,45 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         private readonly List<Problem> _result = new List<Problem>();
 
         private FileName _currentProjectLocation;
+    }
+
+    public class AmmyProblem : Problem
+    {
+        public override void Describe(Action<string> writeLine)
+        {
+            writeLine("ammy file " + Wrapper.Include + " should be marked as None");
+        }
+
+        public override ProblemFix GetFix()
+        {
+            return new ProblemFix("mark " + Wrapper.Include + " as None", () =>
+            {
+                
+                var xml      = XDocument.Load(ProjectFilename.FullName);
+                var needSave = false;
+                var file = Wrapper.Include;
+                XamlInCsProjChecker.XmlVisitor(xml, q =>
+                {
+                    var include = q.Include;
+                    if (!string.Equals(file, include, StringComparison.OrdinalIgnoreCase)) return;
+                    q.WrappedElement.Name = q.WrappedElement.Name.Namespace + "None";
+                    // q.SubType = "Designer";
+                    needSave  = true;
+                });
+                if (needSave)
+                    xml.Save(ProjectFilename.FullName);
+                
+                
+                // 
+            });
+            
+        }
+
+        protected override bool GetIsBigProblem()
+        {
+            return true;
+        }
+
+        public CsprojXmlNodeWrapper Wrapper { get; set; }
     }
 }

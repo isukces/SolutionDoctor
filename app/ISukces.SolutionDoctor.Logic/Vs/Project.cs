@@ -72,18 +72,13 @@ namespace ISukces.SolutionDoctor.Logic.Vs
                 var doc = XDocument.Load(Location.FullName);
                 var refNodes = doc?.Root?.Elements("ItemGroup").SelectMany(q => q.Elements("Reference")).ToArray() ??
                                new XElement[0];
-                return refNodes.Select(q =>
-                {
-                    return ProjectReference.FromNode(q, Location.Directory);
-                }).ToList();
+                return refNodes.Select(q => { return ProjectReference.FromNode(q, Location.Directory); }).ToList();
             }
-            else
-            {
-                foreach (var itemGroupElement in root.Elements(root.Name.Namespace + "ItemGroup"))
-                foreach (var reference in itemGroupElement.Elements(itemGroupElement.Name.Namespace + "Reference"))
-                    result.Add(ProjectReference.FromNode(reference, Location.Directory));
-                return result;
-            }
+
+            foreach (var itemGroupElement in root.Elements(root.Name.Namespace + "ItemGroup"))
+            foreach (var reference in itemGroupElement.Elements(itemGroupElement.Name.Namespace + "Reference"))
+                result.Add(ProjectReference.FromNode(reference, Location.Directory));
+            return result;
         }
 
         private NugetPackage[] NugetPackagesInternal()
@@ -111,17 +106,23 @@ namespace ISukces.SolutionDoctor.Logic.Vs
   </ItemGroup>
 </Project>*/
                 var doc = XDocument.Load(Location.FullName);
-                var refNodes = doc?.Root?.Elements("ItemGroup").SelectMany(q => q.Elements("PackageReference")).ToArray() ??
+                var refNodes = doc?.Root?.Elements("ItemGroup").SelectMany(q => q.Elements("PackageReference"))
+                                   .ToArray() ??
                                new XElement[0];
                 return refNodes.Select(q =>
                 {
-                    return new NugetPackage
+                    var r = new NugetPackage
                     {
-                        Id      = (string)q.Attribute("Include"),
-                        Version = NugetVersion.Parse((string)q.Attribute("Version"))
+                        Id = (string)q.Attribute("Include")
                     };
+                    var ver = (string)q.Attribute("Version");
+
+                    if (!string.IsNullOrEmpty(ver))
+                        r.Version = NugetVersion.Parse(ver);
+                    return r;
                 }).ToArray();
             }
+
             // ReSharper disable once PossibleNullReferenceException
             var configFileInfo = Location.GetPackagesConfigFile();
             if (!configFileInfo.Exists)
@@ -158,10 +159,10 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         public CsProjectKind Kind { get; private set; }
 
-        private List<AssemblyBinding>  _assemblyBindings;
-        private NugetPackage[]         _nugetPackages;
+        private List<AssemblyBinding> _assemblyBindings;
+        private NugetPackage[] _nugetPackages;
         private List<ProjectReference> _references;
-        private FileName               _location;
+        private FileName _location;
     }
 
     public enum CsProjectKind
