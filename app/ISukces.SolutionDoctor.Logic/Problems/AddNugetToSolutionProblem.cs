@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
@@ -14,8 +15,9 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             var l = SuggestedNugets.OrderBy(a => a).Last();
             writeLine.WriteFormat("projects references {0} that is in some nuspec",
                  Dependency.Name);
-            writeLine.WriteFormat("   Add nuspec, i.e. {0}", l);
-            writeLine.WriteFormat("   Install-Package {0}", l);
+            writeLine.WriteFormat("   Add nuspec, i.e. {0}", l.FullId);
+            var name = ProjectFilename.GetShortNameWithoutExtension();
+            writeLine.WriteFormat("   Install-Package {0} -Version {1} -ProjectName {2}", l.Id, l.PackageVersion, name);
         }
 
         public override ProblemFix GetFix()
@@ -29,6 +31,6 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         }
 
         public ProjectReference Dependency { get; set; }
-        public HashSet<string> SuggestedNugets { get; set; }
+        public HashSet<PackageId> SuggestedNugets { get; set; }
     }
 }

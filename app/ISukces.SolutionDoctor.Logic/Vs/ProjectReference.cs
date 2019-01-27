@@ -5,9 +5,9 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 {
     public class ProjectReference
     {
-        #region Static Methods
+        #regionÂ StaticÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public static ProjectReference FromNode(XElement reference, DirectoryInfo baseDir)
         {
@@ -20,25 +20,25 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             };
         }
 
-        #endregion Static Methods
+        #endregionÂ StaticÂ Methods
 
-        #region Methods
+        #regionÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public override string ToString()
         {
             return Name;
         }
 
-        #endregion Methods
+        #endregionÂ Methods
 
-        #region Properties
+        #regionÂ Properties
 
         public FileInfo HintPath { get; set; }
 
         public string Name { get; set; }
 
-        #endregion Properties
+        #endregionÂ Properties
     }
 }

@@ -20,6 +20,14 @@ namespace ISukces.SolutionDoctor.Logic
         {
             return projectFile.GetRelativeFile("packages.config");
         }
+        
+        public static string GetShortNameWithoutExtension(this FileName projectFile)
+        {
+            var fi = new FileInfo(projectFile.FullName);
+            var ext = fi.Extension;
+            var name = fi.Name;
+            return name.Substring(0, name.Length - ext.Length);
+        }
         // Private Methods 
 
         private static FileName GetRelativeFile(this FileName projectFile, string name)

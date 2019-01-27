@@ -17,6 +17,9 @@ namespace ISukces.SolutionDoctor
 
         static void Main(string[] args)
         {
+            #if DEBUG
+            args = new[] {"-cfg", "SolutionDoctor.json"};
+            #endif
             try
             {
                 var options = CommandLineOptions.Parse(args);

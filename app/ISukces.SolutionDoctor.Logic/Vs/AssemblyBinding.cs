@@ -7,7 +7,6 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 {
     public class AssemblyBinding
     {
-
         public void SetRedirection([NotNull] string version)
         {
             if (version == null) throw new ArgumentNullException(nameof(version));

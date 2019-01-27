@@ -49,9 +49,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         }
         // Private Methods 
 
-        private static Dictionary<string, HashSet<string>> GetNuspecDllMap(Tuple<string, Nuspec>[] nuspecs)
+        private static Dictionary<string, HashSet<PackageId>> GetNuspecDllMap(Tuple<string, Nuspec>[] nuspecs)
         {
-            var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+            var map = new Dictionary<string, HashSet<PackageId>>(StringComparer.OrdinalIgnoreCase);
             foreach (var nuspec in nuspecs)
             {
                 var tmp = ScanDll(nuspec.Item1);
@@ -59,10 +59,10 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 {
                     if (!map.TryGetValue(ii, out var list))
                     {
-                        list = new HashSet<string>();
+                        list = new HashSet<PackageId>();
                         map[ii] = list;
                     }
-                    list.Add(nuspec.Item2.FullId);
+                    list.Add(nuspec.Item2.GetPackageId());
                 }
             }
             return map;
@@ -177,7 +177,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         #region Fields
 
-        private Dictionary<string, HashSet<string>> _map;
+        private Dictionary<string, HashSet<PackageId>> _map;
         private Tuple<string, Nuspec>[] _nuspecs;
         List<Project> _projects;
         public HashSet<string> _excludeDll;

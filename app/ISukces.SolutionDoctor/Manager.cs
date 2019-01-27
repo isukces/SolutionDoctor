@@ -85,6 +85,7 @@ static internal class Manager
         await Task.Run(
             () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options.ExcludeDirectories, options.ExcludeDll));
         doctor.ExcludeDll = options.ExcludeDll;
+        doctor.RemoveBindingRedirect = options.RemoveBindingRedirect;
         var problems = doctor.CheckAll().ToList();
         if (problems.Count == 0)
         {

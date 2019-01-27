@@ -6,17 +6,7 @@ using ISukces.SolutionDoctor.Logic.Vs;
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
     public class WrongBindingRedirectProblem : Problem
-    {
-        #region Constructors
-
-
-
-        #endregion Constructors
-
-        #region Methods
-
-        // Public Methods 
-
+    {        
         public override void Describe(Action<string> writeLine)
         {
             writeLine(string.Format("{2} nuget package DLL is {0} but config redirects to {1}",
@@ -54,10 +44,6 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return true;
         }
 
-        #endregion Methods
-
-        #region Properties
-
         public FileName ConfigFile
         {
             get
@@ -67,10 +53,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         }
 
         public AssemblyBinding Redirect { get; set; }
-
         public NugetPackage Package { get; set; }
         public string DllVersion { get; set; }
-
-        #endregion Properties
     }
 }

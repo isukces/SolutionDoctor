@@ -10,19 +10,66 @@ using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
-    internal static class NugetPackageAssemblyBindingChecker
+    internal class NugetPackageAssemblyBindingChecker
     {
-        public static IList<Problem> Check([NotNull] IList<Project> projects)
+        public static IList<Problem> Check([NotNull] IList<Project> projects, HashSet<string> removeBindingRedirect)
         {
             if (projects == null) throw new ArgumentNullException(nameof(projects));
-            return projects.SelectMany(ScanProject).ToList();
+            var tmp = new NugetPackageAssemblyBindingChecker();
+            tmp._removeBindingRedirect = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (removeBindingRedirect!=null)
+                foreach (var i in removeBindingRedirect)
+                    tmp._removeBindingRedirect.Add(i);
+            return projects.SelectMany(tmp.ScanProject).ToList();
         }
 
-        private static IEnumerable<Problem> ScanProject(Project project)
+        private static Func<FileInfo, bool> ContainsPackagePath(NugetPackage package)
+        {
+            var path = "\\packages\\" + package.Id + "." + package.Version + "\\";
+            return a => a != null && a.FullName.ToLower().Contains(path.ToLowerInvariant());
+        }
+
+        private static DllInfo GetDllInfo(FileInfo file)
+        {
+            if (!file.Exists)
+                return new DllInfo(file, null, false);
+            try
+            {
+                var currentAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
+                return
+                    new DllInfo(file,
+                        currentAssemblyName.Version.ToString(),
+                        true);
+            }
+            catch
+            {
+                return new DllInfo(file, null, true);
+            }
+        }
+
+        private IEnumerable<Problem> ScanProject(Project project)
         {
             var assemblyBindings = project.AssemblyBindings;
             var packageVersion   = project.NugetPackages;
-            if (!assemblyBindings.Any() || !packageVersion.Any()) yield break;
+
+            if (!assemblyBindings.Any()) yield break;
+            if (_removeBindingRedirect != null && _removeBindingRedirect.Any())
+            {
+                foreach (var i in assemblyBindings)
+                {
+                    if (_removeBindingRedirect.Contains(i.Name))
+                    {
+                        yield return new NotNecessaryBindingRedirectProblem
+                        {
+                            Redirect        = i,
+                            ProjectFilename = project.Location,
+                        };
+                    }
+                    
+                }
+            }
+
+            if (!packageVersion.Any()) yield break;
             foreach (var package in packageVersion)
             {
                 if (project.Kind == CsProjectKind.New)
@@ -31,15 +78,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                             a => string.Equals(a.Name, package.Id, StringComparison.OrdinalIgnoreCase))
                         .ToArray();
                     foreach (var i in redirects)
-                    {
                         if (i.Name != package.Id)
-                        {
-                            yield return new AssemblyRedirectionInvalidPackageId(package.Id, project);                            
-                        }
-                    }
+                            yield return new AssemblyRedirectionInvalidPackageId(package.Id, project);
 
                     continue;
                 }
+
                 var redirect =
                     assemblyBindings.FirstOrDefault(
                         a => string.Equals(a.Name, package.Id, StringComparison.OrdinalIgnoreCase));
@@ -92,42 +136,20 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             }
         }
 
+        private HashSet<string> _removeBindingRedirect;
+
         private class DllInfo
         {
             public DllInfo(FileInfo file, string dllVersion, bool exists)
             {
-                File    = file;
+                File       = file;
                 DllVersion = dllVersion;
-                Exists  = exists;
+                Exists     = exists;
             }
 
-            public FileInfo File    { get; set; }
-            public string   DllVersion { get; set; }
-            public bool     Exists  { get; set; }
-        }
-
-        private static DllInfo GetDllInfo(FileInfo file)
-        {
-            if (!file.Exists)
-                return new DllInfo(file, null, false);
-            try
-            {
-                var currentAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
-                return
-                    new DllInfo(file,
-                        currentAssemblyName.Version.ToString(),
-                        true);
-            }
-            catch
-            {
-                return new DllInfo(file, null, true);
-            }
-        }
-
-        private static Func<FileInfo, bool> ContainsPackagePath(NugetPackage package)
-        {
-            var path = "\\packages\\" + package.Id + "." + package.Version + "\\";
-            return a => a != null && a.FullName.ToLower().Contains(path.ToLowerInvariant());
+            public FileInfo File       { get; }
+            public string   DllVersion { get; }
+            public bool     Exists     { get; }
         }
     }
 }

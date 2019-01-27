@@ -9,9 +9,9 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class NugetVersion : IEquatable<NugetVersion>, IComparable<NugetVersion>
     {
-        #region Static Methods
+        #region StaticÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public static NugetVersion Parse(string ver)
         {
@@ -66,9 +66,9 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         #endregion
 
-        #region Methods
+        #regionÂ Methods
 
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public int CompareTo(NugetVersion other)
         {
@@ -113,7 +113,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             return string.IsNullOrEmpty(Suffix) ? Version.ToString() : Version + "-" + Suffix;
         }
 
-        #endregion Methods
+        #endregionÂ Methods
 
         #region Operators
 

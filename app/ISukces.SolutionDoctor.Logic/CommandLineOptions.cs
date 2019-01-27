@@ -14,6 +14,7 @@ namespace ISukces.SolutionDoctor.Logic
         private CommandLineOptions()
         {
             ScanDirectories    = new List<string>();
+            RemoveBindingRedirect = new HashSet<string>();
             ExcludeDll = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             ExcludeSolutions   = new List<string>();
             ExcludeDirectories = new List<string>();
@@ -58,6 +59,9 @@ namespace ISukces.SolutionDoctor.Logic
                             break;
                         case "excludedll":                            
                             result.ExcludeDll.Add(item);
+                            break;
+                        case "removerebindingredirect":                            
+                            result.RemoveBindingRedirect.Add(item);
                             break;
                         default:
                             result.SetOptionValue(optionName, item);
@@ -151,6 +155,10 @@ namespace ISukces.SolutionDoctor.Logic
             if (other.ExcludeDll != null)
                 foreach (var i in other.ExcludeDll)
                     ExcludeDll.Add(i);
+            
+            if (other.RemoveBindingRedirect != null)
+                foreach (var i in other.RemoveBindingRedirect)
+                    RemoveBindingRedirect.Add(i);
 
             foreach (var i in other._options)
                 SetOptionValue(i.Key, i.Value);
@@ -173,6 +181,8 @@ namespace ISukces.SolutionDoctor.Logic
         }
 
         public HashSet<string> ExcludeDll { get; }
+        
+        public HashSet<string> RemoveBindingRedirect { get; }
 
         public List<string> ScanDirectories { get; private set; }
 

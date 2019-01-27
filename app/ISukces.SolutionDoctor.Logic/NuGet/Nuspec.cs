@@ -8,8 +8,9 @@ using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.NuGet
 {
-    public class Nuspec
+    public class Nuspec 
     {
+        
         private Nuspec()
         {
             // dla serializacji
@@ -107,13 +108,10 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             return (Dependencies != null) && Dependencies.Any();
         }
 
-        // Public Methods 
         public override string ToString()
         {
             return string.Format("nuspec: {0}", FullId);
         }
-
-        // Private Methods 
 
         private XElement GetNode(string nodeName)
         {
@@ -128,9 +126,13 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         public NugetVersion PackageVersion { get; set; }
 
-        public List<NugetDependency> Dependencies { get; set; } = new List<NugetDependency>();
+        public List<NugetDependency> Dependencies { get; } = new List<NugetDependency>();
 
         private readonly XElement _metadata;
- 
+
+        public PackageId GetPackageId()
+        {
+            return new PackageId(Id, PackageVersion, FullId);
+        }
     }
 }

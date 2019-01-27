@@ -72,9 +72,11 @@
     <Compile Include="Checkers\Xaml\XamlNotInPageNodeProblem.cs" />
     <Compile Include="Checkers\Xaml\XamlProblem.cs" />
     <Compile Include="NuGet\NuspecCache.cs" />
+    <Compile Include="NuGet\PackageId.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
     <Compile Include="Problems\AssemblyRedirectionInvalidPackageId.cs" />
     <Compile Include="Problems\IConsiderUpdatePackage.cs" />
+    <Compile Include="Problems\NotNecessaryBindingRedirectProblem.cs" />
     <Compile Include="Problems\NugetRepositoryDependencyProblem.cs" />
     <Compile Include="Checkers\ReferencesWithoutNugetsChecker.cs" />
     <Compile Include="CommandLineOptions.cs" />
