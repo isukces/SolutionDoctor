@@ -23,7 +23,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         // Public Methods 
 
-        public static IList<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories,
+        public static IEnumerable<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories,
             HashSet<string> excludeDll)
         {
             // var aa = localNugetRepositiories.GetUnique(a => a.Location.FullName.ToLower(), a => a);

@@ -21,7 +21,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             if (fileName == null)
                 throw new ArgumentNullException("fileName");
             if (fileName.Exists)
-                _xml = XDocument.Load(fileName.FullName);
+                _xml = FileUtils.Load(fileName);
         }
 
         #endregion Constructors
@@ -115,7 +115,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         public void Save()
         {
-            _xml.Save(_fileName.FullName);
+            _xml.Save2(_fileName);
         }
     }
 

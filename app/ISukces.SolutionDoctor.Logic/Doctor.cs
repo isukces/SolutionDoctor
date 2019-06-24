@@ -16,7 +16,6 @@ namespace ISukces.SolutionDoctor.Logic
 {
     public class Doctor
     {
-
         static Doctor()
         {
 #if PLATFORM_UNIX
@@ -25,24 +24,19 @@ namespace ISukces.SolutionDoctor.Logic
             c = StringComparer.OrdinalIgnoreCase;
 #endif
         }
-        static StringComparer c;
-        
 
-        #region Constructors
 
         public Doctor()
         {
             Solutions = new List<Solution>();
-            LocalNugetRepositiories = new Dictionary<string, Dictionary<string, Nuspec>>(StringComparer.OrdinalIgnoreCase);
+            LocalNugetRepositiories =
+                new Dictionary<string, Dictionary<string, Nuspec>>(StringComparer.OrdinalIgnoreCase);
         }
-
-        #endregion Constructors
-
-        #region Static Methods
 
         // Private Methods 
 
-        private static bool Exlude(FileInfo fileInfo, IReadOnlyList<string> excludeItems, IReadOnlyList<string> excludeDirs)
+        private static bool Exlude(FileInfo fileInfo, IReadOnlyList<string> excludeItems,
+            IReadOnlyList<string> excludeDirs)
         {
             var n = fileInfo.FullName.ToLower();
             if (excludeDirs != null)
@@ -52,18 +46,15 @@ namespace ISukces.SolutionDoctor.Logic
             return excludeItems.Any(i => n.EndsWith(i));
         }
 
-        #endregion Static Methods
-
-        #region Methods
-
         // Public Methods 
 
-        public IEnumerable<Problem> CheckAll()
+        public IEnumerable<Problem> CheckAll(CommandLineOptions options)
         {
             var groupedProjects = GetGroupedProjects();
-            var uniqueProjects = groupedProjects.Select(a => a.Projects.First().Project).ToList();
-            var p1 = Task.Run(() => SolutionsInManyFoldersChecker.Check(groupedProjects));
-            var p2 = Task.Run(() => NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect));
+            var uniqueProjects  = groupedProjects.Select(a => a.Projects.First().Project).ToList();
+            var p1              = Task.Run(() => SolutionsInManyFoldersChecker.Check(groupedProjects));
+            var p2 = Task.Run(() =>
+                NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect));
             var p3 = Task.Run(() => NugetPackageVersionChcecker.Check(uniqueProjects));
             var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
                 uniqueProjects,
@@ -71,90 +62,55 @@ namespace ISukces.SolutionDoctor.Logic
                 ExcludeDll));
             var p5 = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects));
             var p6 = Task.Run(() => XamlInCsProjChecker.Check(uniqueProjects));
-            Task.WaitAll(p1, p2, p3, p4, p5, p6);
-            return p1.Result.Concat(p2.Result).Concat(p3.Result).Concat(p4.Result).Concat(p5.Result).Concat(p6.Result);
+            var p7 = Task.Run(() => WarningsChecker.Check(uniqueProjects, options));
+            var all = new[] {p1, p2, p3, p4, p5, p6, p7};
+            Task.WaitAll(all);
+            return all.SelectMany(a => a.Result).ToArray();
         }
-
-
-        // Private Methods 
-
-        private List<ProjectGroup> GetGroupedProjects()
-        {
-            var liqQuery = from solution in Solutions
-                           from project in solution.Projects
-                           group new ProjectPlusSolution
-                           {
-                               Project = project,
-                               Solution = solution
-                           }
-                           by project.Location
-                               into projectGroup
-                           select new ProjectGroup
-                           {
-                               Filename = projectGroup.Key,
-                               Projects = projectGroup.ToArray()
-                           };
-            var groupedProjects = liqQuery.ToList();
-            return groupedProjects;
-        }
-
-        #endregion Methods
-
-        #region Properties
-
-        public IList<Solution> Solutions { get; private set; }
-
-        public Dictionary<string, Dictionary<string, Nuspec>> LocalNugetRepositiories { get; private set; }
-        public HashSet<string> ExcludeDll { get; set; }
-        public HashSet<string> RemoveBindingRedirect { get; set; }
-
-        #endregion Properties
 
         public void ScanSolutions(IReadOnlyList<DirectoryInfo> dirs, IReadOnlyList<string> excludeItems,
-            IReadOnlyList<string> excludeDirs, HashSet<string> excludeDll)
+            IDoctorConfig cfg)
         {
             if (dirs == null)
                 return;
             dirs = dirs.Where(a => a.Exists).ToArray();
             if (!dirs.Any())
                 return;
-            excludeDirs = excludeDirs?
-                              .Select(a => new DirectoryInfo(a).FullName.ToLower() + "\\")
-                              .ToList() ?? new List<string>();
-            IObservable<FileInfo> filesStream = DiscFileScanner.MakeObservable(dirs,
+            var excludeDirs = cfg.ExcludeDirectories?
+                                  .Select(a => new DirectoryInfo(a).FullName.ToLower() + "\\")
+                                  .ToList() ?? new List<string>();
+            var filesStream = DiscFileScanner.MakeObservable(dirs,
                 "*.sln",
-                i => !Exlude(i, excludeItems, excludeDirs), 
+                i => !Exlude(i, excludeItems, excludeDirs),
                 excludeDirs);
             // .Publish();
 
             var tmp = filesStream.ToEnumerable().ToArray();
 
-
             var solutions =
                 filesStream
-                .ObserveOn(NewThreadScheduler.Default)
-                .Select(
-                 i =>
-                 {
-                     Solution s = null;
-                     try
-                     {
-                         s = new Solution(i);
-                     }
-                     catch (Exception e)
-                     {
-                         Console.WriteLine(Thread.CurrentThread.ManagedThreadId + " solution {0} can't be parsed", i.FullName);
-                     }
-                     return s;
-                 }
-                )
-                .Where(i => i != null)
-                .Publish();
+                    .ObserveOn(NewThreadScheduler.Default)
+                    .Select(
+                        i =>
+                        {
+                            Solution s = null;
+                            try
+                            {
+                                s = new Solution(i);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(
+                                    Thread.CurrentThread.ManagedThreadId + " solution {0} can't be parsed", i.FullName);
+                            }
 
+                            return s;
+                        }
+                    )
+                    .Where(i => i != null)
+                    .Publish();
 
-
-
-            var scanPackagesEventSlim = new ManualResetEventSlim(false);
+            var scanPackagesEventSlim       = new ManualResetEventSlim(false);
             var addSolutionsToListEventSlim = new ManualResetEventSlim(false);
 
             solutions
@@ -171,16 +127,37 @@ namespace ISukces.SolutionDoctor.Logic
                     dir => ScanLocalNugets(new DirectoryInfo(dir)),
                     () => scanPackagesEventSlim.Set());
 
-
             solutions.Connect();
             scanPackagesEventSlim.Wait();
             addSolutionsToListEventSlim.Wait();
         }
 
 
+        // Private Methods 
+
+        private List<ProjectGroup> GetGroupedProjects()
+        {
+            var liqQuery = from solution in Solutions
+                from project in solution.Projects
+                group new ProjectPlusSolution
+                    {
+                        Project  = project,
+                        Solution = solution
+                    }
+                    by project.Location
+                into projectGroup
+                select new ProjectGroup
+                {
+                    Filename = projectGroup.Key,
+                    Projects = projectGroup.ToArray()
+                };
+            var groupedProjects = liqQuery.ToList();
+            return groupedProjects;
+        }
+
         private void ScanLocalNugets(DirectoryInfo directory)
         {
-            lock (LocalNugetRepositiories)
+            lock(LocalNugetRepositiories)
             {
                 directory = new DirectoryInfo(Path.Combine(directory.FullName, "packages"));
                 if (LocalNugetRepositiories.ContainsKey(directory.FullName))
@@ -190,6 +167,13 @@ namespace ISukces.SolutionDoctor.Logic
                     nuspec => nuspec.FullId, nuspec => nuspec);
             }
         }
+
+        public IList<Solution> Solutions { get; }
+
+        public Dictionary<string, Dictionary<string, Nuspec>> LocalNugetRepositiories { get; }
+        public HashSet<string>                                ExcludeDll              { get; set; }
+        public HashSet<string>                                RemoveBindingRedirect   { get; set; }
+        private static readonly StringComparer c;
     }
 
     public class ProjectGroup

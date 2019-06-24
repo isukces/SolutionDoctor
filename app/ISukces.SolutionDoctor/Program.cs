@@ -1,45 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ISukces.SolutionDoctor.Logic;
-using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor
 {
-    class Program
+    internal class Program
     {
         #region Static Methods
 
         // Private Methods 
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            #if DEBUG
+#if DEBUGxx
             args = new[] {"-cfg", "SolutionDoctor.json"};
-            #endif
+#endif
             try
             {
                 var options = CommandLineOptions.Parse(args);
                 if (options == null)
                 {
                     ShowHelp();
-                    return;                    
+                    return;
                 }
+
                 if (options.ScanDirectories.Any())
                     Directory.SetCurrentDirectory(options.ScanDirectories.First());
                 if (!string.IsNullOrEmpty(options.SaveConfigFileName))
                 {
-                    options.Save(new FileInfo( options.SaveConfigFileName));
+                    options.Save(new FileInfo(options.SaveConfigFileName));
                     Console.WriteLine("Config saved into file {0}.", options.SaveConfigFileName);
                 }
+
                 if (options.ScanDirectories.Count < 1)
                 {
                     ShowHelp();
                     return;
                 }
+
                 foreach (var i in options.ScanDirectories)
                 {
                     var directory = new DirectoryInfo(i);
@@ -50,24 +49,35 @@ namespace ISukces.SolutionDoctor
                         return;
                     }
                 }
+
                 var task = Manager.Process(options.ScanDirectories, options);
                 task.Wait();
-
-            }
-            catch (AggregateException e)
-            {
-                foreach (var i in e.InnerExceptions)
-                {
-                    Console.WriteLine("Error: " + i.Message);
-                }
-                ShowHelp();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error: " + e.Message);
+                DisplayException(e);
                 ShowHelp();
             }
+
             Console.ReadLine();
+        }
+
+        private static void DisplayException(Exception e)
+        {
+            switch (e)
+            {
+                case null:
+                    break;
+                case AggregateException ae:
+                    foreach (var i in ae.InnerExceptions)
+                        DisplayException(i);
+                    break;
+                default:
+                    Console.WriteLine("Error: " + e.Message);
+                    Console.WriteLine("       " + e.StackTrace);
+                    DisplayException(e.InnerException);
+                    break;
+            }
         }
 
         private static void ShowHelp()

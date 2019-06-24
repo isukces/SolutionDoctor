@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ISukces.SolutionDoctor.Test</RootNamespace>
     <AssemblyName>ISukces.SolutionDoctor.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>783c8702</NuGetPackageImportStamp>
   </PropertyGroup>

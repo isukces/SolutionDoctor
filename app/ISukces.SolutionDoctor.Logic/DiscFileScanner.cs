@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -10,20 +11,12 @@ namespace ISukces.SolutionDoctor.Logic
 {
     public class DiscFileScanner
     {
-        #region Constructors
-
         public DiscFileScanner(string filter, Func<FileInfo, bool> accept, IReadOnlyList<string> excludeDirs)
         {
             _filter = filter;
             _accept = accept;
             _excludeDirs = excludeDirs;
         }
-
-        #endregion Constructors
-
-        #region Static Methods
-
-        // Public Methods 
 
         public static IObservable<FileInfo> MakeObservable(IReadOnlyList<DirectoryInfo> dirs, string filter, Func<FileInfo, bool> accept, IReadOnlyList<string> excludeDirs)
         {
@@ -45,11 +38,7 @@ namespace ISukces.SolutionDoctor.Logic
 
         }
 
-        #endregion Static Methods
-
-        #region Methods
-
-        // Public Methods 
+        //ï¿½Publicï¿½Methodsï¿½
 
         public IEnumerable<FileInfo> Scan(DirectoryInfo directory)
         {
@@ -63,11 +52,20 @@ namespace ISukces.SolutionDoctor.Logic
                 ? fromSubfolders
                 : files.Concat(fromSubfolders);
         }
-        // Private Methods 
 
-        bool ExD(DirectoryInfo di)
+
+        bool ExcludeDirectory(DirectoryInfo di)
         {
-            if (di.Name.ToLower() == ".git")
+            var dn = di.Name;
+            var skipByName = string.Equals(dn, "bin", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(dn, "obj", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(dn, "packages", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(dn, ".git", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(dn, ".idea", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(dn, ".vs", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(dn, "wwwroot", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(dn, "node_modules", StringComparison.OrdinalIgnoreCase);
+            if (skipByName)
                 return true;
             var n = di.FullName.ToLower() + "\\";
             foreach (var i in _excludeDirs)
@@ -80,12 +78,12 @@ namespace ISukces.SolutionDoctor.Logic
         {
             if (directories == null || directories.Count == 0)
                 return;
-            directories = directories.Where(a => a.Exists && !ExD(a)).ToArray();
+            directories = directories.Where(a => a.Exists && !ExcludeDirectory(a)).ToArray();
             if (directories.Count == 0)
                 return;
 
 
-            var files = directories.SelectMany(a => GetFiles2(a, _filter))
+            var files = directories.SelectMany(a => GetFilesAndIgnoreError(a, _filter))
                 //.SelectMany<DirectoryInfo, DirectoryInfo>(a => a)
                 //.GetFiles(_filter)
                 .Where(fileInfo => _accept(fileInfo));
@@ -109,12 +107,12 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
-        private FileInfo[] GetFiles2(DirectoryInfo dir, string filter)
+        private static FileInfo[] GetFilesAndIgnoreError(DirectoryInfo dir, string filter)
         {
-
+            Debug.WriteLine("Scan " + dir.FullName);
             try
             {
-                return dir.GetFiles(_filter);
+                return dir.GetFiles(filter);
             }
             catch (System.IO.PathTooLongException e)
             {
@@ -122,14 +120,9 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
-        #endregion Methods
-
-        #region Fields
-
+  
         readonly Func<FileInfo, bool> _accept;
         private readonly IReadOnlyList<string> _excludeDirs;
         readonly string _filter;
-
-        #endregion Fields
     }
 }

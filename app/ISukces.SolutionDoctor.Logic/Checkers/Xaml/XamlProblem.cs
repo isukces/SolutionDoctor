@@ -10,7 +10,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         {
             return new ProblemFix(GetFixName(), () =>
             {
-                var xml      = XDocument.Load(ProjectFilename.FullName);
+                var xml      = FileUtils.Load(ProjectFilename);
                 var needSave = false;
                 XamlInCsProjChecker.XmlVisitor(xml, q =>
                 {
@@ -21,7 +21,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                     needSave  = true;
                 });
                 if (needSave)
-                    xml.Save(ProjectFilename.FullName);
+                    xml.Save2(ProjectFilename);
             });
         }
 

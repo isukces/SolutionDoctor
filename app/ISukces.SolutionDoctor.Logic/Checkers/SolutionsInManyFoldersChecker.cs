@@ -6,7 +6,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     static class SolutionsInManyFoldersChecker
     {
-        public static IList<Problem> Check(IList<ProjectGroup> groupedProjects)
+        public static IEnumerable<Problem> Check(IList<ProjectGroup> groupedProjects)
         {
             return groupedProjects.SelectMany(CheckProject).ToList();
         }

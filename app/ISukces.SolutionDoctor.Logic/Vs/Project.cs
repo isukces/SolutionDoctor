@@ -62,14 +62,14 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         private List<ProjectReference> GetReferences()
         {
             // <Project Sdk="Microsoft.NET.Sdk">
-            var xml    = XDocument.Load(Location.FullName);
+            var xml    = FileUtils.Load(Location);
             var root   = xml.Root;
             var result = new List<ProjectReference>();
             if (root == null) return result;
 
             if (Kind == CsProjectKind.New)
             {
-                var doc = XDocument.Load(Location.FullName);
+                var doc = FileUtils.Load(Location);
                 var refNodes = doc?.Root?.Elements("ItemGroup").SelectMany(q => q.Elements("Reference")).ToArray() ??
                                new XElement[0];
                 return refNodes.Select(q => { return ProjectReference.FromNode(q, Location.Directory); }).ToList();
@@ -105,7 +105,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
     </Reference>
   </ItemGroup>
 </Project>*/
-                var doc = XDocument.Load(Location.FullName);
+                var doc = FileUtils.Load(Location);
                 var refNodes = doc?.Root?.Elements("ItemGroup").SelectMany(q => q.Elements("PackageReference"))
                                    .ToArray() ??
                                new XElement[0];
@@ -127,7 +127,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             var configFileInfo = Location.GetPackagesConfigFile();
             if (!configFileInfo.Exists)
                 return new NugetPackage[0];
-            var xml  = XDocument.Load(configFileInfo.FullName);
+            var xml  = FileUtils.Load(configFileInfo);
             var root = xml.Root;
             if (root == null || root.Name.LocalName != "packages")
                 return new NugetPackage[0];
@@ -152,7 +152,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
                     return;
                 _location = value;
                 Kind = value.Exists
-                    ? FindProjectType(XDocument.Load(value.FullName))
+                    ? FindProjectType(FileUtils.Load(value))
                     : CsProjectKind.Unknown;
             }
         }

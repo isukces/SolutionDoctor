@@ -12,7 +12,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     internal class NugetPackageAssemblyBindingChecker
     {
-        public static IList<Problem> Check([NotNull] IList<Project> projects, HashSet<string> removeBindingRedirect)
+        public static IEnumerable<Problem> Check([NotNull] IList<Project> projects, HashSet<string> removeBindingRedirect)
         {
             if (projects == null) throw new ArgumentNullException(nameof(projects));
             var tmp = new NugetPackageAssemblyBindingChecker();

@@ -9,17 +9,19 @@ using Newtonsoft.Json;
 
 namespace ISukces.SolutionDoctor.Logic
 {
-    public class CommandLineOptions
+    public class CommandLineOptions:IDoctorConfig
     {
         private CommandLineOptions()
         {
-            ScanDirectories    = new List<string>();
+            ScanDirectories       = new List<string>();
             RemoveBindingRedirect = new HashSet<string>();
-            ExcludeDll = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            ExcludeSolutions   = new List<string>();
-            ExcludeDirectories = new List<string>();
-            _options           = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            PackagesVersion    = new Dictionary<string, NugetVersion>(StringComparer.OrdinalIgnoreCase);
+            ExcludeDll            = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ExcludeSolutions      = new List<string>();
+            ExcludeDirectories    = new List<string>();
+            _options              = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            PackagesVersion       = new Dictionary<string, NugetVersion>(StringComparer.OrdinalIgnoreCase);
+            WarningsAsErrors      = new Dictionary<string,AddRemoveOption>(StringComparer.OrdinalIgnoreCase);
+            NoWarn                = new Dictionary<string,AddRemoveOption>(StringComparer.OrdinalIgnoreCase);
         }
 
         // Public Methods 
@@ -57,11 +59,18 @@ namespace ISukces.SolutionDoctor.Logic
                                 throw new Exception("-package option need parameter: {package id}={version}");
                             result.PackagesVersion[tmp[0].Trim()] = NugetVersion.Parse(tmp[1]);
                             break;
-                        case "excludedll":                            
+                        case "excludedll":
                             result.ExcludeDll.Add(item);
                             break;
-                        case "removerebindingredirect":                            
+                        case "removerebindingredirect":
                             result.RemoveBindingRedirect.Add(item);
+                            break;
+
+                        case "nowarn":
+                            AddRemove(result.NoWarn, item);
+                            break;
+                        case "warningsaserrors":
+                            AddRemove(result.WarningsAsErrors, item);
                             break;
                         default:
                             result.SetOptionValue(optionName, item);
@@ -88,6 +97,31 @@ namespace ISukces.SolutionDoctor.Logic
             }
 
             return result;
+        }
+
+        private static void AddRemove(IDictionary<string, AddRemoveOption> hs, string item)
+        {
+            if (string.IsNullOrEmpty(item))
+                return;
+            var itemArray = item.Split(',');
+            foreach (var src in itemArray)
+            {
+                var key = src.Trim();
+                if (string.IsNullOrEmpty(key))
+                    continue;
+                var minus = key[0] == '-';
+                if (minus)
+                {
+                    key = key.Substring(1).Trim();
+                    if (string.IsNullOrEmpty(key))
+                        continue;
+                }
+
+                if (minus)
+                    hs[key] = AddRemoveOption.Remove;
+                else
+                    hs[key] = AddRemoveOption.Add;
+            }
         }
 
         private static bool IsBoolOption(string optionName)
@@ -155,7 +189,7 @@ namespace ISukces.SolutionDoctor.Logic
             if (other.ExcludeDll != null)
                 foreach (var i in other.ExcludeDll)
                     ExcludeDll.Add(i);
-            
+
             if (other.RemoveBindingRedirect != null)
                 foreach (var i in other.RemoveBindingRedirect)
                     RemoveBindingRedirect.Add(i);
@@ -164,6 +198,12 @@ namespace ISukces.SolutionDoctor.Logic
                 SetOptionValue(i.Key, i.Value);
             foreach (var i in other.PackagesVersion)
                 PackagesVersion[i.Key] = i.Value;
+            
+            
+            foreach (var i in other.NoWarn)
+                NoWarn[i.Key] = i.Value;
+            foreach (var i in other.WarningsAsErrors)
+                WarningsAsErrors[i.Key] = i.Value;
 
             // Fix = other.ShowOnlyBigProblems;
         }
@@ -181,8 +221,12 @@ namespace ISukces.SolutionDoctor.Logic
         }
 
         public HashSet<string> ExcludeDll { get; }
-        
+
         public HashSet<string> RemoveBindingRedirect { get; }
+
+        public Dictionary<string, AddRemoveOption> NoWarn { get; }
+
+        public Dictionary<string, AddRemoveOption> WarningsAsErrors { get; }
 
         public List<string> ScanDirectories { get; private set; }
 
@@ -228,8 +272,10 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
-        public Dictionary<string, NugetVersion> PackagesVersion { get; private set; }
+        public Dictionary<string, NugetVersion> PackagesVersion { get; }
 
         private readonly Dictionary<string, string> _options;
     }
+
+  
 }

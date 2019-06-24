@@ -13,7 +13,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         {
         }
 
-        public static IList<Problem> Check(List<Project> projs)
+        public static IEnumerable<Problem> Check(List<Project> projs)
         {
             var a = new XamlInCsProjChecker();
             foreach (var project in projs) a.CheckProject(project);
@@ -109,7 +109,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         {
             if (project.Kind != CsProjectKind.Old) return;
             _currentProjectLocation = project.Location;
-            var xml = XDocument.Load(_currentProjectLocation.FullName);
+            var xml = FileUtils.Load(_currentProjectLocation);
 
             // scan for ammy Files
             var ammyFiles = new List<string>();
@@ -169,7 +169,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             return new ProblemFix("mark " + Wrapper.Include + " as None", () =>
             {
                 
-                var xml      = XDocument.Load(ProjectFilename.FullName);
+                var xml      = FileUtils.Load(ProjectFilename);
                 var needSave = false;
                 var file = Wrapper.Include;
                 XamlInCsProjChecker.XmlVisitor(xml, q =>
@@ -181,7 +181,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                     needSave  = true;
                 });
                 if (needSave)
-                    xml.Save(ProjectFilename.FullName);
+                    xml.Save2(ProjectFilename);
                 
                 
                 // 

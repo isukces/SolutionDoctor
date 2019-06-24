@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ISukces.SolutionDoctor.Logic</RootNamespace>
     <AssemblyName>ISukces.SolutionDoctor.Logic</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Checkers\WarningsChecker.cs" />
     <Compile Include="Checkers\Xaml\CsprojXmlNodeWrapper.cs" />
     <Compile Include="Checkers\Xaml\InvalidGeneratorProblem.cs" />
     <Compile Include="Checkers\Xaml\NotDesignerProblem.cs" />
@@ -71,6 +72,8 @@
     <Compile Include="Checkers\Xaml\XamlInCsProjChecker.cs" />
     <Compile Include="Checkers\Xaml\XamlNotInPageNodeProblem.cs" />
     <Compile Include="Checkers\Xaml\XamlProblem.cs" />
+    <Compile Include="FileUtils.cs" />
+    <Compile Include="IDoctorConfig.cs" />
     <Compile Include="NuGet\NuspecCache.cs" />
     <Compile Include="NuGet\PackageId.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />

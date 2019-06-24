@@ -83,10 +83,10 @@ static internal class Manager
         //doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions);
         var tmp = dirs.Select(dir => new DirectoryInfo(dir)).ToArray();
         await Task.Run(
-            () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options.ExcludeDirectories, options.ExcludeDll));
+            () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options));
         doctor.ExcludeDll = options.ExcludeDll;
         doctor.RemoveBindingRedirect = options.RemoveBindingRedirect;
-        var problems = doctor.CheckAll().ToList();
+        var problems = doctor.CheckAll(options).ToList();
         if (problems.Count == 0)
         {
             Console.WriteLine("No problems found. Congratulations.");

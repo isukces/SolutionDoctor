@@ -10,7 +10,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
     public class NugetPackageVersionChcecker
     {
 
-        public static IList<Problem> Check(IList<Project> projects)
+        public static IEnumerable<Problem> Check(IList<Project> projects)
         {
             var a = new NugetPackageVersionChcecker()
             {
