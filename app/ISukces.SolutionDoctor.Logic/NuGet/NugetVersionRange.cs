@@ -5,23 +5,18 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 {
     public class NugetVersionRange
     {
-        #region Static Methods
-
-        // Public Methods 
-
         public static NugetVersionRange Parse([NotNull] string text)
         {
             if (text == null) throw new ArgumentNullException("text");
             text = text.Trim();
-            const string msg = "Invalid version range {0}";
-            var minEdge = ParseRangeEdge(text[0], '[', '(');
-            var maxEdge = ParseRangeEdge(text[text.Length - 1], ']', ')');
+            const string msg     = "Invalid version range {0}";
+            var          minEdge = ParseRangeEdge(text[0], '[', '(');
+            var          maxEdge = ParseRangeEdge(text[text.Length - 1], ']', ')');
 
             if (minEdge != RangeEdge.None)
                 text = text.Substring(1).Trim();
             if (maxEdge != RangeEdge.None)
                 text = text.Substring(0, text.Length - 1).Trim();
-
 
             var textArray = text.Split(',');
             if (textArray.Length > 2)
@@ -30,22 +25,22 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             var result = new NugetVersionRange
             {
                 VersionMin = NugetVersion.Parse(textArray[0]),
-                MinEdge = minEdge,
-                MaxEdge = maxEdge
+                MinEdge    = minEdge,
+                MaxEdge    = maxEdge
             };
             result.VersionMax = textArray.Length == 2
                 ? NugetVersion.Parse(textArray[1])
                 : result.VersionMin;
             return result;
         }
-        // Private Methods 
+        //Â PrivateÂ MethodsÂ 
 
-        static RangeEdge ParseRangeEdge(char c, char t, char f)
+        private static RangeEdge ParseRangeEdge(char c, char t, char f)
         {
-            return c == t ? RangeEdge.Inclusive : (c == f ? RangeEdge.Exclusive : RangeEdge.None);
+            return c == t ? RangeEdge.Inclusive : c == f ? RangeEdge.Exclusive : RangeEdge.None;
         }
 
-        static string RangeEdgeToString(RangeEdge flag, string inclusiveText, string exclusiveText)
+        private static string RangeEdgeToString(RangeEdge flag, string inclusiveText, string exclusiveText)
         {
             switch (flag)
             {
@@ -54,14 +49,11 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                 case RangeEdge.Exclusive:
                     return exclusiveText;
             }
+
             return "";
         }
 
-        #endregion Static Methods
-
-        #region Methods
-
-        // Public Methods 
+        //Â PublicÂ MethodsÂ 
 
         public VersionCheckResult CheckVersion(NugetVersion x)
         {
@@ -78,7 +70,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                 return VersionCheckResult.TooHigh;
 
             return VersionCheckResult.Ok;
-
         }
 
         public override string ToString()
@@ -94,33 +85,19 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                 VersionMin,
                 RangeEdgeToString(MaxEdge, "<=", "<"),
                 VersionMax
-                );
+            );
         }
-
-        #endregion Methods
-
-        #region Fields
-
-        private bool _matchAnyVersion;
-
-        #endregion Fields
-
-        #region Static Properties
 
         public static NugetVersionRange Any
         {
             get
             {
-                return new NugetVersionRange()
+                return new NugetVersionRange
                 {
                     _matchAnyVersion = true
                 };
             }
         }
-
-        #endregion Static Properties
-
-        #region Properties
 
         public NugetVersion VersionMin { get; set; }
 
@@ -130,6 +107,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         public RangeEdge MaxEdge { get; set; }
 
-        #endregion Properties
+        private bool _matchAnyVersion;
     }
 }

@@ -16,7 +16,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         public static IEnumerable<Problem> Check(List<Project> projs)
         {
             var a = new XamlInCsProjChecker();
-            foreach (var project in projs) a.CheckProject(project);
+            foreach (var project in projs)
+                a.CheckProject(project);
 
             return a._result;
         }
@@ -59,16 +60,18 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             _result.Add(problem);
         }
 
+        
+        public const string XamlGenerator = "MSBuild:Compile";
         private void CheckGenerator(CsprojXmlNodeWrapper wrapper)
         {
-            const string generator = "MSBuild:Compile";
-            if (wrapper.Generator == generator) return;
+           
+            if (wrapper.Generator == XamlGenerator) return;
             if (wrapper.NodeType == NodeType.Page)
                 _result.Add(new InvalidGeneratorProblem
                 {
                     ProjectFilename   = _currentProjectLocation,
                     XamlFile          = wrapper.Include,
-                    ExpectedGenerator = generator
+                    ExpectedGenerator = XamlGenerator
                 });
         }
 
@@ -81,6 +84,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                 case NodeType.Unknown:
                 case NodeType.Reference:
                     break;
+                case NodeType.Content:
                 case NodeType.None:
                 {
                     var problem = new XamlNotInPageNodeProblem

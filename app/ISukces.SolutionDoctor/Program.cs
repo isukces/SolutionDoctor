@@ -13,7 +13,7 @@ namespace ISukces.SolutionDoctor
 
         private static void Main(string[] args)
         {
-#if DEBUGxx
+#if DEBUGxxx
             args = new[] {"-cfg", "SolutionDoctor.json"};
 #endif
             try

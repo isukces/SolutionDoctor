@@ -11,10 +11,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             writeLine($"File {XamlFile} should be marked as Page");
         }
 
-     
+
         protected override void FixNode(CsprojXmlNodeWrapper wrapper)
         {
             wrapper.WrappedElement.Name = wrapper.WrappedElement.Name.Namespace + "Page";
+            wrapper.Generator           = XamlInCsProjChecker.XamlGenerator;
+            wrapper.SubType             = "Designer";
         }
 
         protected override string GetFixName()

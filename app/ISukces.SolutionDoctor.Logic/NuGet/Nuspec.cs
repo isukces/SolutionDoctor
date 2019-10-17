@@ -105,7 +105,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         public bool ShouldSerializeDependencies()
         {
-            return (Dependencies != null) && Dependencies.Any();
+            return Dependencies != null && Dependencies.Any();
         }
 
         public override string ToString()

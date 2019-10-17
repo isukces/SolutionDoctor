@@ -69,6 +69,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                         return NodeType.Reference;
                     case "Page":
                         return NodeType.Page;
+                    case "Content":
+                        return NodeType.Content;
                 }
 
                 return NodeType.Unknown;
@@ -81,6 +83,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         Unknown,
         None,
         Page,
-        Reference
+        Reference,
+        Content
     }
 }
