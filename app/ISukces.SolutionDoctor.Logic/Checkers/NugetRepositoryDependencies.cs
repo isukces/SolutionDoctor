@@ -10,7 +10,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
     internal class NugetRepositoryDependencies
     {
         public static IEnumerable<Problem> Check(Dictionary<string, Dictionary<string, Nuspec>> localNugetRepositiories,
-            List<Project>                                                                       uniqueProjects)
+            List<Project> uniqueProjects)
         {
             var instance = new NugetRepositoryDependencies
             {
@@ -66,7 +66,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         }
 
         private Dictionary<string, Dictionary<string, Nuspec>> _localNugetRepositiories;
-        private List<Project>                                  _uniqueProjects;
+        private List<Project> _uniqueProjects;
     }
 
     internal class Data

@@ -60,11 +60,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             _result.Add(problem);
         }
 
-        
-        public const string XamlGenerator = "MSBuild:Compile";
         private void CheckGenerator(CsprojXmlNodeWrapper wrapper)
         {
-           
             if (wrapper.Generator == XamlGenerator) return;
             if (wrapper.NodeType == NodeType.Page)
                 _result.Add(new InvalidGeneratorProblem
@@ -140,7 +137,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                 _result.Add(new AmmyProblem
                 {
                     ProjectFilename = _currentProjectLocation,
-                    Wrapper = wrapper
+                    Wrapper         = wrapper
                 });
             });
         }
@@ -159,11 +156,14 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         private readonly List<Problem> _result = new List<Problem>();
 
         private FileName _currentProjectLocation;
+
+
+        public const string XamlGenerator = "MSBuild:Compile";
     }
 
     public class AmmyProblem : Problem
     {
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine("ammy file " + Wrapper.Include + " should be marked as None");
         }
@@ -172,25 +172,27 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         {
             return new ProblemFix("mark " + Wrapper.Include + " as None", () =>
             {
-                
                 var xml      = FileUtils.Load(ProjectFilename);
                 var needSave = false;
-                var file = Wrapper.Include;
+                var file     = Wrapper.Include;
                 XamlInCsProjChecker.XmlVisitor(xml, q =>
                 {
                     var include = q.Include;
                     if (!string.Equals(file, include, StringComparison.OrdinalIgnoreCase)) return;
                     q.WrappedElement.Name = q.WrappedElement.Name.Namespace + "None";
                     // q.SubType = "Designer";
-                    needSave  = true;
+                    needSave = true;
                 });
                 if (needSave)
                     xml.Save2(ProjectFilename);
-                
-                
+
                 // 
             });
-            
+        }
+
+        public override FixScript GetFixScript()
+        {
+            return null;
         }
 
         protected override bool GetIsBigProblem()

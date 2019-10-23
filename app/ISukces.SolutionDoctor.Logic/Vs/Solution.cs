@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -11,7 +10,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         public Solution(FileInfo solutionFile)
         {
-            Projects = new List<Project>();
+            Projects     = new List<Project>();
             SolutionFile = new FileName(solutionFile);
             var lines = File.ReadAllLines(SolutionFile.FullName);
 
@@ -21,23 +20,32 @@ namespace ISukces.SolutionDoctor.Logic.Vs
                 var ii = i.Trim();
                 if (inProject)
                 {
-                    if (ii == "EndProject")
-                    {
-                        inProject = false;
-                    }
+                    if (ii == "EndProject") inProject = false;
                     continue;
                 }
+
                 var a = TryParseProject(ii);
                 if (a == null)
                     continue;
                 Projects.Add(a);
                 inProject = true;
-
-
             }
         }
 
         #endregion Constructors
+
+        #region Static Fields
+
+        private static readonly Regex ProjectRegex = new Regex(ProjectRegexFilter, RegexOptions.Compiled);
+
+        #endregion Static Fields
+
+        #region Fields
+
+        private const string ProjectRegexFilter =
+            @"^Project\(\s*\""*{([^}]+)\}\""\s*\)\s*=\s*\""([^\""]+)\""\s*,\s*\""([^\""]+)\""\s*,\s*\s*\""*{([^}]+)\}\""\s*(.*)$";
+
+        #endregion Fields
 
         #region Methods
 
@@ -60,7 +68,7 @@ namespace ISukces.SolutionDoctor.Logic.Vs
                 // LocationUid = Guid.Parse(match.Groups[1].Value),
                 // Name = match.Groups[2].Value,
                 // ReSharper disable once PossibleNullReferenceException
-                Location = new FileName(fi),
+                Location = new FileName(fi)
                 // ProjectUid = Guid.Parse(match.Groups[4].Value)
             };
             return project.Location.Exists
@@ -70,23 +78,11 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 
         #endregion Methods
 
-        #region Static Fields
-
-        static readonly Regex ProjectRegex = new Regex(ProjectRegexFilter, RegexOptions.Compiled);
-
-        #endregion Static Fields
-
-        #region Fields
-
-        const string ProjectRegexFilter = @"^Project\(\s*\""*{([^}]+)\}\""\s*\)\s*=\s*\""([^\""]+)\""\s*,\s*\""([^\""]+)\""\s*,\s*\s*\""*{([^}]+)\}\""\s*(.*)$";
-
-        #endregion Fields
-
         #region Properties
 
-        public FileName SolutionFile { get; private set; }
+        public FileName SolutionFile { get; }
 
-        public List<Project> Projects { get; private set; }
+        public List<Project> Projects { get; }
 
         #endregion Properties
     }

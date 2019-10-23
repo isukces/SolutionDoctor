@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
@@ -11,8 +8,6 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 {
     public class AppConfig
     {
-        private readonly FileName _fileName;
-
         #region Constructors
 
         public AppConfig([NotNull] FileName fileName)
@@ -25,6 +20,44 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         }
 
         #endregion Constructors
+
+        public AssemblyBinding FindByAssemblyIdentity(string id)
+        {
+            var xAssemblyBinding = GetXAssemblyBinding();
+            if (xAssemblyBinding == null)
+                return null;
+            foreach (var i in GetDependentAssemblyElements(xAssemblyBinding))
+            {
+                var t = AssemblyBinding.ParseDependentAssembly(i);
+
+                if (t != null && string.Equals(t.Name, id, StringComparison.OrdinalIgnoreCase))
+                    return t;
+            }
+
+            return null;
+        }
+
+        public void Save()
+        {
+            _xml.Save2(_fileName);
+        }
+
+        #region Properties
+
+        public bool Exists
+        {
+            get { return _xml != null; }
+        }
+
+        #endregion Properties
+
+        private readonly FileName _fileName;
+
+        #region Fields
+
+        private readonly XDocument _xml;
+
+        #endregion Fields
 
         #region Static Methods
 
@@ -59,8 +92,8 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         {
             var xAssemblyBinding = GetXAssemblyBinding();
             return xAssemblyBinding == null
-                ? new AssemblyBinding[0] :
-                ParseAssemblyBinding(xAssemblyBinding);
+                ? new AssemblyBinding[0]
+                : ParseAssemblyBinding(xAssemblyBinding);
         }
         // Private Methods 
 
@@ -78,46 +111,5 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         }
 
         #endregion Methods
-
-        #region Fields
-
-        private readonly XDocument _xml;
-
-        #endregion Fields
-
-        #region Properties
-
-        public bool Exists
-        {
-            get
-            {
-                return _xml != null;
-            }
-        }
-
-        #endregion Properties
-
-        public AssemblyBinding FindByAssemblyIdentity(string id)
-        {
-            var xAssemblyBinding = GetXAssemblyBinding();
-            if (xAssemblyBinding == null)
-                return null;
-            foreach (var i in GetDependentAssemblyElements(xAssemblyBinding))
-            {
-                var t = AssemblyBinding.ParseDependentAssembly(i);
-
-                if (t != null && string.Equals(t.Name, id, StringComparison.OrdinalIgnoreCase))
-                    return t;
-            }
-
-            return null;
-        }
-
-        public void Save()
-        {
-            _xml.Save2(_fileName);
-        }
     }
-
-
 }

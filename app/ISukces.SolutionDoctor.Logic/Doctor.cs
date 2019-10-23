@@ -60,9 +60,9 @@ namespace ISukces.SolutionDoctor.Logic
                 uniqueProjects,
                 LocalNugetRepositiories.Values.SelectMany(a => a.Values),
                 ExcludeDll));
-            var p5 = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects));
-            var p6 = Task.Run(() => XamlInCsProjChecker.Check(uniqueProjects));
-            var p7 = Task.Run(() => WarningsChecker.Check(uniqueProjects, options));
+            var p5  = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects));
+            var p6  = Task.Run(() => XamlInCsProjChecker.Check(uniqueProjects));
+            var p7  = Task.Run(() => WarningsChecker.Check(uniqueProjects, options));
             var all = new[] {p1, p2, p3, p4, p5, p6, p7};
             Task.WaitAll(all);
             return all.SelectMany(a => a.Result).ToArray();

@@ -6,34 +6,49 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class NugetRepositoryDependencyProblem : Problem, IConsiderUpdatePackage
     {
-        #region Methods
-
-        // Public Methods 
-        
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
-            writeLine.WriteFormat("projects references package {0}.{1} but package '{2}' requires {3}",
+            var x = RichString.RichFormat(ctx =>
+                {
+                    if (ctx.ParameterIndex == 3)
+                    {
+                        if (ctx.Before)
+                            ctx.Sink.Add(new RichString.ConsoleControl
+                            {
+                                TextColor = ConsoleColor.Cyan
+                            });
+                        else
+                            ctx.ResetColors();
+                    }
+                },
+                "projects references package {0}.{1} but package '{2}' requires {3}",
                 PackageReferencedByProject.Id,
                 PackageReferencedByProject.Version,
                 CheckedPackageId,
                 ReferencedPackageAcceptableVersions
-                );
+            );
         }
 
         public override ProblemFix GetFix()
         {
             return null;
         }
-        // Protected Methods 
+
+        public override FixScript GetFixScript()
+        {
+            return null;
+        }
+
+        public string GetPackageId()
+        {
+            return CheckedPackageId;
+        }
+        //Â ProtectedÂ MethodsÂ 
 
         protected override bool GetIsBigProblem()
         {
             return true;
         }
-
-        #endregion Methods
-
-        #region Properties
 
         public NugetVersionRange ReferencedPackageAcceptableVersions { get; set; }
 
@@ -42,12 +57,5 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public string CheckedPackageId { get; set; }
 
         public DirectoryInfo CheckedPackageLocation { get; set; }
-
-        #endregion Properties
-
-        public string GetPackageId()
-        {
-            return CheckedPackageId;
-        }
     }
 }

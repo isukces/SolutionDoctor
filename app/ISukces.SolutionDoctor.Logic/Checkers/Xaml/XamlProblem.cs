@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml.Linq;
 using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml

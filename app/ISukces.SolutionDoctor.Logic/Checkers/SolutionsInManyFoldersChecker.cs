@@ -4,7 +4,7 @@ using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
-    static class SolutionsInManyFoldersChecker
+    internal static class SolutionsInManyFoldersChecker
     {
         public static IEnumerable<Problem> Check(IList<ProjectGroup> groupedProjects)
         {
@@ -24,8 +24,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             if (unique.Length < 2) yield break;
             yield return new SolutionsInManyFoldersProblem
             {
-                ProjectFilename = projectGroup.Filename,
-                Solutions = projectGroup.Projects.Select(a => a.Solution.SolutionFile).ToArray(),
+                ProjectFilename         = projectGroup.Filename,
+                Solutions               = projectGroup.Projects.Select(a => a.Solution.SolutionFile).ToArray(),
                 ProjectHasNugetPackages = projectGroup.Projects.First().Project.NugetPackages.Any()
             };
         }

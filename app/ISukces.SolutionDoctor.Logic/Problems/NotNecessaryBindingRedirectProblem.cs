@@ -5,7 +5,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 {
     public class NotNecessaryBindingRedirectProblem : Problem
     {
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine($"not necessary redirection to {Redirect.Name} ver {Redirect.NewVersion}");
         }
@@ -14,6 +14,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             var txt = $"remove redirection to {Redirect.Name} ver {Redirect.NewVersion}";
             return new ProblemFix(txt, FixMethod);
+        }
+
+        public override FixScript GetFixScript()
+        {
+            return null;
         }
         // Protected Methods 
 
@@ -35,7 +40,10 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             xml.Save();
         }
 
-        public FileName ConfigFile => ProjectFilename.GetPackagesConfigFile();
+        public FileName ConfigFile
+        {
+            get { return ProjectFilename.GetPackagesConfigFile(); }
+        }
 
         public AssemblyBinding Redirect { get; set; }
     }

@@ -8,9 +8,13 @@ using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.NuGet
 {
-    public class Nuspec 
+    public interface INuspec
     {
-        
+        string Id { get; }
+        NugetVersion PackageVersion { get; }
+    }
+    public class Nuspec:INuspec
+    {
         private Nuspec()
         {
             // dla serializacji
@@ -24,10 +28,10 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             _metadata = root.Elements().First(a => a.Name.LocalName == "metadata");
             if (root == null) throw new NullReferenceException("xml.Root.metadata node");
 
-            var id = GetNode("id").Value;
+            var id  = GetNode("id").Value;
             var ver = GetNode("version").Value;
-            FullId = id + "." + ver;
-            Id = id;
+            FullId         = id + "." + ver;
+            Id             = id;
             PackageVersion = NugetVersion.Parse(ver);
 
             {
@@ -54,6 +58,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                     result.Add(cache1[i.Name]);
                     continue;
                 }
+
                 var fn = new FileInfo(Path.Combine(i.FullName, i.Name + ".nupkg"));
                 if (!fn.Exists) continue;
                 try
@@ -67,6 +72,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
                     Console.WriteLine($"File {fn.FullName} is broken");
                 }
             }
+
             NuspecCache.Save(directory, cache1);
             return result;
         }
@@ -103,6 +109,11 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             }
         }
 
+        public PackageId GetPackageId()
+        {
+            return new PackageId(Id, PackageVersion, FullId);
+        }
+
         public bool ShouldSerializeDependencies()
         {
             return Dependencies != null && Dependencies.Any();
@@ -129,10 +140,5 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         public List<NugetDependency> Dependencies { get; } = new List<NugetDependency>();
 
         private readonly XElement _metadata;
-
-        public PackageId GetPackageId()
-        {
-            return new PackageId(Id, PackageVersion, FullId);
-        }
     }
 }

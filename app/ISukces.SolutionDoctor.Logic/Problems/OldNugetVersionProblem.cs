@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Vs;
 
@@ -7,41 +6,46 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class OldNugetVersionProblem : Problem
     {
-        #region Methods
-
-        // Public Methods 
-
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
-            var txt = string.Format(
+            var c = new MessageColorer()
+                .WithProjectAt(0)
+                .WithPackageAt(1)
+                .WithVersionAt(2, 3);
+
+            var txt = RichString.RichFormat(
+                ctx => c.Color(ctx),
                 "Project {0} refers to old package {1} version ({2} instead of {3})",
                 ProjectFilename.Name,
                 PackageId,
                 ReferencedVersion,
                 NewestVersion
-                );
+            );
             writeLine(txt);
         }
+
 
         public override ProblemFix GetFix()
         {
             return null;
         }
-        // Protected Methods 
+
+        public override FixScript GetFixScript()
+        {
+            var p = new Project {Location = ProjectFilename};
+            if (p.Kind == CsProjectKind.New)
+                return FixScript.CoreNugetInstall(ProjectFilename, new PackageId(PackageId, NewestVersion, ""), "add");
+            
+            return FixScript.FullFxNugetInstall(ProjectFilename, new PackageId(PackageId, NewestVersion, ""), "update");
+        }
 
         protected override bool GetIsBigProblem()
         {
             return true;
         }
 
-        #endregion Methods
-
-        #region Properties
-
         public NugetVersion ReferencedVersion { get; set; }
-        public NugetVersion NewestVersion { get; set; }
-        public string PackageId { get; set; }
-
-        #endregion Properties
+        public NugetVersion NewestVersion     { get; set; }
+        public string       PackageId         { get; set; }
     }
 }

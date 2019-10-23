@@ -15,7 +15,7 @@ namespace ISukces.SolutionDoctor.Logic
         Dictionary<string, AddRemoveOption> NoWarn { get; }
 
         Dictionary<string, AddRemoveOption> WarningsAsErrors { get; }
-        
+
         List<string> ExcludeDirectories { get; }
     }
 }

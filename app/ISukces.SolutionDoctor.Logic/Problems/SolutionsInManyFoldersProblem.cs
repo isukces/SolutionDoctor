@@ -4,11 +4,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 {
     public class SolutionsInManyFoldersProblem : Problem
     {
-        #region Methods
-
-        // Public Methods 
-
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine("is part of solutions located in different folders folders");
             foreach (var folder in Solutions)
@@ -22,21 +18,19 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return null;
         }
 
-        // Protected Methods 
+        public override FixScript GetFixScript()
+        {
+            return null;
+        }
+
 
         protected override bool GetIsBigProblem()
         {
             return ProjectHasNugetPackages;
         }
 
-        #endregion Methods
-
-        #region Properties
-
         public FileName[] Solutions { get; set; }
 
         public bool ProjectHasNugetPackages { get; set; }
-
-        #endregion Properties
     }
 }

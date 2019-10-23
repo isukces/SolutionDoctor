@@ -33,28 +33,31 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         public XElement WrappedElement { get; }
 
         [NotNull]
-        public string Include => (string)WrappedElement.Attribute("Include") ?? string.Empty;
+        public string Include
+        {
+            get { return (string)WrappedElement.Attribute("Include") ?? string.Empty; }
+        }
 
 
         [NotNull]
         public string DependentUpon
         {
-            get => GetNestedNodeValue("DependentUpon");
-            set => SetNestedNodeValue("DependentUpon", value);
+            get { return GetNestedNodeValue("DependentUpon"); }
+            set { SetNestedNodeValue("DependentUpon", value); }
         }
 
         [NotNull]
         public string SubType
         {
-            get => GetNestedNodeValue("SubType");
-            set => SetNestedNodeValue("SubType", value);
+            get { return GetNestedNodeValue("SubType"); }
+            set { SetNestedNodeValue("SubType", value); }
         }
 
         [NotNull]
         public string Generator
         {
-            get => GetNestedNodeValue("Generator");
-            set => SetNestedNodeValue("Generator", value);
+            get { return GetNestedNodeValue("Generator"); }
+            set { SetNestedNodeValue("Generator", value); }
         }
 
         public NodeType NodeType

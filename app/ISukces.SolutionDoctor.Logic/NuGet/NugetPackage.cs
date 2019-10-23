@@ -1,5 +1,4 @@
 using System.Xml.Linq;
-using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic.NuGet
 {
@@ -11,14 +10,14 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         public static NugetPackage Parse(XElement packageXElement)
         {
-            var ver = (string)packageXElement.Attribute("version");
-            NugetVersion parsed = NugetVersion.Parse(ver);
-           // if (!Version.TryParse(ver, out parsed))
-             //   throw new Exception("Invalid version " + ver);
+            var ver    = (string)packageXElement.Attribute("version");
+            var parsed = NugetVersion.Parse(ver);
+            // if (!Version.TryParse(ver, out parsed))
+            //   throw new Exception("Invalid version " + ver);
             return new NugetPackage
             {
-                Id = (string)packageXElement.Attribute("id"),
-                Version = parsed,
+                Id              = (string)packageXElement.Attribute("id"),
+                Version         = parsed,
                 TargetFramework = (string)packageXElement.Attribute("targetFramework")
             };
         }

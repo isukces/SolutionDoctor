@@ -12,11 +12,13 @@ namespace ISukces.SolutionDoctor.Logic.Vs
         public static ProjectReference FromNode(XElement reference, DirectoryInfo baseDir)
         {
             var hintPathElement = reference.Element(reference.Name.Namespace + "HintPath");
-            var hintPath = hintPathElement == null ? null : hintPathElement.Value;
+            var hintPath        = hintPathElement == null ? null : hintPathElement.Value;
             return new ProjectReference
             {
                 Name = (string)reference.Attribute("Include"),
-                HintPath = string.IsNullOrEmpty(hintPath) ? null : new FileInfo(Path.Combine(baseDir.FullName, hintPath))
+                HintPath = string.IsNullOrEmpty(hintPath)
+                    ? null
+                    : new FileInfo(Path.Combine(baseDir.FullName, hintPath))
             };
         }
 

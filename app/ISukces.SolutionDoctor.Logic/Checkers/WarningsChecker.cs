@@ -1,23 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Xml.Linq;
-using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Problems;
 using ISukces.SolutionDoctor.Logic.Vs;
-using JetBrains.Annotations;
-
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
-    class WarningsChecker
+    internal class WarningsChecker
     {
-        public WarningsChecker()
-        {
-        }
-
         // Public Methods 
 
         public static IEnumerable<Problem> Check(IEnumerable<Project> projects, CommandLineOptions options)
@@ -26,14 +17,56 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
             var checker = new WarningsChecker
             {
-                _projects = projects.ToList(), 
-                _options = options
+                _projects = projects.ToList(),
+                _options  = options
             };
             return checker.Check();
-
         }
- 
-        
+
+        private static IEnumerable<Problem> CheckNode(XElement el, bool fix, Project project,
+            CommandLineOptions options)
+        {
+            var cond = (string)el.Attribute("Condition");
+            if (string.IsNullOrEmpty(cond))
+                yield break;
+
+            Problem C(string name, Dictionary<string, AddRemoveOption> dict)
+            {
+                var node = el.Element(el.Name.Namespace + name);
+                var nn   = node?.Value ?? string.Empty;
+                var q    = new HashSet<string>();
+                foreach (var ii in nn.Split(',').Select(a => a.Trim()).Where(a => !string.IsNullOrEmpty(a)))
+                    q.Add(ii);
+
+                var q1 = dict.OrderBy(a => a.Key).ToArray();
+                foreach (var i in q1)
+                    if (i.Value == AddRemoveOption.Add)
+                        q.Add(i.Key);
+                    else
+                        q.Remove(i.Key);
+
+                var expected = string.Join(",", q.OrderBy(a => a).ToArray());
+                if (expected == nn)
+                    return null;
+                if (fix)
+                {
+                    if (node == null)
+                    {
+                        node = new XElement(el.Name.Namespace + name);
+                        el.Add(node);
+                    }
+
+                    node.Value = expected;
+                }
+
+                return new Bla(name, expected, project, options);
+            }
+
+            yield return C("NoWarn", options.NoWarn);
+            yield return C("WarningsAsErrors", options.WarningsAsErrors);
+        }
+
+
         private IList<Problem> Check()
         {
             var a = _projects.SelectMany(CheckProj).ToList();
@@ -46,7 +79,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             var doc   = FileUtils.Load(project.Location);
             var root  = doc.Root;
             var nodes = root.Elements(root.Name.Namespace + "PropertyGroup").ToArray();
-            var ps = new List<Problem>();
+            var ps    = new List<Problem>();
             foreach (var n in nodes)
             {
                 var p = CheckNode(n, false, project, _options).Where(a => a != null).ToArray();
@@ -56,67 +89,20 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return ps;
         }
 
-        private static IEnumerable<Problem> CheckNode(XElement el, bool fix, Project project,
-            CommandLineOptions options)
-        {
-            var cond = (string)el.Attribute("Condition");
-            if (string.IsNullOrEmpty(cond))
-                yield break;
-            
-            Problem C(string name, Dictionary<string, AddRemoveOption> dict)
-            {
-                var node = el.Element(el.Name.Namespace + name);
-                var nn = node?.Value ?? string.Empty;
-                var q = new HashSet<string>();
-                foreach (var ii in nn.Split(',').Select(a => a.Trim()).Where(a=>!string.IsNullOrEmpty(a)))
-                    q.Add(ii);
-
-                var q1 = dict.OrderBy(a => a.Key).ToArray();
-                foreach (var i in q1)
-                {
-                    if (i.Value == AddRemoveOption.Add)
-                        q.Add(i.Key);
-                    else
-                        q.Remove(i.Key);
-                }
-
-                var expected = string.Join(",", q.OrderBy(a => a).ToArray());
-                if (expected == nn)
-                    return null;
-                if (fix)
-                {
-                    if (node == null)
-                    {
-                        node= new XElement(el.Name.Namespace + name);
-                        el.Add(node);
-                    }
-
-                    node.Value = expected;
-                }
-                return new Bla(name, expected, project, options);
-            }
-
-            yield return C("NoWarn", options.NoWarn);
-            yield return C("WarningsAsErrors", options.WarningsAsErrors);
-            
-        }
+        private List<Project> _projects;
+        public CommandLineOptions _options;
 
         private class Bla : Problem
         {
-            private readonly string _name;
-            private readonly string _expected;
-            private readonly Project _project;
-            private CommandLineOptions _opts;
-
             public Bla(string name, string expected, Project project, CommandLineOptions opts)
             {
-                _name = name;
+                _name     = name;
                 _expected = expected;
-                _project = project;
-                _opts = opts;
+                _project  = project;
+                _opts     = opts;
             }
 
-            public override void Describe(Action<string> writeLine)
+            public override void Describe(Action<RichString> writeLine)
             {
                 writeLine("Correct " + _name + " to " + _expected);
             }
@@ -136,7 +122,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                             var q = CheckNode(n, true, _project, _opts).Where(a => a != null).ToArray();
                             if (q.Any())
                                 save = true;
-
                         }
 
                         if (save)
@@ -145,13 +130,20 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 });
             }
 
+            public override FixScript GetFixScript()
+            {
+                return null;
+            }
+
             protected override bool GetIsBigProblem()
             {
                 return true;
             }
+
+            private readonly string _name;
+            private readonly string _expected;
+            private readonly Project _project;
+            private readonly CommandLineOptions _opts;
         }
- 
-        List<Project> _projects;
-        public CommandLineOptions _options;
     }
 }

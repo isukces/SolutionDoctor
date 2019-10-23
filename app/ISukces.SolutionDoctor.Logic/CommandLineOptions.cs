@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace ISukces.SolutionDoctor.Logic
 {
-    public class CommandLineOptions:IDoctorConfig
+    public class CommandLineOptions : IDoctorConfig
     {
         private CommandLineOptions()
         {
@@ -20,8 +20,8 @@ namespace ISukces.SolutionDoctor.Logic
             ExcludeDirectories    = new List<string>();
             _options              = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             PackagesVersion       = new Dictionary<string, NugetVersion>(StringComparer.OrdinalIgnoreCase);
-            WarningsAsErrors      = new Dictionary<string,AddRemoveOption>(StringComparer.OrdinalIgnoreCase);
-            NoWarn                = new Dictionary<string,AddRemoveOption>(StringComparer.OrdinalIgnoreCase);
+            WarningsAsErrors      = new Dictionary<string, AddRemoveOption>(StringComparer.OrdinalIgnoreCase);
+            NoWarn                = new Dictionary<string, AddRemoveOption>(StringComparer.OrdinalIgnoreCase);
         }
 
         // Public Methods 
@@ -198,8 +198,7 @@ namespace ISukces.SolutionDoctor.Logic
                 SetOptionValue(i.Key, i.Value);
             foreach (var i in other.PackagesVersion)
                 PackagesVersion[i.Key] = i.Value;
-            
-            
+
             foreach (var i in other.NoWarn)
                 NoWarn[i.Key] = i.Value;
             foreach (var i in other.WarningsAsErrors)
@@ -276,6 +275,4 @@ namespace ISukces.SolutionDoctor.Logic
 
         private readonly Dictionary<string, string> _options;
     }
-
-  
 }

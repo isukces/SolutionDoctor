@@ -74,6 +74,7 @@
     <Compile Include="Checkers\Xaml\XamlProblem.cs" />
     <Compile Include="FileUtils.cs" />
     <Compile Include="IDoctorConfig.cs" />
+    <Compile Include="MessageColorer.cs" />
     <Compile Include="NuGet\NuspecCache.cs" />
     <Compile Include="NuGet\PackageId.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Problems\ProblemFix.cs" />
     <Compile Include="Problems\OldNugetVersionProblem.cs" />
     <Compile Include="Checkers\SolutionsInManyFoldersChecker.cs" />
+    <Compile Include="Problems\RichString.cs" />
     <Compile Include="Problems\UnableToGetReferencedDllVersionProblem.cs" />
     <Compile Include="Vs\AppConfig.cs" />
     <Compile Include="Vs\AssemblyBinding.cs" />

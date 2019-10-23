@@ -1,13 +1,12 @@
 using System;
-using System.IO;
 using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
     public class WrongBindingRedirectProblem : Problem
-    {        
-        public override void Describe(Action<string> writeLine)
+    {
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine(string.Format("{2} nuget package DLL is {0} but config redirects to {1}",
                 DllVersion,
@@ -19,15 +18,26 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             return new ProblemFix(
                 string.Format("Set redirection to {0} for {1} package in project {2}",
-                    DllVersion, 
+                    DllVersion,
                     Package.Id,
                     ProjectFilename.Name),
                 FixMethod);
         }
 
-        void FixMethod()
+        public override FixScript GetFixScript()
         {
-            var fn = ProjectFilename.GetAppConfigFile();
+            return null;
+        }
+        // Protected Methods 
+
+        protected override bool GetIsBigProblem()
+        {
+            return true;
+        }
+
+        private void FixMethod()
+        {
+            var fn  = ProjectFilename.GetAppConfigFile();
             var xml = new AppConfig(fn);
             if (!xml.Exists)
                 throw new Exception(string.Format("Config file {0} doesn't exist", fn.FullName));
@@ -37,23 +47,14 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             node.SetRedirection(DllVersion);
             xml.Save();
         }
-        // Protected Methods 
-
-        protected override bool GetIsBigProblem()
-        {
-            return true;
-        }
 
         public FileName ConfigFile
         {
-            get
-            {
-                return ProjectFilename.GetPackagesConfigFile();
-            }
+            get { return ProjectFilename.GetPackagesConfigFile(); }
         }
 
-        public AssemblyBinding Redirect { get; set; }
-        public NugetPackage Package { get; set; }
-        public string DllVersion { get; set; }
+        public AssemblyBinding Redirect   { get; set; }
+        public NugetPackage    Package    { get; set; }
+        public string          DllVersion { get; set; }
     }
 }

@@ -7,14 +7,24 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 {
     public class AssemblyBinding
     {
-        public void SetRedirection([NotNull] string version)
+        [CanBeNull]
+        public static AssemblyBinding ParseDependentAssembly(XElement dependentAssemblyXElement)
         {
-            if (version == null) throw new ArgumentNullException(nameof(version));
-            var ns = XmlElement.Name.Namespace;
-            var node = XmlElement.Element(ns + "bindingRedirect");
-            var ver = version.ToString();
-            node.SetAttributeValue("oldVersion", "0.0.0.0-" + ver);
-            node.SetAttributeValue("newVersion", ver);
+            var ns               = dependentAssemblyXElement.Name.Namespace;
+            var assemblyIdentity = dependentAssemblyXElement.Element(ns + "assemblyIdentity");
+            if (assemblyIdentity == null)
+                throw new NullReferenceException("assemblyIdentity");
+            var bindingRedirect = dependentAssemblyXElement.Element(ns + "bindingRedirect");
+            if (bindingRedirect == null)
+                return null;
+            // throw new NullReferenceException("bindingRedirect");
+            return new AssemblyBinding
+            {
+                Name       = (string)assemblyIdentity.Attribute("name"),
+                OldVersion = (string)bindingRedirect.Attribute("oldVersion"),
+                NewVersion = NugetVersion.Parse((string)bindingRedirect.Attribute("newVersion")),
+                XmlElement = dependentAssemblyXElement
+            };
         }
 
         public void SetPackageId(string name)
@@ -25,24 +35,14 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             node.SetAttributeValue("name", name);
         }
 
-        [CanBeNull]
-        public static AssemblyBinding ParseDependentAssembly(XElement dependentAssemblyXElement)
+        public void SetRedirection([NotNull] string version)
         {
-            var ns = dependentAssemblyXElement.Name.Namespace;
-            var assemblyIdentity = dependentAssemblyXElement.Element(ns + "assemblyIdentity");
-            if (assemblyIdentity == null)
-                throw new NullReferenceException("assemblyIdentity");
-            var bindingRedirect = dependentAssemblyXElement.Element(ns + "bindingRedirect");
-            if (bindingRedirect == null)
-                return null;
-                // throw new NullReferenceException("bindingRedirect");
-            return new AssemblyBinding
-            {
-                Name = (string)assemblyIdentity.Attribute("name"),
-                OldVersion = (string)bindingRedirect.Attribute("oldVersion"),
-                NewVersion = NugetVersion.Parse((string)bindingRedirect.Attribute("newVersion")),
-                XmlElement = dependentAssemblyXElement
-            };
+            if (version == null) throw new ArgumentNullException(nameof(version));
+            var ns   = XmlElement.Name.Namespace;
+            var node = XmlElement.Element(ns + "bindingRedirect");
+            var ver  = version;
+            node.SetAttributeValue("oldVersion", "0.0.0.0-" + ver);
+            node.SetAttributeValue("newVersion", ver);
         }
 
 

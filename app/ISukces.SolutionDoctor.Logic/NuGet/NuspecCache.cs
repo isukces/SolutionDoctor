@@ -12,7 +12,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
         public static Dictionary<string, Nuspec> GetForDirectory(DirectoryInfo directory)
         {
-            var fn = GetFileName(directory);
+            var fn     = GetFileName(directory);
             var result = new Dictionary<string, Nuspec>(StringComparer.OrdinalIgnoreCase);
             if (!fn.Exists)
                 return result;
@@ -39,8 +39,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
 
     public class Json1
     {
-        public static JsonUtils Utils => new JsonUtils(MySerializerFactory);
-
         private static JsonSerializer MySerializerFactory()
         {
             var sf = JsonUtils.DefaultSerializerFactory();
@@ -48,23 +46,29 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             return sf;
         }
 
+        public static JsonUtils Utils
+        {
+            get { return new JsonUtils(MySerializerFactory); }
+        }
+
         private class MyVersionConverter : JsonConverter
         {
-            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            public override bool CanConvert(Type objectType)
             {
-                var txt = ((Version)value).ToString();
-                writer.WriteValue(txt);
+                return objectType == typeof(Version);
             }
 
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+                JsonSerializer serializer)
             {
                 var value = reader.Value;
                 return value == null ? null : Version.Parse(value.ToString());
             }
 
-            public override bool CanConvert(Type objectType)
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
-                return objectType == typeof(Version);
+                var txt = ((Version)value).ToString();
+                writer.WriteValue(txt);
             }
         }
     }

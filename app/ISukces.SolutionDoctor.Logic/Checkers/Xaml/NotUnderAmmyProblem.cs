@@ -6,7 +6,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     internal class NotUnderAmmyProblem : XamlProblem
     {
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine($"File {XamlFile} should depend uppon {ShouldDependentUpon}");
         }
@@ -17,6 +17,11 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             var ammyFi = new FileInfo(ShouldDependentUpon);
             if (xamlFi.Directory?.FullName == ammyFi.Directory?.FullName)
                 return base.GetFix();
+            return null;
+        }
+
+        public override FixScript GetFixScript()
+        {
             return null;
         }
 
@@ -38,6 +43,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         }
 
         public string DependentUpon       { get; set; }
-        public string ShouldDependentUpon { get; set; }       
+        public string ShouldDependentUpon { get; set; }
     }
 }

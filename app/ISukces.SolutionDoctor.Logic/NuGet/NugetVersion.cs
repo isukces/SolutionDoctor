@@ -17,18 +17,19 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         {
             if (ver == null) throw new ArgumentNullException("ver");
             ver = ver.Trim();
-            var i = ver.IndexOf("-");
+            var i      = ver.IndexOf("-");
             var result = new NugetVersion();
             if (i >= 0)
             {
                 result.Version = Version.Parse(ver.Substring(0, i));
-                result.Suffix = ver.Substring(i + 1).Trim();
+                result.Suffix  = ver.Substring(i + 1).Trim();
             }
             else
             {
                 result.Version = Version.Parse(ver);
-                result.Suffix = "";
+                result.Suffix  = "";
             }
+
             return result;
         }
 
@@ -40,7 +41,6 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         {
             return !string.IsNullOrEmpty(Suffix);
         }
-
 
         #endregion
 
@@ -88,7 +88,7 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Equals(NormalizedVersion, other.NormalizedVersion)
-                && string.Equals(Suffix?.Trim() ?? "", other.Suffix?.Trim() ?? "");
+                   && string.Equals(Suffix?.Trim() ?? "", other.Suffix?.Trim() ?? "");
         }
 
         public override bool Equals(object obj)

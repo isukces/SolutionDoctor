@@ -3,8 +3,45 @@ using System.Collections.Generic;
 
 namespace ISukces.SolutionDoctor.Logic.NuGet
 {
-    public class PackageId : IEquatable<PackageId>, IComparable<PackageId>, IComparable
+    public class PackageId : IEquatable<PackageId>, IComparable<PackageId>, IComparable, INuspec
     {
+        public PackageId(string id, NugetVersion packageVersion, string fullId)
+        {
+            Id             = id;
+            PackageVersion = packageVersion;
+            FullId         = fullId;
+        }
+
+        public static bool operator ==(PackageId left, PackageId right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator >(PackageId left, PackageId right)
+        {
+            return Comparer<PackageId>.Default.Compare(left, right) > 0;
+        }
+
+        public static bool operator >=(PackageId left, PackageId right)
+        {
+            return Comparer<PackageId>.Default.Compare(left, right) >= 0;
+        }
+
+        public static bool operator !=(PackageId left, PackageId right)
+        {
+            return !Equals(left, right);
+        }
+
+        public static bool operator <(PackageId left, PackageId right)
+        {
+            return Comparer<PackageId>.Default.Compare(left, right) < 0;
+        }
+
+        public static bool operator <=(PackageId left, PackageId right)
+        {
+            return Comparer<PackageId>.Default.Compare(left, right) <= 0;
+        }
+
         public int CompareTo(PackageId other)
         {
             if (ReferenceEquals(this, other)) return 0;
@@ -18,44 +55,9 @@ namespace ISukces.SolutionDoctor.Logic.NuGet
         {
             if (ReferenceEquals(null, obj)) return 1;
             if (ReferenceEquals(this, obj)) return 0;
-            return obj is PackageId other ? CompareTo(other) : throw new ArgumentException($"Object must be of type {nameof(PackageId)}");
-        }
-
-        public static bool operator <(PackageId left, PackageId right)
-        {
-            return Comparer<PackageId>.Default.Compare(left, right) < 0;
-        }
-
-        public static bool operator >(PackageId left, PackageId right)
-        {
-            return Comparer<PackageId>.Default.Compare(left, right) > 0;
-        }
-
-        public static bool operator <=(PackageId left, PackageId right)
-        {
-            return Comparer<PackageId>.Default.Compare(left, right) <= 0;
-        }
-
-        public static bool operator >=(PackageId left, PackageId right)
-        {
-            return Comparer<PackageId>.Default.Compare(left, right) >= 0;
-        }
-
-        public PackageId(string id, NugetVersion packageVersion, string fullId)
-        {
-            Id             = id;
-            PackageVersion = packageVersion;
-            FullId         = fullId;
-        }
-
-        public static bool operator ==(PackageId left, PackageId right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(PackageId left, PackageId right)
-        {
-            return !Equals(left, right);
+            return obj is PackageId other
+                ? CompareTo(other)
+                : throw new ArgumentException($"Object must be of type {nameof(PackageId)}");
         }
 
         public bool Equals(PackageId other)

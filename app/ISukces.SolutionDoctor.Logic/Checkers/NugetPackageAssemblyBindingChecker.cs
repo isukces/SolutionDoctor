@@ -12,12 +12,13 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     internal class NugetPackageAssemblyBindingChecker
     {
-        public static IEnumerable<Problem> Check([NotNull] IList<Project> projects, HashSet<string> removeBindingRedirect)
+        public static IEnumerable<Problem> Check([NotNull] IList<Project> projects,
+            HashSet<string> removeBindingRedirect)
         {
             if (projects == null) throw new ArgumentNullException(nameof(projects));
             var tmp = new NugetPackageAssemblyBindingChecker();
             tmp._removeBindingRedirect = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (removeBindingRedirect!=null)
+            if (removeBindingRedirect != null)
                 foreach (var i in removeBindingRedirect)
                     tmp._removeBindingRedirect.Add(i);
             return projects.SelectMany(tmp.ScanProject).ToList();
@@ -54,20 +55,13 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
             if (!assemblyBindings.Any()) yield break;
             if (_removeBindingRedirect != null && _removeBindingRedirect.Any())
-            {
                 foreach (var i in assemblyBindings)
-                {
                     if (_removeBindingRedirect.Contains(i.Name))
-                    {
                         yield return new NotNecessaryBindingRedirectProblem
                         {
                             Redirect        = i,
-                            ProjectFilename = project.Location,
+                            ProjectFilename = project.Location
                         };
-                    }
-                    
-                }
-            }
 
             if (!packageVersion.Any()) yield break;
             foreach (var package in packageVersion)

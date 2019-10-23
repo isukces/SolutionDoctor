@@ -6,16 +6,20 @@ namespace ISukces.SolutionDoctor.Logic
 {
     public class FileName : IEquatable<FileName>, IComparable<FileName>
     {
-		#region Constructors 
+#if !PLATFORM_UNIX
+        private readonly string _nameForCompare;
+#endif
+
+        #region Constructors 
 
         private FileName(string fullName)
         {
-            _fullName = fullName;
+            FullName = fullName;
 #if PLATFORM_UNIX
             _hash = _fullName.GetHashCode();
 #else
-            _nameForCompare = _fullName.ToLowerInvariant();
-            _hash = _nameForCompare.GetHashCode();
+            _nameForCompare = FullName.ToLowerInvariant();
+            _hash           = _nameForCompare.GetHashCode();
 #endif
         }
 
@@ -24,11 +28,11 @@ namespace ISukces.SolutionDoctor.Logic
         {
         }
 
-		#endregion Constructors 
+        #endregion Constructors 
 
-		#region Static Methods 
+        #region Static Methods 
 
-		// Public Methods 
+        // Public Methods 
 
         public static bool operator !=(FileName left, FileName right)
         {
@@ -40,11 +44,11 @@ namespace ISukces.SolutionDoctor.Logic
             return Equals(left, right);
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods 
 
-		#region Methods 
+        #region Methods 
 
-		// Public Methods 
+        // Public Methods 
 
         public int CompareTo(FileName other)
         {
@@ -85,57 +89,36 @@ namespace ISukces.SolutionDoctor.Logic
 
         public override string ToString()
         {
-            return _fullName;
+            return FullName;
         }
 
-		#endregion Methods 
+        #endregion Methods 
 
-		#region Fields 
+        #region Fields 
 
-        readonly string _fullName;
-        readonly int _hash;
+        private readonly int _hash;
 
-		#endregion Fields 
+        #endregion Fields 
 
-		#region Properties 
+        #region Properties 
 
-        public string FullName
-        {
-            get
-            {
-                return _fullName;
-            }
-        }
+        public string FullName { get; }
 
         public string Name
         {
-            get
-            {
-                return new FileInfo(_fullName).Name;
-            }
+            get { return new FileInfo(FullName).Name; }
         }
 
         public bool Exists
         {
-            get
-            {
-                return File.Exists(_fullName);
-            }
+            get { return File.Exists(FullName); }
         }
 
         public DirectoryInfo Directory
         {
-            get
-            {
-                return new FileInfo(_fullName).Directory;
-
-            }
+            get { return new FileInfo(FullName).Directory; }
         }
 
-		#endregion Properties 
-
-#if !PLATFORM_UNIX
-        readonly string _nameForCompare;
-#endif
+        #endregion Properties 
     }
 }

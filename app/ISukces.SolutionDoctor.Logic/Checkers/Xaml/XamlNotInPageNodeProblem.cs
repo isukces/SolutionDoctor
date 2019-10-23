@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Xml.Linq;
 using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     internal class XamlNotInPageNodeProblem : XamlProblem
     {
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine($"File {XamlFile} should be marked as Page");
+        }
+
+        public override FixScript GetFixScript()
+        {
+            return null;
         }
 
 

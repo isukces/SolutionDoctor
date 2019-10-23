@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
 
 namespace ISukces.SolutionDoctor.Logic
 {
@@ -13,12 +12,13 @@ namespace ISukces.SolutionDoctor.Logic
     {
         public DiscFileScanner(string filter, Func<FileInfo, bool> accept, IReadOnlyList<string> excludeDirs)
         {
-            _filter = filter;
-            _accept = accept;
+            _filter      = filter;
+            _accept      = accept;
             _excludeDirs = excludeDirs;
         }
 
-        public static IObservable<FileInfo> MakeObservable(IReadOnlyList<DirectoryInfo> dirs, string filter, Func<FileInfo, bool> accept, IReadOnlyList<string> excludeDirs)
+        public static IObservable<FileInfo> MakeObservable(IReadOnlyList<DirectoryInfo> dirs, string filter,
+            Func<FileInfo, bool> accept, IReadOnlyList<string> excludeDirs)
         {
             return Observable.Create<FileInfo>(
                 observer =>
@@ -33,9 +33,34 @@ namespace ISukces.SolutionDoctor.Logic
                     {
                         observer.OnError(e);
                     }
+
                     return Disposable.Empty;
                 });
+        }
 
+        private static DirectoryInfo[] GetDirectories2(DirectoryInfo dir)
+        {
+            try
+            {
+                return dir.GetDirectories();
+            }
+            catch (PathTooLongException)
+            {
+                return new DirectoryInfo[0];
+            }
+        }
+
+        private static FileInfo[] GetFilesAndIgnoreError(DirectoryInfo dir, string filter)
+        {
+            Debug.WriteLine("Scan " + dir.FullName);
+            try
+            {
+                return dir.GetFiles(filter);
+            }
+            catch (PathTooLongException)
+            {
+                return new FileInfo[0];
+            }
         }
 
         //�Public�Methods�
@@ -54,7 +79,7 @@ namespace ISukces.SolutionDoctor.Logic
         }
 
 
-        bool ExcludeDirectory(DirectoryInfo di)
+        private bool ExcludeDirectory(DirectoryInfo di)
         {
             var dn = di.Name;
             var skipByName = string.Equals(dn, "bin", StringComparison.OrdinalIgnoreCase)
@@ -82,47 +107,18 @@ namespace ISukces.SolutionDoctor.Logic
             if (directories.Count == 0)
                 return;
 
-
             var files = directories.SelectMany(a => GetFilesAndIgnoreError(a, _filter))
                 //.SelectMany<DirectoryInfo, DirectoryInfo>(a => a)
                 //.GetFiles(_filter)
                 .Where(fileInfo => _accept(fileInfo));
-            foreach (var fileInfo in files)
-            {
-                observer.OnNext(fileInfo);
-            }
+            foreach (var fileInfo in files) observer.OnNext(fileInfo);
             foreach (var directoryInfo in directories.SelectMany(GetDirectories2))
-                ScanToObservable(new[] { directoryInfo }, observer);
+                ScanToObservable(new[] {directoryInfo}, observer);
         }
 
-        private static DirectoryInfo[] GetDirectories2(DirectoryInfo dir)
-        {
-            try
-            {
-                return dir.GetDirectories();
-            }
-            catch (System.IO.PathTooLongException e)
-            {
-                return new DirectoryInfo[0];
-            }
-        }
 
-        private static FileInfo[] GetFilesAndIgnoreError(DirectoryInfo dir, string filter)
-        {
-            Debug.WriteLine("Scan " + dir.FullName);
-            try
-            {
-                return dir.GetFiles(filter);
-            }
-            catch (System.IO.PathTooLongException e)
-            {
-                return new FileInfo[0];
-            }
-        }
-
-  
-        readonly Func<FileInfo, bool> _accept;
+        private readonly Func<FileInfo, bool> _accept;
         private readonly IReadOnlyList<string> _excludeDirs;
-        readonly string _filter;
+        private readonly string _filter;
     }
 }

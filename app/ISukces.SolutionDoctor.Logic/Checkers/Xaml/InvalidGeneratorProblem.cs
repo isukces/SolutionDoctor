@@ -1,18 +1,18 @@
 ﻿using System;
+using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     internal class InvalidGeneratorProblem : XamlProblem
     {
-        public string ExpectedGenerator { get; set; }
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine($"file {XamlFile} should have {ExpectedGenerator} generator attribute");
         }
 
-        protected override bool GetIsBigProblem()
+        public override FixScript GetFixScript()
         {
-            return true;
+            return null;
         }
 
         protected override void FixNode(CsprojXmlNodeWrapper wrapper)
@@ -24,5 +24,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         {
             return $"set Generator={ExpectedGenerator} to {XamlFile}";
         }
+
+        protected override bool GetIsBigProblem()
+        {
+            return true;
+        }
+
+        public string ExpectedGenerator { get; set; }
     }
 }

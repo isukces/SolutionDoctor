@@ -12,7 +12,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             ProjectFilename = _project.Location;
         }
 
-        public override void Describe(Action<string> writeLine)
+        public override void Describe(Action<RichString> writeLine)
         {
             writeLine("Invalid assembly redirection to " + _packageId);
         }
@@ -20,6 +20,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public override ProblemFix GetFix()
         {
             return new ProblemFix($"change assembly redirection to {_packageId} for {_project.Location}", Fix);
+        }
+
+        public override FixScript GetFixScript()
+        {
+            return null;
         }
 
 
@@ -41,7 +46,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             xml.Save();
         }
 
-        private readonly string  _packageId;
+        private readonly string _packageId;
         private readonly Project _project;
     }
 }

@@ -9,13 +9,9 @@ using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
-    class ReferencesWithoutNugetsChecker
+    internal class ReferencesWithoutNugetsChecker
     {
         #region Constructors
-
-        public ReferencesWithoutNugetsChecker()
-        {
-        }
 
         #endregion Constructors
 
@@ -23,29 +19,29 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         // Public Methods 
 
-        public static IEnumerable<Problem> Check(IEnumerable<Project> projects, IEnumerable<Nuspec> localNugetRepositiories,
+        public static IEnumerable<Problem> Check(IEnumerable<Project> projects,
+            IEnumerable<Nuspec> localNugetRepositiories,
             HashSet<string> excludeDll)
         {
             // var aa = localNugetRepositiories.GetUnique(a => a.Location.FullName.ToLower(), a => a);
 
             var checker = new ReferencesWithoutNugetsChecker
             {
-                _excludeDll = excludeDll??new HashSet<string>(),
-                _projects = projects.ToList(), // .Select(a => a.Projects.First()).ToList()
+                _excludeDll = excludeDll ?? new HashSet<string>(),
+                _projects   = projects.ToList(), // .Select(a => a.Projects.First()).ToList()
                 _nuspecs = (from nuspec in localNugetRepositiories
-                            let dir =
-                                nuspec.Location.FullName.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar
-                            select Tuple.Create(dir.ToLower(), nuspec)).ToArray(),
+                    let dir =
+                        nuspec.Location.FullName.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar
+                    select Tuple.Create(dir.ToLower(), nuspec)).ToArray()
             };
 
             checker._nuspecs = checker._nuspecs.GetUnique(a => a.Item1, a => a)
 #if DEBUG
-.OrderBy(a => a.Item1)
+                .OrderBy(a => a.Item1)
 #endif
-.ToArray();
+                .ToArray();
 
             return checker.Check();
-
         }
         // Private Methods 
 
@@ -59,19 +55,21 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 {
                     if (!map.TryGetValue(ii, out var list))
                     {
-                        list = new HashSet<PackageId>();
+                        list    = new HashSet<PackageId>();
                         map[ii] = list;
                     }
+
                     list.Add(nuspec.Item2.GetPackageId());
                 }
             }
+
             return map;
         }
 
         private static HashSet<string> ScanDll(string dirName)
         {
             var directoryInfo = new DirectoryInfo(dirName);
-            var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var result        = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (!directoryInfo.Exists)
                 return result;
             foreach (var dll in directoryInfo.GetFiles("*.dll").Select(a => a.Name))
@@ -82,6 +80,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 foreach (var dll in dlls)
                     result.Add(dll);
             }
+
             return result;
         }
 
@@ -113,16 +112,15 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     if (_excludeDll.Contains(depName))
                         continue;
                     if (_map.TryGetValue(depName, out var list) && list.Any())
-                    {
                         yield return new AddNugetToSolutionProblem
                         {
                             ProjectFilename = project.Location,
-                            Dependency = dep,
+                            Dependency      = dep,
                             SuggestedNugets = list
                         };
-                    }
                     continue;
                 }
+
                 var candidates = project.NugetPackages
                     .Where(a => a.Id == nuspec.Id)
                     .ToArray();
@@ -132,9 +130,10 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 if (nugetPackage != null) continue;
                 yield return new NuGetPackageShouldBeReferencedProblem
                 {
-                    ProjectFilename = project.Location,
+                    ProjectFilename    = project.Location,
                     PackageToReference = nuspec,
-                    ReferencedLibrary = dep
+                    ReferencedLibrary  = dep,
+                    IsCoreProject      = project.Kind == CsProjectKind.New
                 };
             }
         }
@@ -152,13 +151,13 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 throw new ArgumentNullException(nameof(file));
             var hintToLower = file.FullName.ToLower();
             var query = from nuspec in _nuspecs
-                        where hintToLower.StartsWith(nuspec.Item1)
-                        select nuspec.Item2;
-            var a= query.FirstOrDefault();
+                where hintToLower.StartsWith(nuspec.Item1)
+                select nuspec.Item2;
+            var a = query.FirstOrDefault();
             if (a != null)
                 return a;
             var d = file.Directory;
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
                 if (d == null) return null;
                 if (string.Equals(d.Name, "packages", StringComparison.OrdinalIgnoreCase)) return null;
@@ -167,9 +166,14 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     var p = d.GetFiles("*.nupkg");
                     if (p.Any())
                         return Nuspec.Load(p[0]);
-                } catch {}
+                }
+                catch
+                {
+                }
+
                 d = d.Parent;
             }
+
             return null;
         }
 
@@ -179,7 +183,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         private Dictionary<string, HashSet<PackageId>> _map;
         private Tuple<string, Nuspec>[] _nuspecs;
-        List<Project> _projects;
+        private List<Project> _projects;
         public HashSet<string> _excludeDll;
 
         #endregion Fields

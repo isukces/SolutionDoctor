@@ -13,8 +13,25 @@ namespace ISukces.SolutionDoctor
 
         private static void Main(string[] args)
         {
-#if DEBUGxxx
-            args = new[] {"-cfg", "SolutionDoctor.json"};
+#if DEBUG
+            if (args.Length == 1)
+            {
+                if (args[0] == "pd")
+                {
+                    args = new[]
+                    {
+                        ".\\",
+                        "-fix",
+                        "-NoWarn",
+                        "1591,-1573,618",
+                        "-WarningsAsErrors",
+                        "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734,-169219"
+                    };
+                }
+
+                Directory.SetCurrentDirectory(@"C:\programs\isukces\PipelineDesigner\app");
+            }
+            
 #endif
             try
             {

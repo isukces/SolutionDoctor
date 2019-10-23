@@ -136,16 +136,24 @@ namespace ISukces.SolutionDoctor.Logic.Vs
             return packages.Select(NugetPackage.Parse).ToArray();
         }
 
-        public List<AssemblyBinding> AssemblyBindings =>
-            _assemblyBindings ?? (_assemblyBindings = AssemblyBindingsInternal().ToList());
+        public List<AssemblyBinding> AssemblyBindings
+        {
+            get { return _assemblyBindings ?? (_assemblyBindings = AssemblyBindingsInternal().ToList()); }
+        }
 
-        public NugetPackage[] NugetPackages => _nugetPackages ?? (_nugetPackages = NugetPackagesInternal());
+        public NugetPackage[] NugetPackages
+        {
+            get { return _nugetPackages ?? (_nugetPackages = NugetPackagesInternal()); }
+        }
 
-        public List<ProjectReference> References => _references ?? (_references = GetReferences());
+        public List<ProjectReference> References
+        {
+            get { return _references ?? (_references = GetReferences()); }
+        }
 
         public FileName Location
         {
-            get => _location;
+            get { return _location; }
             set
             {
                 if (_location == value)

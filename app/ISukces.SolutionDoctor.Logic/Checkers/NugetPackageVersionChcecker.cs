@@ -9,10 +9,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     public class NugetPackageVersionChcecker
     {
-
         public static IEnumerable<Problem> Check(IList<Project> projects)
         {
-            var a = new NugetPackageVersionChcecker()
+            var a = new NugetPackageVersionChcecker
             {
                 _projects = projects
             };
@@ -31,45 +30,43 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         private IEnumerable<Problem> Check()
         {
             foreach (var project in _projects)
-                foreach (var p in project.NugetPackages)
-                    Add(project.Location, p);
+            foreach (var p in project.NugetPackages)
+                Add(project.Location, p);
 
             foreach (var usages in _packages.Values)
             {
                 var tmp = usages.Versions
                     .GroupBy(a => a.Value)
-                    .Select(a => new { PackageVersion = a.Key, Projects = a.ToArray() })
+                    .Select(a => new {PackageVersion = a.Key, Projects = a.ToArray()})
                     .OrderBy(a => a.PackageVersion)
                     .ToArray();
                 if (tmp.Length < 2) continue;
                 var acceptedVersion = tmp.Last().PackageVersion;
-                var newest = acceptedVersion.Version;
-                var wrong = tmp.Where(a => a.PackageVersion.Version != newest).ToArray();
+                var newest          = acceptedVersion.Version;
+                var wrong           = tmp.Where(a => a.PackageVersion.Version != newest).ToArray();
                 foreach (var i in wrong)
-                {
-                    foreach (var j in i.Projects)
-                        yield return new OldNugetVersionProblem
-                        {
-                            ProjectFilename = j.Key,
-                            ReferencedVersion = j.Value,
-                            NewestVersion = acceptedVersion,
-                            PackageId = usages.PackageId
-                        };
-                }
-
+                foreach (var j in i.Projects)
+                    yield return new OldNugetVersionProblem
+                    {
+                        ProjectFilename   = j.Key,
+                        ReferencedVersion = j.Value,
+                        NewestVersion     = acceptedVersion,
+                        PackageId         = usages.PackageId
+                    };
             }
-
         }
 
-        readonly Dictionary<string, PackageUsages> _packages = new Dictionary<string, PackageUsages>(StringComparer.OrdinalIgnoreCase);
-        IList<Project> _projects;
+        private readonly Dictionary<string, PackageUsages> _packages =
+            new Dictionary<string, PackageUsages>(StringComparer.OrdinalIgnoreCase);
+
+        private IList<Project> _projects;
 
 
-        class PackageUsages
+        private class PackageUsages
         {
             public PackageUsages(string packageId)
             {
-                Versions = new Dictionary<FileName, NugetVersion>();
+                Versions  = new Dictionary<FileName, NugetVersion>();
                 PackageId = packageId;
             }
 
@@ -78,9 +75,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 Versions[projectFullFilename] = nugetPackage.Version;
             }
 
-            public string PackageId { get; set; }
+            public string PackageId { get; }
 
-            public Dictionary<FileName, NugetVersion> Versions { get; private set; }
+            public Dictionary<FileName, NugetVersion> Versions { get; }
         }
     }
 }
