@@ -39,6 +39,9 @@ namespace ISukces.SolutionDoctor.Logic
                 {
                     switch (optionName)
                     {
+                        case "runExternalFix":
+                            result.RunExternalFix = true;
+                            break;
                         case "cfg":
                             var fi          = new FileInfo(item);
                             var lineOptions = Load(fi);
@@ -99,6 +102,7 @@ namespace ISukces.SolutionDoctor.Logic
             return result;
         }
 
+
         private static void AddRemove(IDictionary<string, AddRemoveOption> hs, string item)
         {
             if (string.IsNullOrEmpty(item))
@@ -128,7 +132,8 @@ namespace ISukces.SolutionDoctor.Logic
         {
             return
                 string.Equals(optionName, "fix", StringComparison.CurrentCultureIgnoreCase)
-                || string.Equals(optionName, "onlyBig", StringComparison.CurrentCultureIgnoreCase);
+                || string.Equals(optionName, "onlyBig", StringComparison.CurrentCultureIgnoreCase)
+                || string.Equals(optionName, "runExternalFix", StringComparison.CurrentCultureIgnoreCase);;
         }
 
         private static bool IsListOption(string optionName)
@@ -243,6 +248,18 @@ namespace ISukces.SolutionDoctor.Logic
                     _options["onlyBig"] = "";
                 else
                     _options.Remove("onlyBig");
+            }
+        }
+
+        public bool RunExternalFix
+        {
+            get { return _options.ContainsKey("runExternalFix"); }
+            set
+            {
+                if (value)
+                    _options["runExternalFix"] = "";
+                else
+                    _options.Remove("runExternalFix");
             }
         }
 

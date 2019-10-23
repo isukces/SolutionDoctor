@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using ISukces.SolutionDoctor.Logic;
 using ISukces.SolutionDoctor.Logic.Problems;
@@ -9,7 +11,7 @@ using JetBrains.Annotations;
 
 internal static class Manager
 {
-    public static async Task Process(IEnumerable<string> dirs, CommandLineOptions options)
+    public static async Task ProcessX(IEnumerable<string> dirs, CommandLineOptions options)
     {
         var doctor = new Doctor();
         //doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions);
@@ -80,12 +82,69 @@ internal static class Manager
                 if (s != null)
                 {
                     WriteRichText(new RichString(ConsoleColor.Green, "Run"), false);
+                    string fullName = s.WorkingDirectory.FullName;
+                    var batch = new StringBuilder();
                     if (s.WorkingDirectory != null)
-                        WriteRichText(
-                            new RichString(ConsoleColor.Green, "cd " + s.WorkingDirectory.FullName.QuoteFilename()),
-                            true);
+                    {
+                        var drive = fullName.GetDrive();
+                        if (!string.IsNullOrEmpty(drive))
+                        {
+                            WriteRichText(new RichString(ConsoleColor.Green, drive + ":"), true);
+                            batch.AppendLine(drive + ":");
+                        }
+
+                        WriteRichText( new RichString(ConsoleColor.Green, "cd " + fullName.QuoteFilename()),true);
+                        batch.AppendLine("cd "+fullName.QuoteFilename());
+                    }
+
                     foreach (var ii in s.Commands)
+                    {
                         WriteRichText(ii, true);
+                        batch.AppendLine(ii.GetPureText());
+                    }
+
+                    if (options.RunExternalFix)
+                    {
+                        var f = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".bat");
+                        var fi = new FileInfo(f);
+                        File.WriteAllText(f, batch.ToString());
+                        ProcessStartInfo startInfo = new ProcessStartInfo(fi.FullName)
+                        {
+                            WindowStyle            = ProcessWindowStyle.Minimized,
+                            WorkingDirectory       = fi.Directory.FullName,
+                            CreateNoWindow         = true,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError  = true,
+                            UseShellExecute        = false,
+                        };
+                        try
+                        {
+                            var ii = Process.Start(startInfo);
+                            if (ii != null)
+                            {
+                                ii.OutputDataReceived += (a, b)=>
+                                {
+                                    Console.WriteLine(b.Data);
+                                };
+                                ii.ErrorDataReceived    += (a, b)=>
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine(b.Data);
+                                    Console.ResetColor();
+                                };
+                                ii.WaitForExit();
+                            }
+ 
+                        }
+                        finally
+                        {
+                            File.Delete(f);
+                        }
+                        
+                       
+                             
+                        
+                    }
                 }
 
                 var fix = problem.GetFix();

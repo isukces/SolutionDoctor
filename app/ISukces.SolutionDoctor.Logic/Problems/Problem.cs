@@ -35,7 +35,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public FixScript(DirectoryInfo workingDirectory, params RichString[] commands)
         {
             WorkingDirectory = workingDirectory;
-            this.Commands.AddRange(commands);
+            Commands.AddRange(commands);
         }
 
         public static FixScript FullFxNugetInstall(FileName project, INuspec nuspec, string verb)
@@ -43,14 +43,8 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             var c = new MessageColorer().WithProjectAt(1).WithPackageAt(2);
             var commandToRun = RichString.RichFormat(c.Color, 
                 "nuget {0} {1} -id {2}", 
-                verb, project.FullName, nuspec.Id);
-            return new FixScript
-            {
-                Commands =
-                {
-                    commandToRun
-                }
-            };
+                verb, project.Name, nuspec.Id);
+            return new FixScript(project.Directory, commandToRun);
             
         }
         public static FixScript CoreNugetInstall(FileName project, INuspec nuspec, string verb)

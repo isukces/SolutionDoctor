@@ -88,5 +88,13 @@ namespace ISukces.SolutionDoctor.Logic
 
             return fileName;
         }
+
+        public static string GetDrive(this string fileName)
+        {
+            var m = fiePathRegex.Match(fileName);
+            if (!m.Success) return null;
+            var q = m.Groups[1].Value;
+            return !string.IsNullOrEmpty(q) ? q.Substring(0, 1) : null;
+        }
     }
 }

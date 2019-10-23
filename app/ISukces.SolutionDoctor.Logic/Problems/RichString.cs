@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -94,6 +95,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
             ctx.Add(format.Substring(from));
             return new RichString(ctx.Sink.ToArray());
+        }
+
+        public string GetPureText()
+        {
+            return string.Join("", Items.Select(a => a.Text));
         }
 
         public RichString WithColors(ConsoleColor? textColor, ConsoleColor? backgroundColor)
