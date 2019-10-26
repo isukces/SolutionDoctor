@@ -26,13 +26,25 @@ namespace ISukces.SolutionDoctor
                         "-NoWarn",
                         "1591,-1573,618",
                         "-WarningsAsErrors",
-                        "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734,-169219"
+                        "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734,-169219",
+                        "-cfg",
+                        "solutionDoctor.json"
                     };
+                    Directory.SetCurrentDirectory(@"C:\programs\isukces\PipelineDesigner\app");
                 }
 
-                Directory.SetCurrentDirectory(@"C:\programs\isukces\PipelineDesigner\app");
+                if (args[0] == "ct")
+                {
+                    args = new[]
+                    {
+                        "-runExternalFix", "-NoWarn", "1591,-1573,618", "-WarningsAsErrors",
+                        "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734", "-cfg",
+                        "SolutionDoctor.json"
+                    };
+                    Directory.SetCurrentDirectory(@"C:\programs\conexx");
+                }
             }
-            
+
 #endif
             try
             {

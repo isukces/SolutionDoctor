@@ -6,8 +6,6 @@ namespace ISukces.SolutionDoctor.Logic.Vs
 {
     public class Solution
     {
-        #region Constructors
-
         public Solution(FileInfo solutionFile)
         {
             Projects     = new List<Project>();
@@ -31,23 +29,6 @@ namespace ISukces.SolutionDoctor.Logic.Vs
                 inProject = true;
             }
         }
-
-        #endregion Constructors
-
-        #region Static Fields
-
-        private static readonly Regex ProjectRegex = new Regex(ProjectRegexFilter, RegexOptions.Compiled);
-
-        #endregion Static Fields
-
-        #region Fields
-
-        private const string ProjectRegexFilter =
-            @"^Project\(\s*\""*{([^}]+)\}\""\s*\)\s*=\s*\""([^\""]+)\""\s*,\s*\""([^\""]+)\""\s*,\s*\s*\""*{([^}]+)\}\""\s*(.*)$";
-
-        #endregion Fields
-
-        #region Methods
 
         // Public Methods 
 
@@ -76,14 +57,13 @@ namespace ISukces.SolutionDoctor.Logic.Vs
                 : null;
         }
 
-        #endregion Methods
-
-        #region Properties
-
         public FileName SolutionFile { get; }
 
         public List<Project> Projects { get; }
 
-        #endregion Properties
+        private static readonly Regex ProjectRegex = new Regex(ProjectRegexFilter, RegexOptions.Compiled);
+
+        private const string ProjectRegexFilter =
+            @"^Project\(\s*\""*{([^}]+)\}\""\s*\)\s*=\s*\""([^\""]+)\""\s*,\s*\""([^\""]+)\""\s*,\s*\s*\""*{([^}]+)\}\""\s*(.*)$";
     }
 }

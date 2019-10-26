@@ -50,9 +50,16 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
+        static DateTime  _aaa = DateTime.MinValue;
         private static FileInfo[] GetFilesAndIgnoreError(DirectoryInfo dir, string filter)
         {
-            Debug.WriteLine("Scan " + dir.FullName);
+            var now = DateTime.Now;
+            if ((now - _aaa).TotalSeconds > 5)
+            {
+                Debug.WriteLine("Scan " + dir.FullName);
+                _aaa = now;
+            }
+
             try
             {
                 return dir.GetFiles(filter);

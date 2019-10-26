@@ -128,12 +128,20 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
+        private static string ExpandPath(FileInfo baseFile, string file)
+        {
+            if (baseFile is null)
+                return file;
+            return Path.Combine(baseFile.Directory.FullName, file);
+        }
+
         private static bool IsBoolOption(string optionName)
         {
             return
                 string.Equals(optionName, "fix", StringComparison.CurrentCultureIgnoreCase)
                 || string.Equals(optionName, "onlyBig", StringComparison.CurrentCultureIgnoreCase)
-                || string.Equals(optionName, "runExternalFix", StringComparison.CurrentCultureIgnoreCase);;
+                || string.Equals(optionName, "runExternalFix", StringComparison.CurrentCultureIgnoreCase);
+            ;
         }
 
         private static bool IsListOption(string optionName)
@@ -144,7 +152,9 @@ namespace ISukces.SolutionDoctor.Logic
 
         private static CommandLineOptions Load([NotNull] FileInfo file)
         {
-            return JsonUtils.Default.Load<CommandLineOptions>(file);
+            var x = JsonUtils.Default.Load<CommandLineOptions>(file);
+            x.ApplyPath(file);
+            return x;
         }
 
         private static List<string> NormalizeList(List<string> x)
@@ -155,6 +165,22 @@ namespace ISukces.SolutionDoctor.Logic
                 select j;
             x = q.Distinct().ToList();
             return x;
+        }
+
+        private static string ReduceFilename(FileInfo baseFile, string target)
+        {
+            try
+            {
+                var uri = new Uri(baseFile.FullName);
+
+                var result = uri.MakeRelativeUri(new Uri(target)).ToString();
+                var ii     = result.Replace("/", "\\");
+                return ii;
+            }
+            catch
+            {
+                return target;
+            }
         }
 
         private static bool SkipOption(string optionName)
@@ -177,7 +203,9 @@ namespace ISukces.SolutionDoctor.Logic
         public void Save([NotNull] FileInfo file)
         {
             if (file == null) throw new ArgumentNullException(nameof(file));
+            ReducePath(file);
             JsonUtils.Default.Save(file, this);
+            ApplyPath(file);
         }
 
         // Private Methods 
@@ -209,7 +237,33 @@ namespace ISukces.SolutionDoctor.Logic
             foreach (var i in other.WarningsAsErrors)
                 WarningsAsErrors[i.Key] = i.Value;
 
+            if (other.SolutionOrders != null)
+            {
+                var x = SolutionOrders ?? new List<string>();
+                x.AddRange(other.SolutionOrders);
+                SolutionOrders = x.Distinct().ToList();
+            }
+
             // Fix = other.ShowOnlyBigProblems;
+        }
+
+        private void ApplyPath(FileInfo file)
+        {
+            if (file == null) return;
+            if (SolutionOrders != null)
+                for (var index = 0; index < SolutionOrders.Count; index++)
+                    SolutionOrders[index] = ExpandPath(file, SolutionOrders[index]);
+        }
+
+        private void ReducePath(FileInfo file)
+        {
+            if (file == null) return;
+            if (SolutionOrders != null)
+                for (var index = 0; index < SolutionOrders.Count; index++)
+                {
+                    SolutionOrders[index] = ReduceFilename(file, SolutionOrders[index]);
+                    ;
+                }
         }
 
         private void SetOptionValue(string optionName, string value)
@@ -237,6 +291,8 @@ namespace ISukces.SolutionDoctor.Logic
         public List<string> ExcludeDirectories { get; private set; }
 
         public List<string> ExcludeSolutions { get; private set; }
+
+        public List<string> SolutionOrders { get; set; }
 
 
         public bool ShowOnlyBigProblems
