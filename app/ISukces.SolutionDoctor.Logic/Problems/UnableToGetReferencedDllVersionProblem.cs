@@ -1,11 +1,11 @@
 ﻿using System;
-using ISukces.SolutionDoctor.Logic.Vs;
+using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class UnableToGetReferencedDllVersionProblem : Problem
     {
-        public UnableToGetReferencedDllVersionProblem(string what, Project project, string why)
+        public UnableToGetReferencedDllVersionProblem(string what, SolutionProject project, string why)
         {
             _what           = what;
             _why            = why;

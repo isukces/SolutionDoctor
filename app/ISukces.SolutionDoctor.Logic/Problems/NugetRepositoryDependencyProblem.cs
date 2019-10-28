@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using ISukces.SolutionDoctor.Logic.NuGet;
+using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {

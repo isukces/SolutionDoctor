@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
-using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
@@ -13,7 +13,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         {
         }
 
-        public static IEnumerable<Problem> Check(List<Project> projs)
+        public static IEnumerable<Problem> Check(List<SolutionProject> projs)
         {
             var a = new XamlInCsProjChecker();
             foreach (var project in projs)
@@ -106,9 +106,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             }
         }
 
-        private void CheckProject(Project project)
+        private void CheckProject(SolutionProject project)
         {
-            if (project.Kind != CsProjectKind.Old) return;
+            if (project.Kind != VsProjectKind.Old) return;
             _currentProjectLocation = project.Location;
             var xml = FileUtils.Load(_currentProjectLocation);
 

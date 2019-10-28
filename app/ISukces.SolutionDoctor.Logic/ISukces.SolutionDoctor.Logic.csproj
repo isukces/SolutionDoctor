@@ -50,6 +50,10 @@
       <HintPath>..\..\packages\EnvDTE90a.9.0.3\lib\net10\EnvDTE90a.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="isukces.code.vssolutions, Version=1.0.19301.8, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\iSukces.Code.VsSolutions.1.0.19301.8\lib\net451\isukces.code.vssolutions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="isukces.json, Version=1.0.18337.18, Culture=neutral, PublicKeyToken=a96e3d197f74873c">
       <HintPath>..\..\packages\iSukces.Json.1.0.18337.18\lib\net45\isukces.json.dll</HintPath>
       <Private>True</Private>
@@ -104,8 +108,6 @@
     <Compile Include="FileUtils.cs" />
     <Compile Include="IDoctorConfig.cs" />
     <Compile Include="MessageColorer.cs" />
-    <Compile Include="NuGet\NuspecCache.cs" />
-    <Compile Include="NuGet\PackageId.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
     <Compile Include="Problems\AssemblyRedirectionInvalidPackageId.cs" />
     <Compile Include="Problems\IConsiderUpdatePackage.cs" />
@@ -115,12 +117,8 @@
     <Compile Include="CommandLineOptions.cs" />
     <Compile Include="DiscFileScanner.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FileName.cs" />
     <Compile Include="Checkers\NugetPackageAssemblyBindingChecker.cs" />
     <Compile Include="Checkers\NugetRepositoryDependencies.cs" />
-    <Compile Include="NuGet\NugetVersionRange.cs" />
-    <Compile Include="NuGet\RangeEdge.cs" />
-    <Compile Include="NuGet\VersionCheckResult.cs" />
     <Compile Include="Problems\NuGetPackageShouldBeReferencedProblem.cs" />
     <Compile Include="Checkers\NugetPackageVersionChcecker.cs" />
     <Compile Include="Problems\ProblemFix.cs" />
@@ -132,20 +130,11 @@
     <Compile Include="VsCall\IOleMessageFilter.cs" />
     <Compile Include="VsCall\MessageFilter.cs" />
     <Compile Include="VsCall\VsRunner.cs" />
-    <Compile Include="Vs\AppConfig.cs" />
-    <Compile Include="Vs\AssemblyBinding.cs" />
     <Compile Include="Doctor.cs" />
-    <Compile Include="NuGet\NugetDependency.cs" />
-    <Compile Include="NuGet\NugetVersion.cs" />
-    <Compile Include="NuGet\NugetPackage.cs" />
     <Compile Include="Problems\Problem.cs" />
     <Compile Include="Problems\SolutionsInManyFoldersProblem.cs" />
     <Compile Include="Problems\WrongBindingRedirectProblem.cs" />
-    <Compile Include="NuGet\Nuspec.cs" />
-    <Compile Include="Vs\Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Vs\ProjectReference.cs" />
-    <Compile Include="Vs\Solution.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

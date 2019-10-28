@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic;
 using Xunit;
 

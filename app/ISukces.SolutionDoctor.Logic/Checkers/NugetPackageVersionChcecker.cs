@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ISukces.SolutionDoctor.Logic.NuGet;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
-using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     public class NugetPackageVersionChcecker
     {
-        public static IEnumerable<Problem> Check(IList<Project> projects)
+        public static IEnumerable<Problem> Check(IList<SolutionProject> projects)
         {
             var a = new NugetPackageVersionChcecker
             {
@@ -59,7 +58,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         private readonly Dictionary<string, PackageUsages> _packages =
             new Dictionary<string, PackageUsages>(StringComparer.OrdinalIgnoreCase);
 
-        private IList<Project> _projects;
+        private IList<SolutionProject> _projects;
 
 
         private class PackageUsages

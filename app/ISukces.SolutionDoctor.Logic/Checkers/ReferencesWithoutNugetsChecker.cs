@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ISukces.SolutionDoctor.Logic.NuGet;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
-using ISukces.SolutionDoctor.Logic.Vs;
 using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
@@ -19,7 +18,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         // Public Methods 
 
-        public static IEnumerable<Problem> Check(IEnumerable<Project> projects,
+        public static IEnumerable<Problem> Check(List<SolutionProject> projects,
             IEnumerable<Nuspec> localNugetRepositiories,
             HashSet<string> excludeDll)
         {
@@ -97,7 +96,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return a;
         }
 
-        private IEnumerable<Problem> CheckProj(Project project)
+        private IEnumerable<Problem> CheckProj(SolutionProject project)
         {
             var projectReferences = project.References.Where(a => a.HintPath != null).ToArray();
             if (!projectReferences.Any())
@@ -133,7 +132,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     ProjectFilename    = project.Location,
                     PackageToReference = nuspec,
                     ReferencedLibrary  = dep,
-                    IsCoreProject      = project.Kind == CsProjectKind.New
+                    IsCoreProject      = project.Kind == VsProjectKind.Core
                 };
             }
         }
@@ -183,7 +182,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         private Dictionary<string, HashSet<PackageId>> _map;
         private Tuple<string, Nuspec>[] _nuspecs;
-        private List<Project> _projects;
+        private List<SolutionProject> _projects;
         public HashSet<string> _excludeDll;
 
         #endregion Fields

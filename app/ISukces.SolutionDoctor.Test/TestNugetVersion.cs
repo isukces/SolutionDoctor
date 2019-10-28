@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ISukces.SolutionDoctor.Logic.NuGet;
-using ISukces.SolutionDoctor.Logic.Vs;
+using isukces.code.vssolutions;
 using Xunit;
 
 namespace ISukces.SolutionDoctor.Test

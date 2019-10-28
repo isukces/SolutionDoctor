@@ -1,16 +1,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ISukces.SolutionDoctor.Logic.NuGet;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
-using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     internal class NugetRepositoryDependencies
     {
         public static IEnumerable<Problem> Check(Dictionary<string, Dictionary<string, Nuspec>> localNugetRepositiories,
-            List<Project> uniqueProjects)
+            List<SolutionProject> uniqueProjects)
         {
             var instance = new NugetRepositoryDependencies
             {
@@ -66,7 +65,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         }
 
         private Dictionary<string, Dictionary<string, Nuspec>> _localNugetRepositiories;
-        private List<Project> _uniqueProjects;
+        private List<SolutionProject> _uniqueProjects;
     }
 
     internal class Data

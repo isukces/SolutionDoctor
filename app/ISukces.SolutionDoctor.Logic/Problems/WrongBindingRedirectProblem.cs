@@ -1,6 +1,5 @@
 using System;
-using ISukces.SolutionDoctor.Logic.NuGet;
-using ISukces.SolutionDoctor.Logic.Vs;
+using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {

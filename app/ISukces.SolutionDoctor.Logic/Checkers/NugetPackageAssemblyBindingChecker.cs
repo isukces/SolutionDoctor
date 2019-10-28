@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using ISukces.SolutionDoctor.Logic.NuGet;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
-using ISukces.SolutionDoctor.Logic.Vs;
 using JetBrains.Annotations;
+
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     internal class NugetPackageAssemblyBindingChecker
     {
-        public static IEnumerable<Problem> Check([NotNull] IList<Project> projects,
+        public static IEnumerable<Problem> Check([NotNull] IList<SolutionProject> projects,
             HashSet<string> removeBindingRedirect)
         {
             if (projects == null) throw new ArgumentNullException(nameof(projects));
@@ -48,7 +48,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             }
         }
 
-        private IEnumerable<Problem> ScanProject(Project project)
+        private IEnumerable<Problem> ScanProject(SolutionProject project)
         {
             var assemblyBindings = project.AssemblyBindings;
             var packageVersion   = project.NugetPackages;
@@ -64,9 +64,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                         };
 
             if (!packageVersion.Any()) yield break;
-            foreach (var package in packageVersion)
+            foreach (var package in packageVersion)    
             {
-                if (project.Kind == CsProjectKind.New)
+                if (project.Kind == VsProjectKind.Core)
                 {
                     var redirects = assemblyBindings.Where(
                             a => string.Equals(a.Name, package.Id, StringComparison.OrdinalIgnoreCase))

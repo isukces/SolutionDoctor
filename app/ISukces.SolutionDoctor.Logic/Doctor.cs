@@ -6,11 +6,10 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Checkers;
 using ISukces.SolutionDoctor.Logic.Checkers.Xaml;
-using ISukces.SolutionDoctor.Logic.NuGet;
 using ISukces.SolutionDoctor.Logic.Problems;
-using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic
 {
@@ -196,7 +195,7 @@ namespace ISukces.SolutionDoctor.Logic
     {
         #region Properties
 
-        public Project Project { get; set; }
+        public SolutionProject Project { get; set; }
 
         public Solution Solution { get; set; }
 

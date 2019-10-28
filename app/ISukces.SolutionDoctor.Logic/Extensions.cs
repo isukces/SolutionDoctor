@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic
 {
@@ -34,18 +35,8 @@ namespace ISukces.SolutionDoctor.Logic
             writeLine(string.Format(format, items));
         }
 
-        // Public Methods 
-
-        public static FileName GetAppConfigFile(this FileName projectFile)
-        {
-            return projectFile.GetRelativeFile("app.config");
-        }
-
-        public static FileName GetPackagesConfigFile(this FileName projectFile)
-        {
-            return projectFile.GetRelativeFile("packages.config");
-        }
-
+       
+ 
         public static string GetShortNameWithoutExtension(this FileName projectFile)
         {
             var fi   = new FileInfo(projectFile.FullName);
@@ -55,14 +46,7 @@ namespace ISukces.SolutionDoctor.Logic
         }
         // Private Methods 
 
-        private static FileName GetRelativeFile(this FileName projectFile, string name)
-        {
-            // ReSharper disable once PossibleNullReferenceException
-            var fi             = new FileInfo(projectFile.FullName);
-            var configFileInfo = new FileInfo(Path.Combine(fi.Directory.FullName, name));
-            return new FileName(configFileInfo);
-        }
-
+        
         static HashSet<char> c= new HashSet<char>(Path.GetInvalidFileNameChars());
         private static Regex fiePathRegex = new Regex(@"^(\w:)?(.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 

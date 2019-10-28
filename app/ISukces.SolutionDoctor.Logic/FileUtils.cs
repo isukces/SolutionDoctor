@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic
 {
@@ -6,7 +7,7 @@ namespace ISukces.SolutionDoctor.Logic
     {
         public static XDocument Load(string fileName)
         {
-            lock(SyncObj)
+            lock(Locking.Lock)
             {
                 return XDocument.Load(fileName);
             }
@@ -14,7 +15,7 @@ namespace ISukces.SolutionDoctor.Logic
 
         public static XDocument Load(FileName fileName)
         {
-            lock(SyncObj)
+            lock(Locking.Lock)
             {
                 return XDocument.Load(fileName.FullName);
             }
@@ -22,12 +23,11 @@ namespace ISukces.SolutionDoctor.Logic
 
         public static void Save2(this XDocument xml, FileName fileName)
         {
-            lock(SyncObj)
+            lock(Locking.Lock)
             {
                 xml.Save(fileName.FullName);
             }
         }
-
-        public static object SyncObj = new object();
+ 
     }
 }

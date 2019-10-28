@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using isukces.code.vssolutions;
 using isukces.json;
-using ISukces.SolutionDoctor.Logic.NuGet;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 

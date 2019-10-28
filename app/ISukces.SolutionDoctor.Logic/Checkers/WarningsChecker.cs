@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
-using ISukces.SolutionDoctor.Logic.Vs;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
@@ -11,7 +11,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
     {
         // Public Methods 
 
-        public static IEnumerable<Problem> Check(IEnumerable<Project> projects, CommandLineOptions options)
+        public static IEnumerable<Problem> Check(List<SolutionProject> projects, CommandLineOptions options)
         {
             // var aa = localNugetRepositiories.GetUnique(a => a.Location.FullName.ToLower(), a => a);
 
@@ -23,7 +23,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return checker.Check();
         }
 
-        private static IEnumerable<Problem> CheckNode(XElement el, bool fix, Project project,
+        private static IEnumerable<Problem> CheckNode(XElement el, bool fix, SolutionProject project,
             CommandLineOptions options)
         {
             var cond = (string)el.Attribute("Condition");
@@ -73,9 +73,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return a;
         }
 
-        private IEnumerable<Problem> CheckProj(Project project)
+        private IEnumerable<Problem> CheckProj(SolutionProject project)
         {
-            if (project.Kind != CsProjectKind.Old) return new Problem[0];
+            if (project.Kind != VsProjectKind.Old) return new Problem[0];
             var doc   = FileUtils.Load(project.Location);
             var root  = doc.Root;
             var nodes = root.Elements(root.Name.Namespace + "PropertyGroup").ToArray();
@@ -89,12 +89,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return ps;
         }
 
-        private List<Project> _projects;
+        private List<SolutionProject> _projects;
         public CommandLineOptions _options;
 
         private class Bla : Problem
         {
-            public Bla(string name, string expected, Project project, CommandLineOptions opts)
+            public Bla(string name, string expected, SolutionProject project, CommandLineOptions opts)
             {
                 _name     = name;
                 _expected = expected;
@@ -111,7 +111,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             {
                 return new ProblemFix("Correct " + _name, () =>
                 {
-                    lock(FileUtils.SyncObj)
+                    lock(Locking.Lock)
                     {
                         var doc   = FileUtils.Load(_project.Location);
                         var root  = doc.Root;
@@ -142,7 +142,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
             private readonly string _name;
             private readonly string _expected;
-            private readonly Project _project;
+            private readonly SolutionProject _project;
             private readonly CommandLineOptions _opts;
         }
     }

@@ -1,6 +1,5 @@
 using System;
-using ISukces.SolutionDoctor.Logic.NuGet;
-using ISukces.SolutionDoctor.Logic.Vs;
+using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
@@ -27,8 +26,8 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         public override FixScript GetFixScript()
         {
-            var p = new Project {Location = ProjectFilename};
-            if (p.Kind == CsProjectKind.New)
+            var p = new SolutionProject {Location = ProjectFilename};
+            if (p.Kind == VsProjectKind.Core)
                 return FixScript.CoreNugetInstall(ProjectFilename, PackageToReference, "add");
 
             return FixScript.FullFxNugetInstall(ProjectFilename, PackageToReference, "install");

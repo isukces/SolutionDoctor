@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using ISukces.SolutionDoctor.Logic.NuGet;
+using isukces.code.vssolutions;
+
 using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.Problems

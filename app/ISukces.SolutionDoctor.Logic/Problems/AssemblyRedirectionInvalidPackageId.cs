@@ -1,11 +1,12 @@
 ﻿using System;
-using ISukces.SolutionDoctor.Logic.Vs;
+using EnvDTE;
+using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class AssemblyRedirectionInvalidPackageId : Problem
     {
-        public AssemblyRedirectionInvalidPackageId(string packageId, Project project)
+        public AssemblyRedirectionInvalidPackageId(string packageId, SolutionProject project)
         {
             _packageId      = packageId;
             _project        = project;
@@ -47,6 +48,6 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         }
 
         private readonly string _packageId;
-        private readonly Project _project;
+        private readonly SolutionProject _project;
     }
 }
