@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -30,17 +31,63 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return a => a != null && a.FullName.ToLower().Contains(path.ToLowerInvariant());
         }
 
+        public class InstanceProxy : MarshalByRefObject
+        {
+            public void LoadAssembly(string path)
+            {
+                 AppDomain.CurrentDomain.AssemblyResolve += (a, b) =>
+                 {
+                     return null;
+                 };
+                Assembly asm   = Assembly.LoadFile(path);
+                Type[] types = asm.GetExportedTypes();
+                var ver1 = asm.GetName();
+                var ver2 = ver1.Version;
+                Console.WriteLine(ver1);
+                
+                string assemblyVersion = asm.GetName().Version.ToString(); 
+                //string assemblyVersion = Assembly.LoadFile("your assembly file").GetName().Version.ToString(); 
+                string fileVersion     = FileVersionInfo.GetVersionInfo(asm.Location).FileVersion; 
+                string productVersion  = FileVersionInfo.GetVersionInfo(asm.Location).ProductVersion;
+
+                string fileVersion2    = FileVersionInfo.GetVersionInfo(path).FileVersion; 
+                string productVersion2 = FileVersionInfo.GetVersionInfo(path).ProductVersion;
+                // ...see above...
+            }
+        }
+        
         private static DllInfo GetDllInfo(FileInfo file)
         {
             if (!file.Exists)
                 return new DllInfo(file, null, false);
             try
             {
+                /*if (file.FullName.ToLower().Contains("system.io.comp"))
+                {
+                    Debug.Write("");
+
+                    {
+                        AppDomain domain = AppDomain.CreateDomain("TempDomain");
+                        InstanceProxy proxy = domain.CreateInstanceAndUnwrap(Assembly.GetAssembly(
+                            typeof(InstanceProxy)).FullName, typeof(InstanceProxy).ToString()) as InstanceProxy;
+                        if (proxy != null)
+                        {
+                            proxy.LoadAssembly(file.FullName);
+                        }
+                        AppDomain.Unload(domain);
+                    }
+                }*/
+
                 var currentAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
-                return
-                    new DllInfo(file,
-                        currentAssemblyName.Version.ToString(),
-                        true);
+                var version = currentAssemblyName.Version; 
+                var compression = @"packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll";
+                if (file.FullName.ToLower().EndsWith(compression.ToLower()))
+                {
+                    version = Version.Parse("4.2.0.0");
+                }
+
+
+                return new DllInfo(file, version.ToString(), true);
             }
             catch
             {

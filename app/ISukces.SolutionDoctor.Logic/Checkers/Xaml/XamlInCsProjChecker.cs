@@ -9,13 +9,16 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     public class XamlInCsProjChecker
     {
-        private XamlInCsProjChecker()
+        private readonly CommandLineOptions _options;
+
+        private XamlInCsProjChecker(CommandLineOptions options)
         {
+            _options = options;
         }
 
-        public static IEnumerable<Problem> Check(List<SolutionProject> projs)
+        public static IEnumerable<Problem> Check(List<SolutionProject> projs, CommandLineOptions options)
         {
-            var a = new XamlInCsProjChecker();
+            var a = new XamlInCsProjChecker(options);
             foreach (var project in projs)
                 a.CheckProject(project);
 
@@ -109,6 +112,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         private void CheckProject(SolutionProject project)
         {
             if (project.Kind != VsProjectKind.Old) return;
+            if (_options.IsSkipped(nameof(XamlInCsProjChecker), project.Location))
+                    return;
             _currentProjectLocation = project.Location;
             var xml = FileUtils.Load(_currentProjectLocation);
 

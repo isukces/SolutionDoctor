@@ -5,6 +5,10 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     internal abstract class XamlProblem : Problem
     {
+        protected XamlProblem()
+        {
+        }
+
         public override ProblemFix GetFix()
         {
             return new ProblemFix(GetFixName(), () =>

@@ -26,7 +26,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             var nuget = SuggestedNugets.OrderBy(a => a).Last();
             var p = new SolutionProject {Location = ProjectFilename};
             if (p.Kind == VsProjectKind.Core)
-                return FixScript.CoreNugetInstall(ProjectFilename, nuget, "add");
+            {
+                var tmp = FixScript.CoreNugetInstall(ProjectFilename, nuget, "add");
+                return tmp;
+            }
+
             return FixScript.FullFxNugetInstall(ProjectFilename, nuget, "install");
         }
 

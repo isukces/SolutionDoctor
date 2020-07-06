@@ -5,6 +5,10 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     internal class XamlNotInPageNodeProblem : XamlProblem
     {
+        public XamlNotInPageNodeProblem()
+        {
+        }
+
         public override void Describe(Action<RichString> writeLine)
         {
             writeLine($"File {XamlFile} should be marked as Page");

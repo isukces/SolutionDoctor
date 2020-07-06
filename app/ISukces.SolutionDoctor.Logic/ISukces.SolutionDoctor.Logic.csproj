@@ -50,8 +50,8 @@
       <HintPath>..\..\packages\EnvDTE90a.9.0.3\lib\net10\EnvDTE90a.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="isukces.code.vssolutions, Version=1.0.19301.8, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\iSukces.Code.VsSolutions.1.0.19301.8\lib\net451\isukces.code.vssolutions.dll</HintPath>
+    <Reference Include="isukces.code.vssolutions, Version=1.0.19348.11, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\packages\iSukces.Code.VsSolutions.1.0.19348.11\lib\net451\isukces.code.vssolutions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="isukces.json, Version=1.0.18337.18, Culture=neutral, PublicKeyToken=a96e3d197f74873c">
@@ -107,6 +107,7 @@
     <Compile Include="Checkers\Xaml\XamlProblem.cs" />
     <Compile Include="FileUtils.cs" />
     <Compile Include="IDoctorConfig.cs" />
+    <Compile Include="LogicDisposer.cs" />
     <Compile Include="MessageColorer.cs" />
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
     <Compile Include="Problems\AssemblyRedirectionInvalidPackageId.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Checkers\SolutionsInManyFoldersChecker.cs" />
     <Compile Include="Problems\RichString.cs" />
     <Compile Include="Problems\UnableToGetReferencedDllVersionProblem.cs" />
+    <Compile Include="SkipRule.cs" />
     <Compile Include="VsCall\GuidsAndIds.cs" />
     <Compile Include="VsCall\IOleMessageFilter.cs" />
     <Compile Include="VsCall\MessageFilter.cs" />

@@ -196,12 +196,15 @@ namespace ISukces.SolutionDoctor.Logic
             ScanDirectories    = NormalizeList(ScanDirectories);
             ExcludeDirectories = NormalizeList(ExcludeDirectories);
             ExcludeSolutions   = NormalizeList(ExcludeSolutions);
+            SkippedRules = SkippedRules?.Distinct()
+                .OrderBy(a => a.Project)
+                .ThenBy(a => a.Rule)
+                .ToList() ?? new List<SkipRule>();
         }
-
-        // Public Methods 
 
         public void Save([NotNull] FileInfo file)
         {
+            Normalize();
             if (file == null) throw new ArgumentNullException(nameof(file));
             ReducePath(file);
             JsonUtils.Default.Save(file, this);
@@ -222,6 +225,13 @@ namespace ISukces.SolutionDoctor.Logic
             if (other.ExcludeDll != null)
                 foreach (var i in other.ExcludeDll)
                     ExcludeDll.Add(i);
+            if (other.SkippedRules != null)
+            {
+                if (SkippedRules is null)
+                    SkippedRules = new List<SkipRule>();
+                foreach (var i in other.SkippedRules)
+                    SkippedRules.Add(i);
+            }
 
             if (other.RemoveBindingRedirect != null)
                 foreach (var i in other.RemoveBindingRedirect)
@@ -293,6 +303,8 @@ namespace ISukces.SolutionDoctor.Logic
         public List<string> ExcludeSolutions { get; private set; }
 
         public List<string> SolutionOrders { get; set; }
+        
+        public List<SkipRule> SkippedRules { get; set; } 
 
 
         public bool ShowOnlyBigProblems
@@ -347,5 +359,20 @@ namespace ISukces.SolutionDoctor.Logic
         public Dictionary<string, NugetVersion> PackagesVersion { get; }
 
         private readonly Dictionary<string, string> _options;
+
+        public bool IsSkipped(string rule, FileName projectLocation)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            if (SkippedRules is null)
+                return false;
+
+            return SkippedRules.Any(a =>
+            {
+                var fn = Path.Combine(currentDirectory, a.Project);
+                var fi = new  FileInfo(fn);
+                return a.Rule == rule &&
+                       string.Equals(fi.FullName, projectLocation.FullName, StringComparison.OrdinalIgnoreCase);
+            });
+        }
     }
 }

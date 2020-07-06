@@ -21,7 +21,7 @@ namespace ISukces.SolutionDoctor
                     args = new[]
                     {
                         ".\\",
-                        "-runExternalFix",
+                        // "-runExternalFix",
                         "-fix",
                         "-NoWarn",
                         "1591,-1573,618",
@@ -30,7 +30,15 @@ namespace ISukces.SolutionDoctor
                         "-cfg",
                         "solutionDoctor.json"
                     };
-                    Directory.SetCurrentDirectory(@"C:\programs\isukces\PipelineDesigner\app");
+                    args = new[]
+                    {
+                        ".\\",
+                        "-saveOptions",
+                        "app\\solutionDoctor.json",
+                        "-cfg",
+                        "app\\solutionDoctor.json"
+                    };
+                    Directory.SetCurrentDirectory(@"C:\programs\isukces\PipelineDesigner");
                 }
 
                 if (args[0] == "ct")
@@ -88,7 +96,7 @@ namespace ISukces.SolutionDoctor
                 DisplayException(e);
                 ShowHelp();
             }
-
+            LogicDisposer.Flush();
             Console.ReadLine();
         }
 

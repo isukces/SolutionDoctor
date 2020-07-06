@@ -5,6 +5,7 @@ using System.Linq;
 using isukces.code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
@@ -49,7 +50,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             var map = new Dictionary<string, HashSet<PackageId>>(StringComparer.OrdinalIgnoreCase);
             foreach (var nuspec in nuspecs)
             {
-                var tmp = ScanDll(nuspec.Item1);
+                var tmp = _cache.Find(nuspec);
                 foreach (var ii in tmp)
                 {
                     if (!map.TryGetValue(ii, out var list))
@@ -64,6 +65,74 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
             return map;
         }
+
+        private class Cache
+        {
+            public HashSet<string> Find(Tuple<string, Nuspec> nuspec)
+            {
+                lock(l)
+                {
+                    if (_data is null)
+                    {
+                        var file = CacheFileName;
+                        if (File.Exists(file))
+                            try
+                            {
+                                _data = JsonConvert.DeserializeObject<Dictionary<string, HashSet<string>>>(
+                                    File.ReadAllText(file));
+                            }
+                            catch
+                            {
+                                File.Delete(file);
+                            }
+
+                        _data = _data ?? new Dictionary<string, HashSet<string>>();
+                    }
+
+                    if (_data.TryGetValue(nuspec.Item2.FullId, out var x))
+                        return x;
+                    var tmp = ScanDll(nuspec.Item1);
+                    _hasNew = true;
+                    return _data[nuspec.Item2.FullId] = tmp;
+                }
+            }
+
+            public void FlushMe()
+            {
+                lock(l)
+                {
+                    if (_data is null || !_hasNew)
+                        return;
+                    var json = JsonConvert.SerializeObject(_data, Formatting.Indented);
+                    var file = new FileInfo(CacheFileName);
+                    file.Directory?.Create();
+                    File.WriteAllText(file.FullName, json);
+                }
+            }
+
+            private static string CacheFileName
+            {
+                get
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "SolutionDoctor", "nugetDllCache.json");
+                }
+            }
+
+            private readonly object l = new object();
+
+            private Dictionary<string, HashSet<string>> _data;
+            private bool _hasNew;
+        }
+
+        public static void Flush()
+        {
+            _cache.FlushMe();
+        }
+
+
+        private static readonly Cache _cache = new Cache();
+
 
         private static HashSet<string> ScanDll(string dirName)
         {
