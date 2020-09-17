@@ -14,14 +14,20 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
     internal class NugetPackageAssemblyBindingChecker
     {
         public static IEnumerable<Problem> Check([NotNull] IList<SolutionProject> projects,
-            HashSet<string> removeBindingRedirect)
+            HashSet<string> removeBindingRedirect, Dictionary<string, string> forceBindingRedirects)
         {
             if (projects == null) throw new ArgumentNullException(nameof(projects));
-            var tmp = new NugetPackageAssemblyBindingChecker();
-            tmp._removeBindingRedirect = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var tmp = new NugetPackageAssemblyBindingChecker
+            {
+                _removeBindingRedirect = new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+                _forceBindingRedirects = new Dictionary<string, NugetVersion>(StringComparer.OrdinalIgnoreCase)
+            };
             if (removeBindingRedirect != null)
                 foreach (var i in removeBindingRedirect)
                     tmp._removeBindingRedirect.Add(i);
+            if (forceBindingRedirects != null)
+                foreach (var i in forceBindingRedirects)
+                    tmp._forceBindingRedirects[i.Key] = NugetVersion.Parse(i.Value);
             return projects.SelectMany(tmp.ScanProject).ToList();
         }
 
@@ -103,12 +109,24 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             if (!assemblyBindings.Any()) yield break;
             if (_removeBindingRedirect != null && _removeBindingRedirect.Any())
                 foreach (var i in assemblyBindings)
+                {
                     if (_removeBindingRedirect.Contains(i.Name))
-                        yield return new NotNecessaryBindingRedirectProblem
+                        yield return new NotNecessaryOrForceVersionBindingRedirectProblem
                         {
                             Redirect        = i,
                             ProjectFilename = project.Location
                         };
+                    else if (_forceBindingRedirects.TryGetValue(i.Name, out var version))
+                    {
+                        if (i.NewVersion != version)
+                            yield return new NotNecessaryOrForceVersionBindingRedirectProblem
+                            {
+                                Redirect        = i,
+                                ProjectFilename = project.Location,
+                                Version         = version
+                            };
+                    }
+                }
 
             if (!packageVersion.Any()) yield break;
             foreach (var package in packageVersion)    
@@ -146,6 +164,20 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     continue;
                 }
 
+                dlls = dlls.Where(a =>
+                {
+                    var name = a.GetShortNameWithoutExtension();
+                    if (_removeBindingRedirect.Contains(name))
+                        return false;
+                    if (_forceBindingRedirects.ContainsKey(name))
+                        return false;
+                    return true;
+                }).ToArray();
+                if (dlls.Length == 0)
+                {
+                    continue;
+                }
+
                 var versions = dlls.Select(GetDllInfo).Distinct().ToArray();
                 {
                     var aa = versions.Where(q => q.DllVersion == null || !q.Exists).ToArray();
@@ -178,6 +210,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         }
 
         private HashSet<string> _removeBindingRedirect;
+        public Dictionary<string, NugetVersion> _forceBindingRedirects;
 
         private class DllInfo
         {

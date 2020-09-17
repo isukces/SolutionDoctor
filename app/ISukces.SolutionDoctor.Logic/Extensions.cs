@@ -35,14 +35,16 @@ namespace ISukces.SolutionDoctor.Logic
             writeLine(string.Format(format, items));
         }
 
-       
- 
-        public static string GetShortNameWithoutExtension(this FileName projectFile)
+
+        public static string GetShortNameWithoutExtension(this FileInfo fi)
         {
-            var fi   = new FileInfo(projectFile.FullName);
             var ext  = fi.Extension;
             var name = fi.Name;
             return name.Substring(0, name.Length - ext.Length);
+        }
+        public static string GetShortNameWithoutExtension(this FileName projectFile)
+        {
+            return  new FileInfo(projectFile.FullName).GetShortNameWithoutExtension();
         }
         // Private Methods 
 

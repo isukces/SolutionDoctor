@@ -53,7 +53,7 @@ namespace ISukces.SolutionDoctor.Logic
             var uniqueProjects  = groupedProjects.Select(a => a.Projects.First().Project).ToList();
             var p1              = Task.Run(() => SolutionsInManyFoldersChecker.Check(groupedProjects));
             var p2 = Task.Run(() =>
-                NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect));
+                NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect,ForceBindingRedirects));
             var p3 = Task.Run(() => NugetPackageVersionChcecker.Check(uniqueProjects));
             var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
                 uniqueProjects,
@@ -172,6 +172,8 @@ namespace ISukces.SolutionDoctor.Logic
         public Dictionary<string, Dictionary<string, Nuspec>> LocalNugetRepositiories { get; }
         public HashSet<string>                                ExcludeDll              { get; set; }
         public HashSet<string>                                RemoveBindingRedirect   { get; set; }
+        public Dictionary<string, string>                     ForceBindingRedirects   { get; set; }
+
         private static readonly StringComparer c;
     }
 

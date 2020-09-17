@@ -15,6 +15,7 @@ namespace ISukces.SolutionDoctor.Logic
         {
             ScanDirectories       = new List<string>();
             RemoveBindingRedirect = new HashSet<string>();
+            ForceBindingRedirects = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             ExcludeDll            = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             ExcludeSolutions      = new List<string>();
             ExcludeDirectories    = new List<string>();
@@ -37,6 +38,7 @@ namespace ISukces.SolutionDoctor.Logic
                 optionName = optionName?.Trim().ToLowerInvariant();
                 if (!string.IsNullOrEmpty(optionName))
                 {
+                    string[] tmp;
                     switch (optionName)
                     {
                         case "runExternalFix":
@@ -57,7 +59,7 @@ namespace ISukces.SolutionDoctor.Logic
                             result.ExcludeDirectories.Add(item);
                             break;
                         case "package":
-                            var tmp = item.Split('=');
+                            tmp = item.Split('=');
                             if (tmp.Length != 2)
                                 throw new Exception("-package option need parameter: {package id}={version}");
                             result.PackagesVersion[tmp[0].Trim()] = NugetVersion.Parse(tmp[1]);
@@ -71,6 +73,12 @@ namespace ISukces.SolutionDoctor.Logic
 
                         case "nowarn":
                             AddRemove(result.NoWarn, item);
+                            break;
+                        case "forceredirect":
+                            tmp = item.Split('=');
+                            if (tmp.Length != 2)
+                                throw new Exception("-forceRedirects option need parameter: {package id}={version}");
+                            result.ForceBindingRedirects[tmp[0].Trim()] = tmp[1];
                             break;
                         case "warningsaserrors":
                             AddRemove(result.WarningsAsErrors, item);
@@ -191,6 +199,21 @@ namespace ISukces.SolutionDoctor.Logic
                 string.Equals(optionName, "cfg", StringComparison.CurrentCultureIgnoreCase);
         }
 
+        public bool IsSkipped(string rule, FileName projectLocation)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            if (SkippedRules is null)
+                return false;
+
+            return SkippedRules.Any(a =>
+            {
+                var fn = Path.Combine(currentDirectory, a.Project);
+                var fi = new FileInfo(fn);
+                return a.Rule == rule &&
+                       string.Equals(fi.FullName, projectLocation.FullName, StringComparison.OrdinalIgnoreCase);
+            });
+        }
+
         public void Normalize()
         {
             ScanDirectories    = NormalizeList(ScanDirectories);
@@ -246,6 +269,8 @@ namespace ISukces.SolutionDoctor.Logic
                 NoWarn[i.Key] = i.Value;
             foreach (var i in other.WarningsAsErrors)
                 WarningsAsErrors[i.Key] = i.Value;
+            foreach (var i in other.ForceBindingRedirects)
+                ForceBindingRedirects[i.Key] = i.Value;
 
             if (other.SolutionOrders != null)
             {
@@ -288,6 +313,8 @@ namespace ISukces.SolutionDoctor.Logic
             _options[optionName] = value;
         }
 
+        public Dictionary<string, string> ForceBindingRedirects { get;  }
+
         public HashSet<string> ExcludeDll { get; }
 
         public HashSet<string> RemoveBindingRedirect { get; }
@@ -303,8 +330,8 @@ namespace ISukces.SolutionDoctor.Logic
         public List<string> ExcludeSolutions { get; private set; }
 
         public List<string> SolutionOrders { get; set; }
-        
-        public List<SkipRule> SkippedRules { get; set; } 
+
+        public List<SkipRule> SkippedRules { get; set; }
 
 
         public bool ShowOnlyBigProblems
@@ -359,20 +386,5 @@ namespace ISukces.SolutionDoctor.Logic
         public Dictionary<string, NugetVersion> PackagesVersion { get; }
 
         private readonly Dictionary<string, string> _options;
-
-        public bool IsSkipped(string rule, FileName projectLocation)
-        {
-            var currentDirectory = Directory.GetCurrentDirectory();
-            if (SkippedRules is null)
-                return false;
-
-            return SkippedRules.Any(a =>
-            {
-                var fn = Path.Combine(currentDirectory, a.Project);
-                var fi = new  FileInfo(fn);
-                return a.Rule == rule &&
-                       string.Equals(fi.FullName, projectLocation.FullName, StringComparison.OrdinalIgnoreCase);
-            });
-        }
     }
 }

@@ -112,7 +112,7 @@
     <Compile Include="Problems\AddNugetToSolutionProblem.cs" />
     <Compile Include="Problems\AssemblyRedirectionInvalidPackageId.cs" />
     <Compile Include="Problems\IConsiderUpdatePackage.cs" />
-    <Compile Include="Problems\NotNecessaryBindingRedirectProblem.cs" />
+    <Compile Include="Problems\NotNecessaryOrForceVersionBindingRedirectProblem.cs" />
     <Compile Include="Problems\NugetRepositoryDependencyProblem.cs" />
     <Compile Include="Checkers\ReferencesWithoutNugetsChecker.cs" />
     <Compile Include="CommandLineOptions.cs" />

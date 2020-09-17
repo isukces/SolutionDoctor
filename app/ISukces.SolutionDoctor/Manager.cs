@@ -20,6 +20,7 @@ internal static class Manager
             () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options));
         doctor.ExcludeDll            = options.ExcludeDll;
         doctor.RemoveBindingRedirect = options.RemoveBindingRedirect;
+        doctor.ForceBindingRedirects = options.ForceBindingRedirects;
         var problems = doctor.CheckAll(options).ToList();
         if (problems.Count == 0)
         {

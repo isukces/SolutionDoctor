@@ -45,7 +45,7 @@ namespace ISukces.SolutionDoctor
                 {
                     args = new[]
                     {
-                        "-runExternalFix", "-NoWarn", "1591,-1573,618", "-WarningsAsErrors",
+                        "-runExternalFix", "-NoWarn", "1591,1573,618", "-WarningsAsErrors",
                         "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734", "-cfg",
                         "SolutionDoctor.json"
                     };

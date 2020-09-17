@@ -3,16 +3,23 @@ using isukces.code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
-    public class NotNecessaryBindingRedirectProblem : Problem
+    public class NotNecessaryOrForceVersionBindingRedirectProblem : Problem
     {
         public override void Describe(Action<RichString> writeLine)
         {
-            writeLine($"not necessary redirection to {Redirect.Name} ver {Redirect.NewVersion}");
+            if (Version != null)
+                writeLine($"force redirection {Redirect.Name} ver {Redirect.NewVersion} -> {Version}");
+            else
+                writeLine($"not necessary redirection to {Redirect.Name} ver {Redirect.NewVersion}");
         }
 
         public override ProblemFix GetFix()
         {
-            var txt = $"remove redirection to {Redirect.Name} ver {Redirect.NewVersion}";
+            string txt;
+            if (Version != null)
+                txt = $"change redirection to {Redirect.Name} ver {Version}";
+            else
+                txt = $"remove redirection to {Redirect.Name} ver {Redirect.NewVersion}";
             return new ProblemFix(txt, FixMethod);
         }
 
@@ -33,10 +40,13 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             var xml = new AppConfig(fn);
             if (!xml.Exists)
                 throw new Exception(string.Format("Config file {0} doesn't exist", fn.FullName));
-            var node = xml.FindByAssemblyIdentity(Redirect.Name);
+            AssemblyBinding node = xml.FindByAssemblyIdentity(Redirect.Name);
             if (node == null)
                 throw new Exception(string.Format("Redirection for '{0}' not found", Redirect.Name));
-            node.XmlElement.Remove();
+            if (Version != null)
+                node.SetRedirection(this.Version.ToString());
+            else
+                node.XmlElement.Remove();
             xml.Save();
         }
 
@@ -46,5 +56,6 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         }
 
         public AssemblyBinding Redirect { get; set; }
+        public NugetVersion    Version  { get; set; }
     }
 }

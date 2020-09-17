@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISukces.SolutionDoctor.Wpf"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISukces.SolutionDoctor.Test", "app\ISukces.SolutionDoctor.Test\ISukces.SolutionDoctor.Test.csproj", "{25128287-8D19-4D79-80A4-02F4D2C0BF02}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NOTATKI", "NOTATKI\NOTATKI.csproj", "{707A4965-F4F5-4F16-8D41-81E8E2C540D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{25128287-8D19-4D79-80A4-02F4D2C0BF02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25128287-8D19-4D79-80A4-02F4D2C0BF02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25128287-8D19-4D79-80A4-02F4D2C0BF02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{707A4965-F4F5-4F16-8D41-81E8E2C540D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{707A4965-F4F5-4F16-8D41-81E8E2C540D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{707A4965-F4F5-4F16-8D41-81E8E2C540D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{707A4965-F4F5-4F16-8D41-81E8E2C540D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
