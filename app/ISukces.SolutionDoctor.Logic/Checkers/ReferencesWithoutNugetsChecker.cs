@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using isukces.code.vssolutions;
+using iSukces.Code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 using JetBrains.Annotations;
 using Newtonsoft.Json;

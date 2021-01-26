@@ -1,6 +1,5 @@
 ﻿using System;
-using EnvDTE;
-using isukces.code.vssolutions;
+using iSukces.Code.vssolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {

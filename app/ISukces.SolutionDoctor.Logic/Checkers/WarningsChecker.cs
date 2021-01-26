@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using isukces.code.vssolutions;
+using iSukces.Code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers

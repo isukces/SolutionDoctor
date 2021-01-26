@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
-using isukces.code.vssolutions;
-using ISukces.SolutionDoctor.Logic;
+using iSukces.Code.vssolutions;
 using Xunit;
 
 namespace ISukces.SolutionDoctor.Test

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using isukces.code.vssolutions;
-
+using iSukces.Code.vssolutions;
 using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.Problems

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ISukces.SolutionDoctor.Logic;
+﻿using ISukces.SolutionDoctor.Logic;
 using Xunit;
 
 namespace ISukces.SolutionDoctor.Test

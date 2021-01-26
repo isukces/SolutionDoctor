@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using isukces.code.vssolutions;
+using iSukces.Code.vssolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 using JetBrains.Annotations;
 
