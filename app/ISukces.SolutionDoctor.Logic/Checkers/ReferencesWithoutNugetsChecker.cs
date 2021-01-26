@@ -172,6 +172,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 yield break;
             foreach (var dep in projectReferences)
             {
+                var hitedDllNotFound =  !dep.HintPath.Exists;
                 var nuspec = FindNuspecByFile(dep.HintPath);
 
                 if (nuspec == null)
@@ -184,7 +185,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                         {
                             ProjectFilename = project.Location,
                             Dependency      = dep,
-                            SuggestedNugets = list
+                            SuggestedNugets = list,
+                            ExtraInfo = hitedDllNotFound ? $"File {dep.HintPath.FullName} doesn't exists" :""
                         };
                     continue;
                 }

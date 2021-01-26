@@ -7,10 +7,16 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class AddNugetToSolutionProblem : Problem
     {
+        public AddNugetToSolutionProblem()
+        {
+        }
+
         public override void Describe(Action<RichString> writeLine)
         {
             var l = SuggestedNugets.OrderBy(a => a).Last();
             writeLine($"projects references {Dependency.Name} that is in some nuspec");
+            if (!string.IsNullOrEmpty(ExtraInfo))
+                writeLine(ExtraInfo);
             //writeLine("   Add nuspec, i.e. " + l.FullId);
             //var name = ProjectFilename.GetShortNameWithoutExtension();
             // writeLine($"   Install-Package {l.Id} -Version {l.PackageVersion} -ProjectName {name}");
@@ -41,5 +47,6 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         public ProjectReference   Dependency      { get; set; }
         public HashSet<PackageId> SuggestedNugets { get; set; }
+        public string             ExtraInfo       { get; set; }
     }
 }

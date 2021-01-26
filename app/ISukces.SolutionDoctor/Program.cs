@@ -38,7 +38,7 @@ namespace ISukces.SolutionDoctor
                         "-cfg",
                         "app\\solutionDoctor.json"
                     };
-                    Directory.SetCurrentDirectory(@"C:\programs\isukces\PipelineDesigner");
+                    Directory.SetCurrentDirectory(@"C:\programs\ALPEX\PipelineDesigner");
                 }
 
                 if (args[0] == "ct")
