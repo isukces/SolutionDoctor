@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISukces.SolutionDoctor.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NOTATKI", "NOTATKI\NOTATKI.csproj", "{707A4965-F4F5-4F16-8D41-81E8E2C540D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "isukces.code.vssolutions", "..\dotnetLib\isukces.code\isukces.code.vssolutions\isukces.code.vssolutions.csproj", "{7FBFA7E8-B790-4327-87E1-3F9DA0870054}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{707A4965-F4F5-4F16-8D41-81E8E2C540D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{707A4965-F4F5-4F16-8D41-81E8E2C540D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{707A4965-F4F5-4F16-8D41-81E8E2C540D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FBFA7E8-B790-4327-87E1-3F9DA0870054}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FBFA7E8-B790-4327-87E1-3F9DA0870054}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FBFA7E8-B790-4327-87E1-3F9DA0870054}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FBFA7E8-B790-4327-87E1-3F9DA0870054}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

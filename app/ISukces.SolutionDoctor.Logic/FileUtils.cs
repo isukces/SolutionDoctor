@@ -1,5 +1,5 @@
 using System.Xml.Linq;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 
 
 namespace ISukces.SolutionDoctor.Logic

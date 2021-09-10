@@ -32,10 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="iSukces.Code.vssolutions, Version=1.0.21009.13, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\iSukces.Code.VsSolutions.1.0.21009.13\lib\net451\iSukces.Code.vssolutions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+
     <Reference Include="JetBrains.Annotations, Version=2020.3.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
       <HintPath>..\..\packages\JetBrains.Annotations.2020.3.0\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
@@ -67,6 +64,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\dotnetLib\isukces.code\isukces.code.vssolutions\isukces.code.vssolutions.csproj">
+      <Project>{7fbfa7e8-b790-4327-87e1-3f9da0870054}</Project>
+      <Name>isukces.code.vssolutions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ISukces.SolutionDoctor.Logic\ISukces.SolutionDoctor.Logic.csproj">
       <Project>{C554BFD4-5F6C-4974-858D-EB8EC5DF5652}</Project>
       <Name>ISukces.SolutionDoctor.Logic</Name>

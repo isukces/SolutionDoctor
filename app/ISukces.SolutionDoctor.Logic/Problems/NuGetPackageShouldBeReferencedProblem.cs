@@ -1,10 +1,14 @@
 using System;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class NuGetPackageShouldBeReferencedProblem : Problem
     {
+        public NuGetPackageShouldBeReferencedProblem()
+        {
+        }
+
         public override void Describe(Action<RichString> writeLine)
         {
             var c = new MessageColorer()

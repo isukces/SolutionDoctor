@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 using Xunit;
 
 namespace ISukces.SolutionDoctor.Test
@@ -28,9 +28,9 @@ namespace ISukces.SolutionDoctor.Test
         [Fact]
         public static void Grouping()
         {
-            var fn1 = new FileName(new FileInfo("c:\\command.com"));
-            var fn2 = new FileName(new FileInfo("C:\\command.com"));
-            var array = new[] { fn1, fn2 };
+            var fn1      = new FileName(new FileInfo("c:\\command.com"));
+            var fn2      = new FileName(new FileInfo("C:\\command.com"));
+            var array    = new[] { fn1, fn2 };
             var distinct = array.Distinct().ToArray();
 #if PLATFORM_UNIX
             Assert.Equal(2, distinct.Length);

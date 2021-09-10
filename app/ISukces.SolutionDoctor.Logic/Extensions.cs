@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 
 
 namespace ISukces.SolutionDoctor.Logic

@@ -6,10 +6,11 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 using ISukces.SolutionDoctor.Logic.Checkers;
 using ISukces.SolutionDoctor.Logic.Checkers.Xaml;
 using ISukces.SolutionDoctor.Logic.Problems;
+using Thread = System.Threading.Thread;
 
 namespace ISukces.SolutionDoctor.Logic
 {

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {

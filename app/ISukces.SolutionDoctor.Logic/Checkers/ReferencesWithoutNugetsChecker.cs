@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -192,11 +192,11 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 }
 
                 var candidates = project.NugetPackages
-                    .Where(a => a.Id == nuspec.Id)
+                    .Where(a => string.Equals(a.Id, nuspec.Id, StringComparison.OrdinalIgnoreCase))
                     .ToArray();
 
                 var nugetPackage = candidates
-                    .FirstOrDefault(a => a.Version == nuspec.PackageVersion);
+                    .FirstOrDefault(a => a.Version.NormalizedVersion == nuspec.PackageVersion.NormalizedVersion);
                 if (nugetPackage != null) continue;
                 yield return new NuGetPackageShouldBeReferencedProblem
                 {
@@ -221,7 +221,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 throw new ArgumentNullException(nameof(file));
             var hintToLower = file.FullName.ToLower();
             var query = from nuspec in _nuspecs
-                where hintToLower.StartsWith(nuspec.Item1)
+                where hintToLower.StartsWith(nuspec.Item1, StringComparison.OrdinalIgnoreCase)
                 select nuspec.Item2;
             var a = query.FirstOrDefault();
             if (a != null)

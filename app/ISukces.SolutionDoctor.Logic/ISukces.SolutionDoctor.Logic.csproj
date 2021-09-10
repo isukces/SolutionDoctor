@@ -52,15 +52,16 @@
       <HintPath>..\..\packages\EnvDTE90a.16.7.30328.74\lib\net45\EnvDTE90a.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="iSukces.Code.vssolutions, Version=1.0.21009.13, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\packages\iSukces.Code.VsSolutions.1.0.21009.13\lib\net451\iSukces.Code.vssolutions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+
     <Reference Include="isukces.json, Version=1.0.18337.18, Culture=neutral, PublicKeyToken=a96e3d197f74873c, processorArchitecture=MSIL">
       <HintPath>..\..\packages\iSukces.Json.1.0.18337.18\lib\net45\isukces.json.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=2020.3.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\..\packages\JetBrains.Annotations.2020.3.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.XmlTransform, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\..\packages\Microsoft.Web.Xdt.2.1.1\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -106,6 +107,7 @@
     <Compile Include="Checkers\Xaml\XamlNotInPageNodeProblem.cs" />
     <Compile Include="Checkers\Xaml\XamlProblem.cs" />
     <Compile Include="FileUtils.cs" />
+    <Compile Include="HardCoded.cs" />
     <Compile Include="IDoctorConfig.cs" />
     <Compile Include="LogicDisposer.cs" />
     <Compile Include="MessageColorer.cs" />
@@ -140,6 +142,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\dotnetLib\isukces.code\isukces.code.vssolutions\isukces.code.vssolutions.csproj">
+      <Project>{7fbfa7e8-b790-4327-87e1-3f9da0870054}</Project>
+      <Name>isukces.code.vssolutions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.VisualStudio.SDK.EmbedInteropTypes.15.0.36\build\Microsoft.VisualStudio.SDK.EmbedInteropTypes.targets" Condition="Exists('..\..\packages\Microsoft.VisualStudio.SDK.EmbedInteropTypes.15.0.36\build\Microsoft.VisualStudio.SDK.EmbedInteropTypes.targets')" />

@@ -1,5 +1,5 @@
 ﻿using System;
-using iSukces.Code.vssolutions;
+using iSukces.Code.VsSolutions;
 using Xunit;
 
 namespace ISukces.SolutionDoctor.Test
