@@ -198,13 +198,18 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 var nugetPackage = candidates
                     .FirstOrDefault(a => a.Version.NormalizedVersion == nuspec.PackageVersion.NormalizedVersion);
                 if (nugetPackage != null) continue;
-                yield return new NuGetPackageShouldBeReferencedProblem
+                var problem = new NuGetPackageShouldBeReferencedProblem
                 {
                     ProjectFilename    = project.Location,
                     PackageToReference = nuspec,
                     ReferencedLibrary  = dep,
                     IsCoreProject      = project.Kind == VsProjectKind.Core
                 };
+                if (candidates.Any())
+                {
+                    problem.VersionProblem = "contains " + string.Join(",", candidates.Select(a => a.Version)) + " but needs " + nuspec.PackageVersion;
+                }
+                yield return problem;
             }
         }
 

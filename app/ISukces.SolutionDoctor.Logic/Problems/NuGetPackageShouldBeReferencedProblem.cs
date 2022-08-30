@@ -21,6 +21,8 @@ namespace ISukces.SolutionDoctor.Logic.Problems
                 ReferencedLibrary.HintPath.FullName, PackageToReference.FullId);
 
             writeLine(txt);
+            if (!string.IsNullOrWhiteSpace(VersionProblem))
+                writeLine(VersionProblem);
         }
 
         public override ProblemFix GetFix()
@@ -45,5 +47,6 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public Nuspec           PackageToReference { get; set; }
         public ProjectReference ReferencedLibrary  { get; set; }
         public bool             IsCoreProject      { get; set; }
+        public string           VersionProblem     { get; set; }
     }
 }
