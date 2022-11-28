@@ -46,7 +46,7 @@ namespace ISukces.SolutionDoctor.Logic
             }
             catch (PathTooLongException)
             {
-                return new DirectoryInfo[0];
+                return Array.Empty<DirectoryInfo>();
             }
         }
 
@@ -66,7 +66,7 @@ namespace ISukces.SolutionDoctor.Logic
             }
             catch (PathTooLongException)
             {
-                return new FileInfo[0];
+                return Array.Empty<FileInfo>();
             }
         }
 
@@ -75,7 +75,7 @@ namespace ISukces.SolutionDoctor.Logic
         public IEnumerable<FileInfo> Scan(DirectoryInfo directory)
         {
             if (!directory.Exists)
-                return new FileInfo[0];
+                return Array.Empty<FileInfo>();
             var files = directory
                 .GetFiles(_filter)
                 .Where(fileInfo => _accept(fileInfo)).ToList();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using ISukces.SolutionDoctor.Logic;
 
 namespace ISukces.SolutionDoctor
@@ -14,44 +15,7 @@ namespace ISukces.SolutionDoctor
         private static void Main(string[] args)
         {
 #if DEBUG
-            if (args.Length == 1)
-            {
-                if (args[0] == "pd")
-                {
-                    args = new[]
-                    {
-                        ".\\",
-                        // "-runExternalFix",
-                        "-fix",
-                        "-NoWarn",
-                        "1591,-1573,618",
-                        "-WarningsAsErrors",
-                        "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734,-169219",
-                        "-cfg",
-                        "solutionDoctor.json"
-                    };
-                    args = new[]
-                    {
-                        ".\\",
-                        "-saveOptions",
-                        "app\\solutionDoctor.json",
-                        "-cfg",
-                        "app\\solutionDoctor.json"
-                    };
-                    Directory.SetCurrentDirectory(@"C:\programs\ALPEX\PipelineDesigner");
-                }
-
-                if (args[0] == "ct")
-                {
-                    args = new[]
-                    {
-                        "-runExternalFix", "-NoWarn", "1591,1573,618", "-WarningsAsErrors",
-                        "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734", "-cfg",
-                        "SolutionDoctor.json"
-                    };
-                    Directory.SetCurrentDirectory(@"C:\programs\conexx");
-                }
-            }
+            args = DebugConfigs.SetArgs(args);
 
 #endif
             try

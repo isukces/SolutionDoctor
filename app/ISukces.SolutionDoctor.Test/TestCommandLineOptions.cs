@@ -1,4 +1,5 @@
-﻿using ISukces.SolutionDoctor.Logic;
+﻿using System;
+using ISukces.SolutionDoctor.Logic;
 using Xunit;
 
 namespace ISukces.SolutionDoctor.Test
@@ -11,7 +12,7 @@ namespace ISukces.SolutionDoctor.Test
         {
             var q = CommandLineOptions.Parse(null);
             Assert.Null(q);
-            q = CommandLineOptions.Parse(new string[0]);
+            q = CommandLineOptions.Parse(Array.Empty<string>());
             Assert.Null(q);
         }
 

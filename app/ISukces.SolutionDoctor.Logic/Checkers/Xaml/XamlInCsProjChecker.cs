@@ -111,7 +111,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 
         private void CheckProject(SolutionProject project)
         {
-            if (project.Kind != VsProjectKind.Old) return;
+            if (project.Kind != VsProjectKind.Legacy) return;
             if (_options.IsSkipped(nameof(XamlInCsProjChecker), project.Location))
                     return;
             _currentProjectLocation = project.Location;
