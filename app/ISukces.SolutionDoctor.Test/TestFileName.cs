@@ -35,7 +35,7 @@ namespace ISukces.SolutionDoctor.Test
 #if PLATFORM_UNIX
             Assert.Equal(2, distinct.Length);
 #else
-            Assert.Equal(1, distinct.Length);
+            Assert.Single(distinct);
 #endif
         }
 
