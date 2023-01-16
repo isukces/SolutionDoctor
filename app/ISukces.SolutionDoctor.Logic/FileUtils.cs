@@ -1,7 +1,6 @@
 using System.Xml.Linq;
 using iSukces.Code.VsSolutions;
 
-
 namespace ISukces.SolutionDoctor.Logic
 {
     public static class FileUtils
@@ -29,6 +28,5 @@ namespace ISukces.SolutionDoctor.Logic
                 xml.Save(fileName.FullName);
             }
         }
- 
     }
 }

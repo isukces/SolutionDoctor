@@ -1,4 +1,3 @@
-using System;
 using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
@@ -30,8 +29,12 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return ProjectHasNugetPackages;
         }
 
+        #region properties
+
         public FileName[] Solutions { get; set; }
 
         public bool ProjectHasNugetPackages { get; set; }
+
+        #endregion
     }
 }

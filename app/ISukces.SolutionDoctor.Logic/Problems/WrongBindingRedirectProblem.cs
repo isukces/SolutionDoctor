@@ -1,4 +1,3 @@
-using System;
 using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
@@ -11,6 +10,19 @@ namespace ISukces.SolutionDoctor.Logic.Problems
                 DllVersion,
                 Redirect.NewVersion,
                 Package.Id));
+        }
+
+        private void FixMethod()
+        {
+            var fn  = ProjectFilename.GetAppConfigFile();
+            var xml = new AppConfig(fn);
+            if (!xml.Exists)
+                throw new Exception(string.Format("Config file {0} doesn't exist", fn.FullName));
+            var node = xml.FindByAssemblyIdentity(Package.Id);
+            if (node == null)
+                throw new Exception(string.Format("Redirection for '{0}' not found", Package.Id));
+            node.SetRedirection(DllVersion);
+            xml.Save();
         }
 
         public override ProblemFix GetFix()
@@ -27,33 +39,21 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             return null;
         }
-        // Protected Methods 
+        // Protected Methods 
 
         protected override bool GetIsBigProblem()
         {
             return true;
         }
 
-        private void FixMethod()
-        {
-            var fn  = ProjectFilename.GetAppConfigFile();
-            var xml = new AppConfig(fn);
-            if (!xml.Exists)
-                throw new Exception(string.Format("Config file {0} doesn't exist", fn.FullName));
-            var node = xml.FindByAssemblyIdentity(Package.Id);
-            if (node == null)
-                throw new Exception(string.Format("Redirection for '{0}' not found", Package.Id));
-            node.SetRedirection(DllVersion);
-            xml.Save();
-        }
+        #region properties
 
-        public FileName ConfigFile
-        {
-            get { return ProjectFilename.GetPackagesConfigFile(); }
-        }
+        public FileName ConfigFile => ProjectFilename.GetPackagesConfigFile();
 
         public AssemblyBinding Redirect   { get; set; }
         public NugetPackage    Package    { get; set; }
         public string          DllVersion { get; set; }
+
+        #endregion
     }
 }

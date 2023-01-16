@@ -1,22 +1,12 @@
-﻿using System;
-using ISukces.SolutionDoctor.Logic.Problems;
+﻿using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     internal class XamlNotInPageNodeProblem : XamlProblem
     {
-        public XamlNotInPageNodeProblem()
-        {
-        }
-
         public override void Describe(Action<RichString> writeLine)
         {
             writeLine($"File {XamlFile} should be marked as Page");
-        }
-
-        public override FixScript GetFixScript()
-        {
-            return null;
         }
 
 
@@ -32,11 +22,20 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             return $"Set {XamlFile} as page";
         }
 
+        public override FixScript GetFixScript()
+        {
+            return null;
+        }
+
         protected override bool GetIsBigProblem()
         {
             return true;
         }
 
+        #region properties
+
         public string DependendUppon { get; set; }
+
+        #endregion
     }
 }

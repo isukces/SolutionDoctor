@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reactive.Concurrency;
+﻿using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using iSukces.Code.VsSolutions;
 using ISukces.SolutionDoctor.Logic.Checkers;
 using ISukces.SolutionDoctor.Logic.Checkers.Xaml;
 using ISukces.SolutionDoctor.Logic.Problems;
-using Thread = System.Threading.Thread;
 
 namespace ISukces.SolutionDoctor.Logic
 {
@@ -33,7 +26,6 @@ namespace ISukces.SolutionDoctor.Logic
                 new Dictionary<string, Dictionary<string, Nuspec>>(StringComparer.OrdinalIgnoreCase);
         }
 
-        // Private Methods 
 
         private static bool Exlude(FileInfo fileInfo, IReadOnlyList<string> excludeItems,
             IReadOnlyList<string> excludeDirs)
@@ -46,14 +38,13 @@ namespace ISukces.SolutionDoctor.Logic
             return excludeItems.Any(i => n.EndsWith(i));
         }
 
-        // Public Methods 
 
         public IEnumerable<Problem> CheckAll(CommandLineOptions options)
         {
             var groupedProjects = GetGroupedProjects();
             var uniqueProjects  = groupedProjects.Select(a => a.Projects.First().Project).ToList();
             var p1              = Task.Run(() => SolutionsInManyFoldersChecker.Check(groupedProjects));
-            var p2              = Task.Run(() => NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect,ForceBindingRedirects));
+            var p2              = Task.Run(() => NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect, ForceBindingRedirects));
             var p3              = Task.Run(() => NugetPackageVersionChcecker.Check(uniqueProjects));
             var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
                 uniqueProjects,
@@ -63,9 +54,43 @@ namespace ISukces.SolutionDoctor.Logic
             var p6  = Task.Run(() => XamlInCsProjChecker.Check(uniqueProjects, options));
             var p7  = Task.Run(() => WarningsChecker.Check(uniqueProjects, options));
             var p8  = Task.Run(() => LangVersionChecker.Check(uniqueProjects, options));
-            var all = new[] {p1, p2, p3, p4, p5, p6, p7, p8};
+            var all = new[] { p1, p2, p3, p4, p5, p6, p7, p8 };
             Task.WaitAll(all);
             return all.SelectMany(a => a.Result).ToArray();
+        }
+
+
+        private List<ProjectGroup> GetGroupedProjects()
+        {
+            var liqQuery = from solution in Solutions
+                from project in solution.Projects
+                group new ProjectPlusSolution
+                    {
+                        Project  = project,
+                        Solution = solution
+                    }
+                    by project.Location
+                into projectGroup
+                select new ProjectGroup
+                {
+                    Filename = projectGroup.Key,
+                    Projects = projectGroup.ToArray()
+                };
+            var groupedProjects = liqQuery.ToList();
+            return groupedProjects;
+        }
+
+        private void ScanLocalNugets(DirectoryInfo directory)
+        {
+            lock(LocalNugetRepositiories)
+            {
+                directory = new DirectoryInfo(Path.Combine(directory.FullName, "packages"));
+                if (LocalNugetRepositiories.ContainsKey(directory.FullName))
+                    return;
+                var repositories = Nuspec.GetRepositories(directory);
+                LocalNugetRepositiories[directory.FullName] = repositories.ToDictionary(
+                    nuspec => nuspec.FullId, nuspec => nuspec);
+            }
         }
 
         public void ScanSolutions(IReadOnlyList<DirectoryInfo> dirs, IReadOnlyList<string> excludeItems,
@@ -77,8 +102,8 @@ namespace ISukces.SolutionDoctor.Logic
             if (!dirs.Any())
                 return;
             var excludeDirs = cfg.ExcludeDirectories?
-                                  .Select(a => new DirectoryInfo(a).FullName.ToLower() + "\\")
-                                  .ToList() ?? new List<string>();
+                .Select(a => new DirectoryInfo(a).FullName.ToLower() + "\\")
+                .ToList() ?? new List<string>();
             var filesStream = DiscFileScanner.MakeObservable(dirs,
                 "*.sln",
                 i => !Exlude(i, excludeItems, excludeDirs),
@@ -132,41 +157,7 @@ namespace ISukces.SolutionDoctor.Logic
             addSolutionsToListEventSlim.Wait();
         }
 
-
-        // Private Methods 
-
-        private List<ProjectGroup> GetGroupedProjects()
-        {
-            var liqQuery = from solution in Solutions
-                from project in solution.Projects
-                group new ProjectPlusSolution
-                    {
-                        Project  = project,
-                        Solution = solution
-                    }
-                    by project.Location
-                into projectGroup
-                select new ProjectGroup
-                {
-                    Filename = projectGroup.Key,
-                    Projects = projectGroup.ToArray()
-                };
-            var groupedProjects = liqQuery.ToList();
-            return groupedProjects;
-        }
-
-        private void ScanLocalNugets(DirectoryInfo directory)
-        {
-            lock(LocalNugetRepositiories)
-            {
-                directory = new DirectoryInfo(Path.Combine(directory.FullName, "packages"));
-                if (LocalNugetRepositiories.ContainsKey(directory.FullName))
-                    return;
-                var repositories = Nuspec.GetRepositories(directory);
-                LocalNugetRepositiories[directory.FullName] = repositories.ToDictionary(
-                    nuspec => nuspec.FullId, nuspec => nuspec);
-            }
-        }
+        #region properties
 
         public IList<Solution> Solutions { get; }
 
@@ -175,7 +166,13 @@ namespace ISukces.SolutionDoctor.Logic
         public HashSet<string>                                RemoveBindingRedirect   { get; set; }
         public Dictionary<string, string>                     ForceBindingRedirects   { get; set; }
 
+        #endregion
+
+        #region Fields
+
         private static readonly StringComparer c;
+
+        #endregion
     }
 
     public class ProjectGroup
@@ -185,23 +182,23 @@ namespace ISukces.SolutionDoctor.Logic
             return string.Format("project {0} in {1} solution(s)", Filename.Name, Projects.Length);
         }
 
-        #region Properties
+        #region properties
 
         public FileName Filename { get; set; }
 
         public ProjectPlusSolution[] Projects { get; set; }
 
-        #endregion Properties
+        #endregion
     }
 
     public class ProjectPlusSolution
     {
-        #region Properties
+        #region properties
 
         public SolutionProject Project { get; set; }
 
         public Solution Solution { get; set; }
 
-        #endregion Properties
+        #endregion
     }
 }

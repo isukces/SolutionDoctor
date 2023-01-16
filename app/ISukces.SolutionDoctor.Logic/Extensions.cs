@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using iSukces.Code.VsSolutions;
-
 
 namespace ISukces.SolutionDoctor.Logic
 {
@@ -15,6 +11,27 @@ namespace ISukces.SolutionDoctor.Logic
                 throw new ArgumentNullException("file");
             if (!file.Exists)
                 throw new FileNotFoundException(string.Format("File {0} doesn't exist", file.FullName));
+        }
+
+        public static string GetDrive(this string fileName)
+        {
+            var m = fiePathRegex.Match(fileName);
+            if (!m.Success) return null;
+            var q = m.Groups[1].Value;
+            return !string.IsNullOrEmpty(q) ? q.Substring(0, 1) : null;
+        }
+
+
+        public static string GetShortNameWithoutExtension(this FileInfo fi)
+        {
+            var ext  = fi.Extension;
+            var name = fi.Name;
+            return name.Substring(0, name.Length - ext.Length);
+        }
+
+        public static string GetShortNameWithoutExtension(this FileName projectFile)
+        {
+            return new FileInfo(projectFile.FullName).GetShortNameWithoutExtension();
         }
 
         public static IEnumerable<TOut> GetUnique<TOut, TIn>(this IEnumerable<TIn> src, Func<TIn, string> getKey,
@@ -31,34 +48,12 @@ namespace ISukces.SolutionDoctor.Logic
             }
         }
 
-        public static void WriteFormat(this Action<string> writeLine, string format, params object[] items)
-        {
-            writeLine(string.Format(format, items));
-        }
-
-
-        public static string GetShortNameWithoutExtension(this FileInfo fi)
-        {
-            var ext  = fi.Extension;
-            var name = fi.Name;
-            return name.Substring(0, name.Length - ext.Length);
-        }
-        public static string GetShortNameWithoutExtension(this FileName projectFile)
-        {
-            return  new FileInfo(projectFile.FullName).GetShortNameWithoutExtension();
-        }
-        // Private Methods 
-
-        
-        static HashSet<char> c= new HashSet<char>(Path.GetInvalidFileNameChars());
-        private static Regex fiePathRegex = new Regex(@"^(\w:)?(.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
 
         public static string Quote(this string text)
         {
             return "\"" + text + "\"";
         }
-        
+
         public static string QuoteFilename(this string fileName)
         {
             var m = fiePathRegex.Match(fileName);
@@ -76,12 +71,16 @@ namespace ISukces.SolutionDoctor.Logic
             return fileName;
         }
 
-        public static string GetDrive(this string fileName)
+        public static void WriteFormat(this Action<string> writeLine, string format, params object[] items)
         {
-            var m = fiePathRegex.Match(fileName);
-            if (!m.Success) return null;
-            var q = m.Groups[1].Value;
-            return !string.IsNullOrEmpty(q) ? q.Substring(0, 1) : null;
+            writeLine(string.Format(format, items));
         }
+
+        #region Fields
+
+        static readonly HashSet<char> c = new HashSet<char>(Path.GetInvalidFileNameChars());
+        private static readonly Regex fiePathRegex = new Regex(@"^(\w:)?(.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        #endregion
     }
 }

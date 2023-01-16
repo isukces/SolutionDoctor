@@ -8,9 +8,9 @@ namespace ISukces.SolutionDoctor
 {
     internal class Program
     {
-        #region Static Methods
+        #region Static Methods
 
-        // Private Methods 
+         
 
         private static void Main(string[] args)
         {
@@ -52,8 +52,7 @@ namespace ISukces.SolutionDoctor
                     }
                 }
 
-                var task = Manager.ProcessX(options.ScanDirectories, options);
-                task.Wait();
+                Manager.ProcessX(options.ScanDirectories, options);
             }
             catch (Exception e)
             {
@@ -95,6 +94,6 @@ namespace ISukces.SolutionDoctor
             Console.WriteLine("    -cfg {file name}         Load options from file");
         }
 
-        #endregion Static Methods
+        #endregion Static Methods
     }
 }

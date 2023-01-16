@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ISukces.SolutionDoctor.Logic.Problems
+﻿namespace ISukces.SolutionDoctor.Logic.Problems
 {
     public class ProblemFix
     {
@@ -15,7 +13,16 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             _fixAction();
         }
 
+        #region properties
+
         public string Description { get; }
+
+        #endregion
+
+        #region Fields
+
         private readonly Action _fixAction;
+
+        #endregion
     }
 }

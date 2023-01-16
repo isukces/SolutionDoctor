@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using iSukces.Code.VsSolutions;
+﻿using iSukces.Code.VsSolutions;
 using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
@@ -17,12 +14,13 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         protected abstract bool GetIsBigProblem();
 
-        public bool IsBigProblem
-        {
-            get { return GetIsBigProblem(); }
-        }
+        #region properties
+
+        public bool IsBigProblem => GetIsBigProblem();
 
         public FileName ProjectFilename { get; set; }
+
+        #endregion
     }
 
     public class FixScript
@@ -38,28 +36,31 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             Commands.AddRange(commands);
         }
 
-        public static FixScript FullFxNugetInstall(FileName project, INuspec nuspec, string verb)
-        {
-            var c = new MessageColorer().WithProjectAt(1).WithPackageAt(2);
-            var commandToRun = RichString.RichFormat(c.Color, 
-                "nuget {0} {1} -id {2}", 
-                verb, project.Name, nuspec.Id);
-            return new FixScript(project.Directory, commandToRun);
-            
-        }
         public static FixScript CoreNugetInstall(FileName project, INuspec nuspec, string verb)
         {
             var c = new MessageColorer().WithProjectAt(1).WithPackageAt(2).WithVersionAt(3);
             var commandToRun = RichString.RichFormat(c.Color,
-                "dotnet {0} {1} package -v {2} {3}", 
+                "dotnet {0} {1} package -v {2} {3}",
                 verb, project.Name,
                 nuspec.PackageVersion, nuspec.Id);
             return new FixScript(project.Directory, commandToRun);
-
         }
 
-        public DirectoryInfo           WorkingDirectory { get; set; }
+        public static FixScript FullFxNugetInstall(FileName project, INuspec nuspec, string verb)
+        {
+            var c = new MessageColorer().WithProjectAt(1).WithPackageAt(2);
+            var commandToRun = RichString.RichFormat(c.Color,
+                "nuget {0} {1} -id {2}",
+                verb, project.Name, nuspec.Id);
+            return new FixScript(project.Directory, commandToRun);
+        }
+
+        #region properties
+
+        public DirectoryInfo    WorkingDirectory { get; set; }
         public List<RichString> Commands         { get; } = new List<RichString>();
+
+        #endregion
     }
 
     public enum ScriptKind

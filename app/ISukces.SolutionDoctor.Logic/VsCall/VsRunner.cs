@@ -1,6 +1,4 @@
-using System;
 using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
@@ -25,6 +23,67 @@ namespace ISukces.SolutionDoctor.Logic.VsCall
             }
 
             return lockFile;
+        }
+
+        private void CleanUp()
+        {
+            if (DTE != null)
+            {
+                if (DTE.Solution != null) DTE.Solution.Close(true);
+
+                DTE.Quit();
+            }
+        }
+
+        private void CommandEvents_AfterExecute(string guid, int id, object customIn, object customOut)
+        {
+            PrintDebugLog(string.Format("Command Executed: GUID: {0}; ID: {1}; CustomIn: {2}; CustomOut: {3}", guid, id,
+                customIn, customOut));
+
+            // This means that PMC has loaded and loaded its sources
+            if (guid == GuidsAndIds.GuidNuGetConsoleCmdSet && id == GuidsAndIds.CmdidNuGetSources)
+                TransitionState(ExecutionStates.PROJECT_OPENED, ExecutionStates.NUGET_OPENED);
+            else
+                TransitionState(ExecutionStates.NOT_STARTED, ExecutionStates.VS_OPENED);
+        }
+
+        private void CommandEvents_BeforeExecute(string guid, int id, object customIn, object customOut,
+            ref bool cancelDefault)
+        {
+            PrintDebugLog(string.Format("Command Sent: GUID: {0}; ID: {1}; CustomIn: {2}; CustomOut: {3}", guid, id,
+                customIn, customOut));
+        }
+
+        private DTE GetDTE2()
+        {
+            // Get the ProgID for DTE 14.0.
+            var t = Type.GetTypeFromProgID(
+                "VisualStudio.DTE." + VSVersion, true);
+
+            // Create a new instance of the IDE.
+            var obj = Activator.CreateInstance(t, true);
+
+            // Cast the instance to DTE2 and assign to variable dte.
+            var dte2 = (DTE2)obj;
+
+            // We want to make sure that the devenv is killed when we quit();
+            dte2.UserControl = false;
+            return dte2.DTE;
+        }
+
+        private string GetValue(string key, string defaultValue)
+        {
+            var result                               = Environment.GetEnvironmentVariable(key);
+            if (string.IsNullOrEmpty(result)) result = defaultValue;
+
+            return result;
+        }
+
+        private void PrintDebugLog(string message)
+        {
+            if (Debug)
+                Console.WriteLine("{0}: {1}",
+                    DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.ffff", CultureInfo.InvariantCulture), message);
         }
 
         public void Run()
@@ -96,67 +155,6 @@ namespace ISukces.SolutionDoctor.Logic.VsCall
             MessageFilter.Revoke();
         }
 
-        private void CleanUp()
-        {
-            if (DTE != null)
-            {
-                if (DTE.Solution != null) DTE.Solution.Close(true);
-
-                DTE.Quit();
-            }
-        }
-
-        private void CommandEvents_AfterExecute(string guid, int id, object customIn, object customOut)
-        {
-            PrintDebugLog(string.Format("Command Executed: GUID: {0}; ID: {1}; CustomIn: {2}; CustomOut: {3}", guid, id,
-                customIn, customOut));
-
-            // This means that PMC has loaded and loaded its sources
-            if (guid == GuidsAndIds.GuidNuGetConsoleCmdSet && id == GuidsAndIds.CmdidNuGetSources)
-                TransitionState(ExecutionStates.PROJECT_OPENED, ExecutionStates.NUGET_OPENED);
-            else
-                TransitionState(ExecutionStates.NOT_STARTED, ExecutionStates.VS_OPENED);
-        }
-
-        private void CommandEvents_BeforeExecute(string guid, int id, object customIn, object customOut,
-            ref bool cancelDefault)
-        {
-            PrintDebugLog(string.Format("Command Sent: GUID: {0}; ID: {1}; CustomIn: {2}; CustomOut: {3}", guid, id,
-                customIn, customOut));
-        }
-
-        private DTE GetDTE2()
-        {
-            // Get the ProgID for DTE 14.0.
-            var t = Type.GetTypeFromProgID(
-                "VisualStudio.DTE." + VSVersion, true);
-
-            // Create a new instance of the IDE.
-            var obj = Activator.CreateInstance(t, true);
-
-            // Cast the instance to DTE2 and assign to variable dte.
-            var dte2 = (DTE2)obj;
-
-            // We want to make sure that the devenv is killed when we quit();
-            dte2.UserControl = false;
-            return dte2.DTE;
-        }
-
-        private string GetValue(string key, string defaultValue)
-        {
-            var result                               = Environment.GetEnvironmentVariable(key);
-            if (string.IsNullOrEmpty(result)) result = defaultValue;
-
-            return result;
-        }
-
-        private void PrintDebugLog(string message)
-        {
-            if (Debug)
-                Console.WriteLine("{0}: {1}",
-                    DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.ffff", CultureInfo.InvariantCulture), message);
-        }
-
         /// <summary>
         ///     Failures can occure when accessing the newly created DTE2 instance.
         ///     This is due to COM Interop errors in Windows.
@@ -213,6 +211,8 @@ namespace ISukces.SolutionDoctor.Logic.VsCall
             }
         }
 
+        #region properties
+
         private string VSVersion { get; set; }
 
         private string ProjectOrSolutionPath { get; set; }
@@ -224,19 +224,28 @@ namespace ISukces.SolutionDoctor.Logic.VsCall
         private DTE DTE { get; set; }
 
         private string NuGetOutputFile { get; set; }
+
+        #endregion
+
+        #region Fields
+
+        private const string CmdNameForPMC = "View.PackageManagerConsole";
         private bool retry = true;
         private string state = ExecutionStates.NOT_STARTED;
         private readonly object stateMutex = new object();
 
-
-        private const string CmdNameForPMC = "View.PackageManagerConsole";
+        #endregion
 
         private class ExecutionStates
         {
+            #region Fields
+
             public static readonly string NOT_STARTED = "NOT_STARTED";
             public static readonly string VS_OPENED = "VS_OPENED";
             public static readonly string PROJECT_OPENED = "PROJECT_OPENED";
             public static readonly string NUGET_OPENED = "NUGET_OPENED";
+
+            #endregion
         }
     }
 }

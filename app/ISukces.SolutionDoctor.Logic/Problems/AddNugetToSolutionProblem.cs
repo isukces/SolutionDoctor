@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using iSukces.Code.VsSolutions;
+﻿using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class AddNugetToSolutionProblem : Problem
     {
-        public AddNugetToSolutionProblem()
-        {
-        }
-
         public override void Describe(Action<RichString> writeLine)
         {
             var l = SuggestedNugets.OrderBy(a => a).Last();
@@ -30,7 +23,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public override FixScript GetFixScript()
         {
             var nuget = SuggestedNugets.OrderBy(a => a).Last();
-            var p = new SolutionProject {Location = ProjectFilename};
+            var p     = new SolutionProject { Location = ProjectFilename };
             if (p.Kind == VsProjectKind.Core)
             {
                 var tmp = FixScript.CoreNugetInstall(ProjectFilename, nuget, "add");
@@ -45,8 +38,12 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return true;
         }
 
+        #region properties
+
         public ProjectReference   Dependency      { get; set; }
         public HashSet<PackageId> SuggestedNugets { get; set; }
         public string             ExtraInfo       { get; set; }
+
+        #endregion
     }
 }

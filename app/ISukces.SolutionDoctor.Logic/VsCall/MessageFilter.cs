@@ -1,18 +1,17 @@
-// taken from https://github.com/benwtrent/PMCCommand 
-
-
-
-using System;
 using System.Runtime.InteropServices;
 
 namespace ISukces.SolutionDoctor.Logic.VsCall
 {
     /// <summary>
-    /// Copied wholesale from: https://msdn.microsoft.com/en-us/library/ms228772.aspx
+    ///     Copied wholesale from: https://msdn.microsoft.com/en-us/library/ms228772.aspx
     /// </summary>
     public class MessageFilter : IOleMessageFilter
     {
-        private static bool Registered { get; set; }
+        // Implement the IOleMessageFilter interface.
+        [DllImport("Ole32.dll")]
+        private static extern int CoRegisterMessageFilter(
+            IOleMessageFilter newFilter,
+            out IOleMessageFilter oldFilter);
 
         // Class containing the IOleMessageFilter
         // thread error-handling functions.
@@ -42,17 +41,26 @@ namespace ISukces.SolutionDoctor.Logic.VsCall
         // Handle incoming thread requests.
         int IOleMessageFilter.HandleInComingCall(
             int dwCallType,
-            System.IntPtr hTaskCaller,
+            IntPtr hTaskCaller,
             int dwTickCount,
-            System.IntPtr lpInterfaceInfo)
+            IntPtr lpInterfaceInfo)
         {
             // Return the flag SERVERCALL_ISHANDLED.
             return 0;
         }
 
+        int IOleMessageFilter.MessagePending(
+            IntPtr hTaskCallee,
+            int dwTickCount,
+            int dwPendingType)
+        {
+            // Return the flag PENDINGMSG_WAITDEFPROCESS.
+            return 2;
+        }
+
         // Thread call was rejected, so try again.
         int IOleMessageFilter.RetryRejectedCall(
-            System.IntPtr hTaskCallee,
+            IntPtr hTaskCallee,
             int dwTickCount,
             int dwRejectType)
         {
@@ -69,19 +77,10 @@ namespace ISukces.SolutionDoctor.Logic.VsCall
             return -1;
         }
 
-        int IOleMessageFilter.MessagePending(
-            System.IntPtr hTaskCallee,
-            int dwTickCount,
-            int dwPendingType)
-        {
-            // Return the flag PENDINGMSG_WAITDEFPROCESS.
-            return 2;
-        }
+        #region properties
 
-        // Implement the IOleMessageFilter interface.
-        [DllImport("Ole32.dll")]
-        private static extern int CoRegisterMessageFilter(
-            IOleMessageFilter newFilter,
-            out IOleMessageFilter oldFilter);
+        private static bool Registered { get; set; }
+
+        #endregion
     }
 }

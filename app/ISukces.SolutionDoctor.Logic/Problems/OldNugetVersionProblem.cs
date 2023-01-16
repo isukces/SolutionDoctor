@@ -1,4 +1,3 @@
-using System;
 using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
@@ -31,10 +30,10 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         public override FixScript GetFixScript()
         {
-            var p = new SolutionProject {Location = ProjectFilename};
+            var p = new SolutionProject { Location = ProjectFilename };
             if (p.Kind == VsProjectKind.Core)
                 return FixScript.CoreNugetInstall(ProjectFilename, new PackageId(PackageId, NewestVersion, ""), "add");
-            
+
             return FixScript.FullFxNugetInstall(ProjectFilename, new PackageId(PackageId, NewestVersion, ""), "update");
         }
 
@@ -43,8 +42,12 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return true;
         }
 
+        #region properties
+
         public NugetVersion ReferencedVersion { get; set; }
         public NugetVersion NewestVersion     { get; set; }
         public string       PackageId         { get; set; }
+
+        #endregion
     }
 }

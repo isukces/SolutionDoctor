@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
@@ -38,17 +36,19 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             return null;
         }
-
-        public string GetPackageId()
-        {
-            return CheckedPackageId;
-        }
-        // Protected Methods 
+        // Protected Methods 
 
         protected override bool GetIsBigProblem()
         {
             return true;
         }
+
+        public string GetPackageId()
+        {
+            return CheckedPackageId;
+        }
+
+        #region properties
 
         public NugetVersionRange ReferencedPackageAcceptableVersions { get; set; }
 
@@ -57,5 +57,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public string CheckedPackageId { get; set; }
 
         public DirectoryInfo CheckedPackageLocation { get; set; }
+
+        #endregion
     }
 }

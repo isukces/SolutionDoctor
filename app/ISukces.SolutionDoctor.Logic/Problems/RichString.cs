@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -10,7 +7,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
     public struct RichString
     {
         public RichString(string s)
-            : this(new ConsoleControl {Text = s})
+            : this(new ConsoleControl { Text = s })
         {
         }
 
@@ -18,7 +15,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             _items = new[]
             {
-                new ConsoleControl {TextColor = color, Text = x}
+                new ConsoleControl { TextColor = color, Text = x }
             };
         }
 
@@ -26,7 +23,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             _items = items;
         }
-        
+
         public static RichString operator +(RichString a, RichString b)
         {
             if (a.IsEmpty) return b;
@@ -112,15 +109,9 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             };
         }
 
-        public bool IsEmpty
-        {
-            get { return _items is null || _items.Length == 0; }
-        }
+        public bool IsEmpty => _items is null || _items.Length == 0;
 
-        public IReadOnlyList<ConsoleControl> Items
-        {
-            get { return _items; }
-        }
+        public IReadOnlyList<ConsoleControl> Items => _items;
 
         private static readonly Regex r = new Regex(f, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -128,7 +119,8 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         public struct ConsoleControl
         {
-            public ConsoleControl(string text) : this()
+            public ConsoleControl(string text)
+                : this()
             {
                 Text = text;
             }
@@ -164,7 +156,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
             public void ResetColors()
             {
-                Sink.Add(new ConsoleControl {ResetColors = true});
+                Sink.Add(new ConsoleControl { ResetColors = true });
             }
 
             public void SetTextColor(ConsoleColor textColor)
@@ -175,12 +167,16 @@ namespace ISukces.SolutionDoctor.Logic.Problems
                 });
             }
 
+            #region properties
+
             public List<ConsoleControl> Sink                 { get; set; }
             public int                  ParameterIndex       { get; set; }
             public int                  Iteration            { get; set; }
             public object[]             Args                 { get; set; }
             public bool                 Before               { get; set; }
             public bool                 AutoResetColorsAfter { get; set; }
+
+            #endregion
         }
     }
 }

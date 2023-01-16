@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using isukces.code.vssolutions;
 using iSukces.Code.VsSolutions;
@@ -14,6 +10,16 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     internal class NugetPackageAssemblyBindingChecker
     {
+        private static void Can(string path, List<FileInfo> sink)
+        {
+            var di = new DirectoryInfo(path);
+            if (!di.Exists)
+                return;
+            sink.AddRange(di.GetFiles("*.dll"));
+            foreach (var i in di.GetDirectories())
+                Can(i.FullName, sink);
+        }
+
         public static IEnumerable<Problem> Check([NotNull] IList<SolutionProject> projects,
             HashSet<string> removeBindingRedirect, Dictionary<string, string> forceBindingRedirects)
         {
@@ -30,63 +36,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 foreach (var i in forceBindingRedirects)
                     tmp._forceBindingRedirects[i.Key] = NugetVersion.Parse(i.Value);
             return projects.SelectMany(tmp.ScanProject).ToList();
-        }
-
-        public static Result FindPossibleOrNull(FileInfo fileInfo, FrameworkVersion project)
-        {
-            string dirShortName = null;
-            var    d            = fileInfo.Directory;
-            var    list         = new List<string>();
-            while (d != null)
-            {
-                if (d.Name == "lib")
-                {
-                    dirShortName = list.LastOrDefault();
-                }
-                list.Add(d.Name);
-                d = d.Parent;
-            }
-            // var dirShortName = fileInfo.Directory?.Name;
-            if (string.IsNullOrEmpty(dirShortName))
-                return null;
-
-            var nugetVersions = FrameworkVersion.Parse(dirShortName);
-            if (nugetVersions is null || nugetVersions.Any(version => version == null))
-                return null;
-                // throw new NotSupportedException();
-
-            var possible = nugetVersions
-                .Select(q =>
-                {
-                    var tmp = project.CanLoad(q);
-                    if (tmp == NugetLoadCompatibility.None)
-                        return null;
-                    return new PossibleToLoadNuget(q, tmp);
-                })
-                .Where(a=>a != null)
-                .OrderBy(a => a)
-                .ToArray();
-
-            switch (possible.Length)
-            {
-                case 0:
-                    return null;
-                case 1:
-                    return new Result(possible[0], new FileName(fileInfo));
-                default:
-                    return new Result(possible.Last(), new FileName(fileInfo));
-            }
-        }
-
-
-        private static void Can(string path, List<FileInfo> sink)
-        {
-            var di = new DirectoryInfo(path);
-            if (!di.Exists)
-                return;
-            sink.AddRange(di.GetFiles("*.dll"));
-            foreach (var i in di.GetDirectories())
-                Can(i.FullName, sink);
         }
 
         private static Func<FileInfo, bool> ContainsPackagePath(NugetPackage package)
@@ -129,11 +78,59 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             {
                 var values = tmp.Single().Value;
                 if (values.Length == 1)
-                    return new[] {values.Single().File.GetFileInfo()};
-                return new[] {values.Last().File.GetFileInfo()};
+                    return new[] { values.Single().File.GetFileInfo() };
+                return new[] { values.Last().File.GetFileInfo() };
             }
 
             return dlls;
+        }
+
+        public static Result FindPossibleOrNull(FileInfo fileInfo, FrameworkVersion project)
+        {
+            string dirShortName = null;
+            var    d            = fileInfo.Directory;
+            var    list         = new List<string>();
+            while (d != null)
+            {
+                if (d.Name == "lib")
+                {
+                    dirShortName = list.LastOrDefault();
+                }
+
+                list.Add(d.Name);
+                d = d.Parent;
+            }
+
+            // var dirShortName = fileInfo.Directory?.Name;
+            if (string.IsNullOrEmpty(dirShortName))
+                return null;
+
+            var nugetVersions = FrameworkVersion.Parse(dirShortName);
+            if (nugetVersions is null || nugetVersions.Any(version => version == null))
+                return null;
+            // throw new NotSupportedException();
+
+            var possible = nugetVersions
+                .Select(q =>
+                {
+                    var tmp = project.CanLoad(q);
+                    if (tmp == NugetLoadCompatibility.None)
+                        return null;
+                    return new PossibleToLoadNuget(q, tmp);
+                })
+                .Where(a => a != null)
+                .OrderBy(a => a)
+                .ToArray();
+
+            switch (possible.Length)
+            {
+                case 0:
+                    return null;
+                case 1:
+                    return new Result(possible[0], new FileName(fileInfo));
+                default:
+                    return new Result(possible.Last(), new FileName(fileInfo));
+            }
         }
 
         private static DllInfo GetDllInfo(FileInfo file)
@@ -158,9 +155,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     }
                 }*/
 
-                var currentAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
-                var version = currentAssemblyName.Version;
-                var compression = @"packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll";
+                var currentAssemblyName                                              = AssemblyName.GetAssemblyName(file.FullName);
+                var version                                                          = currentAssemblyName.Version;
+                var compression                                                      = @"packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll";
                 if (file.FullName.ToLower().EndsWith(compression.ToLower())) version = Version.Parse("4.2.0.0");
 
                 return new DllInfo(file, version.ToString(), true);
@@ -233,8 +230,9 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
                         return false;
                     }
+
                     bool next = true;
-                    while (next && dlls2.Count>1)
+                    while (next && dlls2.Count > 1)
                     {
                         next = Check();
                     }
@@ -295,8 +293,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             }
         }
 
+        #region Fields
+
         private HashSet<string> _removeBindingRedirect;
         public Dictionary<string, NugetVersion> _forceBindingRedirects;
+
+        #endregion
 
         [ImmutableObject(true)]
         public class Result
@@ -312,9 +314,13 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 return $"Loading={Loading}, File={File}";
             }
 
+            #region properties
+
             public PossibleToLoadNuget Loading { get; }
 
             public FileName File { get; }
+
+            #endregion
         }
 
         public class InstanceProxy : MarshalByRefObject
@@ -349,9 +355,13 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 Exists     = exists;
             }
 
+            #region properties
+
             public FileInfo File       { get; }
             public string   DllVersion { get; }
             public bool     Exists     { get; }
+
+            #endregion
         }
     }
 }

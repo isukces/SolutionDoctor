@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using iSukces.Code.VsSolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 
@@ -47,7 +44,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 if (packageRelation.ReferencedPackageName == null)
                     continue;
                 if (!nugetVersionsForProjects.TryGetValue(packageRelation.ReferencedPackageName,
-                    out var packageReferencedByProject)) continue;
+                        out var packageReferencedByProject)) continue;
                 var result =
                     packageRelation.ReferencedPackageAcceptableVersions.CheckVersion(packageReferencedByProject
                         .Version);
@@ -64,8 +61,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             }
         }
 
+        #region Fields
+
         private Dictionary<string, Dictionary<string, Nuspec>> _localNugetRepositiories;
         private List<SolutionProject> _uniqueProjects;
+
+        #endregion
     }
 
     internal class Data
@@ -76,9 +77,13 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 CheckedPackageLocation);
         }
 
+        #region properties
+
         public string            CheckedPackageId                    { get; set; }
         public string            ReferencedPackageName               { get; set; }
         public NugetVersionRange ReferencedPackageAcceptableVersions { get; set; }
         public DirectoryInfo     CheckedPackageLocation              { get; set; }
+
+        #endregion
     }
 }

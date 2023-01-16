@@ -1,10 +1,7 @@
-using System;
-
 namespace ISukces.SolutionDoctor.Logic
 {
     public class SkipRule : IEquatable<SkipRule>
     {
-        
         public static bool operator ==(SkipRule left, SkipRule right)
         {
             return left.Equals(right);
@@ -32,9 +29,12 @@ namespace ISukces.SolutionDoctor.Logic
                 return ((Project != null ? Project.GetHashCode() : 0) * 397) ^ (Rule != null ? Rule.GetHashCode() : 0);
             }
         }
-        
-        public string Rule { get; set; }
+
+        #region properties
+
+        public string Rule    { get; set; }
         public string Project { get; set; }
-        
+
+        #endregion
     }
 }

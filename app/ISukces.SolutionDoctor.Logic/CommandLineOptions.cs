@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using iSukces.Code.VsSolutions;
+﻿using iSukces.Code.VsSolutions;
 using isukces.json;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -90,7 +86,6 @@ namespace ISukces.SolutionDoctor.Logic
             return x;
         }
 
-        // Public Methods 
 
         public static CommandLineOptions Parse(string[] args)
         {
@@ -199,7 +194,6 @@ namespace ISukces.SolutionDoctor.Logic
                 string.Equals(optionName, "cfg", StringComparison.CurrentCultureIgnoreCase);
         }
 
-        // Private Methods 
 
         private void Append([NotNull] CommandLineOptions other)
         {
@@ -245,7 +239,7 @@ namespace ISukces.SolutionDoctor.Logic
             }
 
             if (!string.IsNullOrEmpty(other.LangVersion))
-                this.LangVersion = other.LangVersion;
+                LangVersion = other.LangVersion;
             // Fix = other.ShowOnlyBigProblems;
         }
 
@@ -307,8 +301,7 @@ namespace ISukces.SolutionDoctor.Logic
         {
             if (IsListOption(optionName))
             {
-                string current;
-                if (_options.TryGetValue(optionName, out current))
+                if (_options.TryGetValue(optionName, out var current))
                     value = current + "|" + value.Trim();
             }
 
@@ -367,8 +360,7 @@ namespace ISukces.SolutionDoctor.Logic
         {
             get
             {
-                string fileName;
-                if (!_options.TryGetValue("saveOptions", out fileName) || fileName == null)
+                if (!_options.TryGetValue("saveOptions", out var fileName) || fileName == null)
                     return null;
                 fileName = fileName.Trim();
                 return string.IsNullOrEmpty(fileName) ? null : fileName;

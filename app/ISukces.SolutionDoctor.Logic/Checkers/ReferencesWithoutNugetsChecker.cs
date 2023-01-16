@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using iSukces.Code.VsSolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 using JetBrains.Annotations;
@@ -11,14 +7,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     internal class ReferencesWithoutNugetsChecker
     {
-        #region Constructors
-
-        #endregion Constructors
-
-        #region Static Methods
-
-        // Public Methods 
-
         public static IEnumerable<Problem> Check(List<SolutionProject> projects,
             IEnumerable<Nuspec> localNugetRepositiories,
             HashSet<string> excludeDll)
@@ -43,7 +31,19 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
             return checker.Check();
         }
-        // Private Methods 
+
+        public static void Flush()
+        {
+            _cache.FlushMe();
+        }
+
+        private static string GetDepDll(ProjectReference dep)
+        {
+            if (dep.HintPath == null)
+                return null;
+            return dep.HintPath.Name;
+        }
+
 
         private static Dictionary<string, HashSet<PackageId>> GetNuspecDllMap(Tuple<string, Nuspec>[] nuspecs)
         {
@@ -65,6 +65,125 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
             return map;
         }
+
+
+        private static HashSet<string> ScanDll(string dirName)
+        {
+            var directoryInfo = new DirectoryInfo(dirName);
+            var result        = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (!directoryInfo.Exists)
+                return result;
+            foreach (var dll in directoryInfo.GetFiles("*.dll").Select(a => a.Name))
+                result.Add(dll);
+            foreach (var dir in directoryInfo.GetDirectories())
+            {
+                var dlls = ScanDll(dir.FullName);
+                foreach (var dll in dlls)
+                    result.Add(dll);
+            }
+
+            return result;
+        }
+
+
+        private IList<Problem> Check()
+        {
+            _map = GetNuspecDllMap(_nuspecs);
+            var a = _projects.SelectMany(CheckProj).ToList();
+            return a;
+        }
+
+        private IEnumerable<Problem> CheckProj(SolutionProject project)
+        {
+            var projectReferences = project.References.Where(a => a.HintPath != null).ToArray();
+            if (!projectReferences.Any())
+                yield break;
+            foreach (var dep in projectReferences)
+            {
+                var hitedDllNotFound = !dep.HintPath.Exists;
+                var nuspec           = FindNuspecByFile(dep.HintPath);
+
+                if (nuspec == null)
+                {
+                    var depName = GetDepDll(dep);
+                    if (_excludeDll.Contains(depName))
+                        continue;
+                    if (_map.TryGetValue(depName, out var list) && list.Any())
+                        yield return new AddNugetToSolutionProblem
+                        {
+                            ProjectFilename = project.Location,
+                            Dependency      = dep,
+                            SuggestedNugets = list,
+                            ExtraInfo       = hitedDllNotFound ? $"File {dep.HintPath.FullName} doesn't exists" : ""
+                        };
+                    continue;
+                }
+
+                var candidates = project.NugetPackages
+                    .Where(a => string.Equals(a.Id, nuspec.Id, StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+
+                var nugetPackage = candidates
+                    .FirstOrDefault(a => a.Version.NormalizedVersion == nuspec.PackageVersion.NormalizedVersion);
+                if (nugetPackage != null) continue;
+                var problem = new NuGetPackageShouldBeReferencedProblem
+                {
+                    ProjectFilename    = project.Location,
+                    PackageToReference = nuspec,
+                    ReferencedLibrary  = dep,
+                    IsCoreProject      = project.Kind == VsProjectKind.Core
+                };
+                if (candidates.Any())
+                {
+                    problem.VersionProblem = "contains " + string.Join(",", candidates.Select(a => a.Version)) + " but needs " + nuspec.PackageVersion;
+                }
+
+                yield return problem;
+            }
+        }
+
+        private Nuspec FindNuspecByFile([NotNull] FileInfo file)
+        {
+            if (file == null)
+                throw new ArgumentNullException(nameof(file));
+            var hintToLower = file.FullName.ToLower();
+            var query = from nuspec in _nuspecs
+                where hintToLower.StartsWith(nuspec.Item1, StringComparison.OrdinalIgnoreCase)
+                select nuspec.Item2;
+            var a = query.FirstOrDefault();
+            if (a != null)
+                return a;
+            var d = file.Directory;
+            for (var i = 0; i < 3; i++)
+            {
+                if (d == null) return null;
+                if (string.Equals(d.Name, "packages", StringComparison.OrdinalIgnoreCase)) return null;
+                try
+                {
+                    var p = d.GetFiles("*.nupkg");
+                    if (p.Any())
+                        return Nuspec.Load(p[0]);
+                }
+                catch
+                {
+                }
+
+                d = d.Parent;
+            }
+
+            return null;
+        }
+
+        #region Fields
+
+        private static readonly Cache _cache = new Cache();
+
+        private Dictionary<string, HashSet<PackageId>> _map;
+        private Tuple<string, Nuspec>[] _nuspecs;
+        private List<SolutionProject> _projects;
+        public HashSet<string> _excludeDll;
+
+        #endregion
 
         private class Cache
         {
@@ -110,157 +229,21 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 }
             }
 
-            private static string CacheFileName
-            {
-                get
-                {
-                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "SolutionDoctor", "nugetDllCache.json");
-                }
-            }
+            #region properties
+
+            private static string CacheFileName => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SolutionDoctor", "nugetDllCache.json");
+
+            #endregion
+
+            #region Fields
 
             private readonly object l = new object();
 
             private Dictionary<string, HashSet<string>> _data;
             private bool _hasNew;
+
+            #endregion
         }
-
-        public static void Flush()
-        {
-            _cache.FlushMe();
-        }
-
-
-        private static readonly Cache _cache = new Cache();
-
-
-        private static HashSet<string> ScanDll(string dirName)
-        {
-            var directoryInfo = new DirectoryInfo(dirName);
-            var result        = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (!directoryInfo.Exists)
-                return result;
-            foreach (var dll in directoryInfo.GetFiles("*.dll").Select(a => a.Name))
-                result.Add(dll);
-            foreach (var dir in directoryInfo.GetDirectories())
-            {
-                var dlls = ScanDll(dir.FullName);
-                foreach (var dll in dlls)
-                    result.Add(dll);
-            }
-
-            return result;
-        }
-
-        #endregion Static Methods
-
-        #region Methods
-
-        // Private Methods 
-
-        private IList<Problem> Check()
-        {
-            _map = GetNuspecDllMap(_nuspecs);
-            var a = _projects.SelectMany(CheckProj).ToList();
-            return a;
-        }
-
-        private IEnumerable<Problem> CheckProj(SolutionProject project)
-        {
-            var projectReferences = project.References.Where(a => a.HintPath != null).ToArray();
-            if (!projectReferences.Any())
-                yield break;
-            foreach (var dep in projectReferences)
-            {
-                var hitedDllNotFound =  !dep.HintPath.Exists;
-                var nuspec = FindNuspecByFile(dep.HintPath);
-
-                if (nuspec == null)
-                {
-                    var depName = GetDepDll(dep);
-                    if (_excludeDll.Contains(depName))
-                        continue;
-                    if (_map.TryGetValue(depName, out var list) && list.Any())
-                        yield return new AddNugetToSolutionProblem
-                        {
-                            ProjectFilename = project.Location,
-                            Dependency      = dep,
-                            SuggestedNugets = list,
-                            ExtraInfo = hitedDllNotFound ? $"File {dep.HintPath.FullName} doesn't exists" :""
-                        };
-                    continue;
-                }
-
-                var candidates = project.NugetPackages
-                    .Where(a => string.Equals(a.Id, nuspec.Id, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-
-                var nugetPackage = candidates
-                    .FirstOrDefault(a => a.Version.NormalizedVersion == nuspec.PackageVersion.NormalizedVersion);
-                if (nugetPackage != null) continue;
-                var problem = new NuGetPackageShouldBeReferencedProblem
-                {
-                    ProjectFilename    = project.Location,
-                    PackageToReference = nuspec,
-                    ReferencedLibrary  = dep,
-                    IsCoreProject      = project.Kind == VsProjectKind.Core
-                };
-                if (candidates.Any())
-                {
-                    problem.VersionProblem = "contains " + string.Join(",", candidates.Select(a => a.Version)) + " but needs " + nuspec.PackageVersion;
-                }
-                yield return problem;
-            }
-        }
-
-        private static string GetDepDll(ProjectReference dep)
-        {
-            if (dep.HintPath == null)
-                return null;
-            return dep.HintPath.Name;
-        }
-
-        private Nuspec FindNuspecByFile([NotNull] FileInfo file)
-        {
-            if (file == null)
-                throw new ArgumentNullException(nameof(file));
-            var hintToLower = file.FullName.ToLower();
-            var query = from nuspec in _nuspecs
-                where hintToLower.StartsWith(nuspec.Item1, StringComparison.OrdinalIgnoreCase)
-                select nuspec.Item2;
-            var a = query.FirstOrDefault();
-            if (a != null)
-                return a;
-            var d = file.Directory;
-            for (var i = 0; i < 3; i++)
-            {
-                if (d == null) return null;
-                if (string.Equals(d.Name, "packages", StringComparison.OrdinalIgnoreCase)) return null;
-                try
-                {
-                    var p = d.GetFiles("*.nupkg");
-                    if (p.Any())
-                        return Nuspec.Load(p[0]);
-                }
-                catch
-                {
-                }
-
-                d = d.Parent;
-            }
-
-            return null;
-        }
-
-        #endregion Methods
-
-        #region Fields
-
-        private Dictionary<string, HashSet<PackageId>> _map;
-        private Tuple<string, Nuspec>[] _nuspecs;
-        private List<SolutionProject> _projects;
-        public HashSet<string> _excludeDll;
-
-        #endregion Fields
     }
 }

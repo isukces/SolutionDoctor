@@ -1,13 +1,10 @@
-﻿using System;
-using ISukces.SolutionDoctor.Logic.Problems;
+﻿using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     internal abstract class XamlProblem : Problem
     {
-        protected XamlProblem()
-        {
-        }
+        protected abstract void FixNode(CsprojXmlNodeWrapper wrapper);
 
         public override ProblemFix GetFix()
         {
@@ -28,10 +25,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             });
         }
 
-        protected abstract void FixNode(CsprojXmlNodeWrapper wrapper);
-
         protected abstract string GetFixName();
 
+        #region properties
+
         public string XamlFile { get; set; }
+
+        #endregion
     }
 }

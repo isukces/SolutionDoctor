@@ -7,9 +7,9 @@ namespace ISukces.SolutionDoctor.Test
 {
     public class TestFileName
     {
-        #region Static Methods
+        #region Static Methods
 
-        // Public Methods 
+         
 
         [Fact]
         public static void Equality()
@@ -46,6 +46,6 @@ namespace ISukces.SolutionDoctor.Test
             Assert.Equal("command.com", fn1.Name);
         }
 
-        #endregion Static Methods
+        #endregion Static Methods
     }
 }

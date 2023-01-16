@@ -1,5 +1,4 @@
-﻿using System;
-using iSukces.Code.VsSolutions;
+﻿using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
@@ -33,7 +32,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return true;
         }
 
+        #region Fields
+
         private readonly string _what;
         private readonly string _why;
+
+        #endregion
     }
 }

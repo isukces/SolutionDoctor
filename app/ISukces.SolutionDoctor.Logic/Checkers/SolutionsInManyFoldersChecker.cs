@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers

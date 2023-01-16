@@ -1,14 +1,9 @@
-using System;
 using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
     internal class NuGetPackageShouldBeReferencedProblem : Problem
     {
-        public NuGetPackageShouldBeReferencedProblem()
-        {
-        }
-
         public override void Describe(Action<RichString> writeLine)
         {
             var c = new MessageColorer()
@@ -32,7 +27,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
 
         public override FixScript GetFixScript()
         {
-            var p = new SolutionProject {Location = ProjectFilename};
+            var p = new SolutionProject { Location = ProjectFilename };
             if (p.Kind == VsProjectKind.Core)
                 return FixScript.CoreNugetInstall(ProjectFilename, PackageToReference, "add");
 
@@ -44,9 +39,13 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return true;
         }
 
+        #region properties
+
         public Nuspec           PackageToReference { get; set; }
         public ProjectReference ReferencedLibrary  { get; set; }
         public bool             IsCoreProject      { get; set; }
         public string           VersionProblem     { get; set; }
+
+        #endregion
     }
 }

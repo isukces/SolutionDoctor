@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{13CCABB5-157B-4DB1-9B7D-22444BB56750}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -6,7 +7,7 @@
     <TargetFramework>net48</TargetFramework>
     <AssemblyTitle>ISukces.SolutionDoctor</AssemblyTitle>
     <Product>ISukces.SolutionDoctor</Product>
-    <Copyright>Copyright © Piotr Stęclik 2015-2022</Copyright>
+    <Copyright>Copyright © Internet Sukces Piotr Stęclik 2015-2022</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <LangVersion>10</LangVersion>
   </PropertyGroup>

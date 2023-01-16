@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using iSukces.Code.VsSolutions;
@@ -10,8 +7,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 {
     internal class WarningsChecker
     {
-        // Public Methods 
-
         public static IEnumerable<Problem> Check(List<SolutionProject> projects, CommandLineOptions options)
         {
             // var aa = localNugetRepositiories.GetUnique(a => a.Location.FullName.ToLower(), a => a);
@@ -38,8 +33,8 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             {
                 if (string.IsNullOrEmpty(configuration))
                     throw new NotSupportedException();
-                var ns = root.Name.Namespace + "PropertyGroup";
-                var all           = root.Elements(ns).ToArray();
+                var ns  = root.Name.Namespace + "PropertyGroup";
+                var all = root.Elements(ns).ToArray();
                 el = all.FirstOrDefault(a => string.Equals(Info1.FromNode(a)?.Configuration, configuration, StringComparison.OrdinalIgnoreCase));
                 if (el is null)
                 {
@@ -48,7 +43,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     if (first is null)
                     {
                         root.Add(el);
-                        
                     }
                     else
                     {
@@ -56,7 +50,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     }
                 }
             }
-            
+
             var node = el.Element(el.Name.Namespace + name);
             var nn   = node?.Value ?? string.Empty;
             var q    = new HashSet<string>();
@@ -78,7 +72,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 if (node == null)
                 {
                     node = new XElement(el.Name.Namespace + name);
-                    if (!string.IsNullOrEmpty(configuration)) 
+                    if (!string.IsNullOrEmpty(configuration))
                         node.SetAttributeValue("Condition", GetCondition(configuration));
                     el.Add(node);
                 }
@@ -166,7 +160,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             #endregion
         }
 
-  
+
         private class Bla : Problem
         {
             public Bla(string name, string expected, SolutionProject project, CommandLineOptions opts,
@@ -217,7 +211,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                                     save = true;
                             }
                         }
-                        
+
                         if (save)
                             doc.Save2(_project.Location);
                     }

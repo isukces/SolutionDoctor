@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using iSukces.Code.VsSolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 
@@ -9,8 +6,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
     public class XamlInCsProjChecker
     {
-        private readonly CommandLineOptions _options;
-
         private XamlInCsProjChecker(CommandLineOptions options)
         {
             _options = options;
@@ -113,7 +108,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         {
             if (project.Kind != VsProjectKind.Legacy) return;
             if (_options.IsSkipped(nameof(XamlInCsProjChecker), project.Location))
-                    return;
+                return;
             _currentProjectLocation = project.Location;
             var xml = FileUtils.Load(_currentProjectLocation);
 
@@ -158,12 +153,16 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
                 });
         }
 
+        #region Fields
+
+        public const string XamlGenerator = "MSBuild:Compile";
+        private readonly CommandLineOptions _options;
+
         private readonly List<Problem> _result = new List<Problem>();
 
         private FileName _currentProjectLocation;
 
-
-        public const string XamlGenerator = "MSBuild:Compile";
+        #endregion
     }
 
     public class AmmyProblem : Problem
@@ -205,6 +204,10 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             return true;
         }
 
+        #region properties
+
         public CsprojXmlNodeWrapper Wrapper { get; set; }
+
+        #endregion
     }
 }

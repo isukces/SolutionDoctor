@@ -6,9 +6,9 @@ namespace ISukces.SolutionDoctor.Test
 {
     public class TestNugetVersion
     {
-        #region Static Methods
+        #region Static Methods
 
-        // Public Methods 
+         
 
         [Fact]
         public static void Compare()
@@ -49,7 +49,7 @@ namespace ISukces.SolutionDoctor.Test
             CompareTest(ver12, ver12beta, ver13, ver1300);
             CompareTest(ver12beta, ver13, ver1300);
         }
-        // Private Methods 
+         
 
         private static void CompareTest(NugetVersion lower, params NugetVersion[] highers)
         {
@@ -76,7 +76,7 @@ namespace ISukces.SolutionDoctor.Test
             Assert.Equal(0, b.CompareTo(a));
         }
 
-        #endregion Static Methods
+        #endregion Static Methods
     }
 
     

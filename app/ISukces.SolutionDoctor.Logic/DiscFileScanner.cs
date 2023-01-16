@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
@@ -15,6 +11,37 @@ namespace ISukces.SolutionDoctor.Logic
             _filter      = filter;
             _accept      = accept;
             _excludeDirs = excludeDirs;
+        }
+
+        private static DirectoryInfo[] GetDirectories2(DirectoryInfo dir)
+        {
+            try
+            {
+                return dir.GetDirectories();
+            }
+            catch (PathTooLongException)
+            {
+                return Array.Empty<DirectoryInfo>();
+            }
+        }
+
+        private static FileInfo[] GetFilesAndIgnoreError(DirectoryInfo dir, string filter)
+        {
+            var now = DateTime.Now;
+            if ((now - _aaa).TotalSeconds > 5)
+            {
+                Debug.WriteLine("Scan " + dir.FullName);
+                _aaa = now;
+            }
+
+            try
+            {
+                return dir.GetFiles(filter);
+            }
+            catch (PathTooLongException)
+            {
+                return Array.Empty<FileInfo>();
+            }
         }
 
         public static IObservable<FileInfo> MakeObservable(IReadOnlyList<DirectoryInfo> dirs, string filter,
@@ -38,53 +65,6 @@ namespace ISukces.SolutionDoctor.Logic
                 });
         }
 
-        private static DirectoryInfo[] GetDirectories2(DirectoryInfo dir)
-        {
-            try
-            {
-                return dir.GetDirectories();
-            }
-            catch (PathTooLongException)
-            {
-                return Array.Empty<DirectoryInfo>();
-            }
-        }
-
-        static DateTime  _aaa = DateTime.MinValue;
-        private static FileInfo[] GetFilesAndIgnoreError(DirectoryInfo dir, string filter)
-        {
-            var now = DateTime.Now;
-            if ((now - _aaa).TotalSeconds > 5)
-            {
-                Debug.WriteLine("Scan " + dir.FullName);
-                _aaa = now;
-            }
-
-            try
-            {
-                return dir.GetFiles(filter);
-            }
-            catch (PathTooLongException)
-            {
-                return Array.Empty<FileInfo>();
-            }
-        }
-
-        //�Public�Methods�
-
-        public IEnumerable<FileInfo> Scan(DirectoryInfo directory)
-        {
-            if (!directory.Exists)
-                return Array.Empty<FileInfo>();
-            var files = directory
-                .GetFiles(_filter)
-                .Where(fileInfo => _accept(fileInfo)).ToList();
-            var fromSubfolders = directory.GetDirectories().SelectMany(Scan);
-            return files.Count == 0
-                ? fromSubfolders
-                : files.Concat(fromSubfolders);
-        }
-
 
         private bool ExcludeDirectory(DirectoryInfo di)
         {
@@ -106,6 +86,21 @@ namespace ISukces.SolutionDoctor.Logic
             return false;
         }
 
+        //�Public�Methods�
+
+        public IEnumerable<FileInfo> Scan(DirectoryInfo directory)
+        {
+            if (!directory.Exists)
+                return Array.Empty<FileInfo>();
+            var files = directory
+                .GetFiles(_filter)
+                .Where(fileInfo => _accept(fileInfo)).ToList();
+            var fromSubfolders = directory.GetDirectories().SelectMany(Scan);
+            return files.Count == 0
+                ? fromSubfolders
+                : files.Concat(fromSubfolders);
+        }
+
         private void ScanToObservable(IReadOnlyList<DirectoryInfo> directories, IObserver<FileInfo> observer)
         {
             if (directories == null || directories.Count == 0)
@@ -120,12 +115,18 @@ namespace ISukces.SolutionDoctor.Logic
                 .Where(fileInfo => _accept(fileInfo));
             foreach (var fileInfo in files) observer.OnNext(fileInfo);
             foreach (var directoryInfo in directories.SelectMany(GetDirectories2))
-                ScanToObservable(new[] {directoryInfo}, observer);
+                ScanToObservable(new[] { directoryInfo }, observer);
         }
+
+        #region Fields
+
+        static DateTime _aaa = DateTime.MinValue;
 
 
         private readonly Func<FileInfo, bool> _accept;
         private readonly IReadOnlyList<string> _excludeDirs;
         private readonly string _filter;
+
+        #endregion
     }
 }

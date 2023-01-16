@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using ISukces.SolutionDoctor.Logic.Problems;
+﻿using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
@@ -9,6 +7,12 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         public override void Describe(Action<RichString> writeLine)
         {
             writeLine($"File {XamlFile} should depend uppon {ShouldDependentUpon}");
+        }
+
+        protected override void FixNode(CsprojXmlNodeWrapper wrapper)
+        {
+            var ammyFi = new FileInfo(ShouldDependentUpon);
+            wrapper.DependentUpon = ammyFi.Name;
         }
 
         public override ProblemFix GetFix()
@@ -20,21 +24,15 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             return null;
         }
 
-        public override FixScript GetFixScript()
-        {
-            return null;
-        }
-
-        protected override void FixNode(CsprojXmlNodeWrapper wrapper)
-        {
-            var ammyFi = new FileInfo(ShouldDependentUpon);
-            wrapper.DependentUpon = ammyFi.Name;
-        }
-
         protected override string GetFixName()
         {
             var ammyFi = new FileInfo(ShouldDependentUpon);
             return "move uppon " + ammyFi.Name;
+        }
+
+        public override FixScript GetFixScript()
+        {
+            return null;
         }
 
         protected override bool GetIsBigProblem()
@@ -42,7 +40,11 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             return true;
         }
 
+        #region properties
+
         public string DependentUpon       { get; set; }
         public string ShouldDependentUpon { get; set; }
+
+        #endregion
     }
 }

@@ -11,13 +11,12 @@ using JetBrains.Annotations;
 
 internal static class Manager
 {
-    public static async Task ProcessX(IEnumerable<string> dirs, CommandLineOptions options)
+    public static void  ProcessX(IEnumerable<string> dirs, CommandLineOptions options)
     {
         var doctor = new Doctor();
         //doctor.ScanSolutions(new DirectoryInfo(dir), options.ExcludeSolutions);
         var tmp = dirs.Select(dir => new DirectoryInfo(dir)).ToArray();
-        await Task.Run(
-            () => doctor.ScanSolutions(tmp, options.ExcludeSolutions, options));
+        doctor.ScanSolutions(tmp, options.ExcludeSolutions, options);
         doctor.ExcludeDll            = options.ExcludeDll;
         doctor.RemoveBindingRedirect = options.RemoveBindingRedirect;
         doctor.ForceBindingRedirects = options.ForceBindingRedirects;
@@ -32,14 +31,14 @@ internal static class Manager
         FixProblems(options, fixes);
     }
 
-    #region Static Methods
+    #region Static Methods
 
-    // Private Methods 
+     
 
     private static void FixProblems([NotNull] CommandLineOptions options, [NotNull] List<ProblemFix> fixes)
     {
-        if (options == null) throw new ArgumentNullException("options");
-        if (fixes == null) throw new ArgumentNullException("fixes");
+        if (options == null) throw new ArgumentNullException(nameof(options));
+        if (fixes == null) throw new ArgumentNullException(nameof(fixes));
         Console.WriteLine("{0} fix(es) found.", fixes.Count);
         if (!options.Fix) return;
         foreach (var problemFix in fixes)
@@ -188,5 +187,5 @@ internal static class Manager
         Console.WriteLine();
     }
 
-    #endregion Static Methods
+    #endregion Static Methods
 }

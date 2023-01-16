@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic
@@ -27,6 +25,13 @@ namespace ISukces.SolutionDoctor.Logic
                 ctx.SetTextColor(color.Value);
         }
 
+        private MessageColorer With(ISet<int> projects, int[] indexes)
+        {
+            foreach (var i in indexes)
+                projects.Add(i);
+            return this;
+        }
+
         public MessageColorer WithPackageAt(params int[] indexes)
         {
             return With(_packages, indexes);
@@ -42,15 +47,12 @@ namespace ISukces.SolutionDoctor.Logic
             return With(_versions, indexes);
         }
 
-        private MessageColorer With(ISet<int> projects, int[] indexes)
-        {
-            foreach (var i in indexes)
-                projects.Add(i);
-            return this;
-        }
+        #region Fields
 
         private readonly HashSet<int> _projects = new HashSet<int>();
         private readonly ISet<int> _packages = new HashSet<int>();
         private readonly ISet<int> _versions = new HashSet<int>();
+
+        #endregion
     }
 }

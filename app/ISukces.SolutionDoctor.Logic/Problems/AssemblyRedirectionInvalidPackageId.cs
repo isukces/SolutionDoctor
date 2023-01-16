@@ -1,5 +1,4 @@
-﻿using System;
-using iSukces.Code.VsSolutions;
+﻿using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {
@@ -15,6 +14,19 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         public override void Describe(Action<RichString> writeLine)
         {
             writeLine("Invalid assembly redirection to " + _packageId);
+        }
+
+        private void Fix()
+        {
+            var fn  = ProjectFilename.GetAppConfigFile();
+            var xml = new AppConfig(fn);
+            if (!xml.Exists)
+                throw new Exception(string.Format("Config file {0} doesn't exist", fn.FullName));
+            var node = xml.FindByAssemblyIdentity(_packageId);
+            if (node == null)
+                throw new Exception(string.Format("Redirection for '{0}' not found", _packageId));
+            node.SetPackageId(_packageId);
+            xml.Save();
         }
 
         public override ProblemFix GetFix()
@@ -33,20 +45,11 @@ namespace ISukces.SolutionDoctor.Logic.Problems
             return true;
         }
 
-        private void Fix()
-        {
-            var fn  = ProjectFilename.GetAppConfigFile();
-            var xml = new AppConfig(fn);
-            if (!xml.Exists)
-                throw new Exception(string.Format("Config file {0} doesn't exist", fn.FullName));
-            var node = xml.FindByAssemblyIdentity(_packageId);
-            if (node == null)
-                throw new Exception(string.Format("Redirection for '{0}' not found", _packageId));
-            node.SetPackageId(_packageId);
-            xml.Save();
-        }
+        #region Fields
 
         private readonly string _packageId;
         private readonly SolutionProject _project;
+
+        #endregion
     }
 }

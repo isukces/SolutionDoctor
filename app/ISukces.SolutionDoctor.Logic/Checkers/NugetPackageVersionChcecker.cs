@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using iSukces.Code.VsSolutions;
 using ISukces.SolutionDoctor.Logic.Problems;
 
@@ -20,8 +17,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
 
         private void Add(FileName projectFile, NugetPackage nugetPackage)
         {
-            PackageUsages packageUsages;
-            if (!_packages.TryGetValue(nugetPackage.Id, out packageUsages))
+            if (!_packages.TryGetValue(nugetPackage.Id, out var packageUsages))
                 _packages[nugetPackage.Id] = packageUsages = new PackageUsages(nugetPackage.Id);
             packageUsages.Add(projectFile, nugetPackage);
         }
@@ -36,7 +32,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             {
                 var tmp = usages.Versions
                     .GroupBy(a => a.Value)
-                    .Select(a => new {PackageVersion = a.Key, Projects = a.ToArray()})
+                    .Select(a => new { PackageVersion = a.Key, Projects = a.ToArray() })
                     .OrderBy(a => a.PackageVersion)
                     .ToArray();
                 if (tmp.Length < 2) continue;
@@ -55,10 +51,14 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             }
         }
 
+        #region Fields
+
         private readonly Dictionary<string, PackageUsages> _packages =
             new Dictionary<string, PackageUsages>(StringComparer.OrdinalIgnoreCase);
 
         private IList<SolutionProject> _projects;
+
+        #endregion
 
 
         private class PackageUsages
@@ -74,9 +74,13 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 Versions[projectFullFilename] = nugetPackage.Version;
             }
 
+            #region properties
+
             public string PackageId { get; }
 
             public Dictionary<FileName, NugetVersion> Versions { get; }
+
+            #endregion
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using ISukces.SolutionDoctor.Logic.Problems;
+﻿using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
 {
@@ -10,11 +9,6 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
             writeLine($"File {XamlFile} has no Subtype=Designer attribute");
         }
 
-        public override FixScript GetFixScript()
-        {
-            return null;
-        }
-
         protected override void FixNode(CsprojXmlNodeWrapper wrapper)
         {
             wrapper.SubType = "Designer";
@@ -23,6 +17,11 @@ namespace ISukces.SolutionDoctor.Logic.Checkers.Xaml
         protected override string GetFixName()
         {
             return $"add Subtype attribute to {XamlFile}";
+        }
+
+        public override FixScript GetFixScript()
+        {
+            return null;
         }
 
         protected override bool GetIsBigProblem()
