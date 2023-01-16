@@ -8,18 +8,8 @@ using JetBrains.Annotations;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers
 {
-    internal class NugetPackageAssemblyBindingChecker
+    public class NugetPackageAssemblyBindingChecker
     {
-        private static void Can(string path, List<FileInfo> sink)
-        {
-            var di = new DirectoryInfo(path);
-            if (!di.Exists)
-                return;
-            sink.AddRange(di.GetFiles("*.dll"));
-            foreach (var i in di.GetDirectories())
-                Can(i.FullName, sink);
-        }
-
         public static IEnumerable<Problem> Check([NotNull] IList<SolutionProject> projects,
             HashSet<string> removeBindingRedirect, Dictionary<string, string> forceBindingRedirects)
         {
@@ -38,23 +28,17 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return projects.SelectMany(tmp.ScanProject).ToList();
         }
 
-        private static Func<FileInfo, bool> ContainsPackagePath(NugetPackage package)
-        {
-            var path = "\\packages\\" + package.Id + "." + package.Version + "\\";
-            return a => a != null && a.FullName.ToLower().Contains(path.ToLowerInvariant());
-        }
-
         private static FileInfo[] FindDlls(SolutionProject project, NugetPackage package)
         {
             var dlls =
                 project.References.Select(a => a.HintPath)
-                    .Where(ContainsPackagePath(package))
+                    .Where(DllVersionRepo.ContainsPackagePath(package))
                     .ToArray();
             var path = Path.Combine(HardCoded.Cache, package.Id, package.Version.ToString(), "lib");
             if (Directory.Exists(path))
             {
                 var sink = new List<FileInfo>();
-                Can(path, sink);
+                DllVersionRepo.Can(path, sink);
                 sink.AddRange(dlls);
                 dlls = sink.ToArray();
             }
@@ -68,7 +52,7 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             var projectFrameworkVersion = FrameworkVersion.Parse(t).Single();
             if (projectFrameworkVersion is null)
                 return dlls;
-            var tmp = dlls.Select(fileInfo => FindPossibleOrNull(fileInfo, projectFrameworkVersion))
+            var tmp = dlls.Select(fileInfo => DllVersionRepo.FindPossibleOrNull(fileInfo, projectFrameworkVersion))
                 .Where(a => a != null)
                 .OrderBy(a => a.Loading)
                 .GroupBy(a => a.File.Name)
@@ -85,91 +69,116 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
             return dlls;
         }
 
-        public static Result FindPossibleOrNull(FileInfo fileInfo, FrameworkVersion project)
+
+        IEnumerable<Problem> Decisions(FileInfo[] dlls, NugetPackage package, SolutionProject project, AssemblyBinding redirect)
         {
-            string dirShortName = null;
-            var    d            = fileInfo.Directory;
-            var    list         = new List<string>();
-            while (d != null)
+            var dlls2 = dlls
+                .GroupBy(a => a.Name, FileName.FileNameComparer)
+                .ToDictionary(a => a.Key, a => a.ToArray());
+
+            bool Check()
             {
-                if (d.Name == "lib")
+                foreach (var i in dlls2.Keys)
                 {
-                    dirShortName = list.LastOrDefault();
+                    var n  = new FileInfo(i);
+                    var nn = i.Substring(0, i.Length - n.Extension.Length) + ".resources" + n.Extension;
+                    if (dlls2.ContainsKey(nn))
+                    {
+                        dlls2.Remove(nn);
+                        return true;
+                    }
                 }
 
-                list.Add(d.Name);
-                d = d.Parent;
+                return false;
             }
 
-            // var dirShortName = fileInfo.Directory?.Name;
-            if (string.IsNullOrEmpty(dirShortName))
-                return null;
+            bool next = true;
+            while (next && dlls2.Count > 1)
+            {
+                next = Check();
+            }
 
-            var nugetVersions = FrameworkVersion.Parse(dirShortName);
-            if (nugetVersions is null || nugetVersions.Any(version => version == null))
-                return null;
-            // throw new NotSupportedException();
+            bool dllsOk = false;
 
-            var possible = nugetVersions
-                .Select(q =>
+            if (dlls2.Count > 1)
+            {
+                var expected = redirect.Name + ".dll";
+                if (dlls2.TryGetValue(expected, out var f))
                 {
-                    var tmp = project.CanLoad(q);
-                    if (tmp == NugetLoadCompatibility.None)
-                        return null;
-                    return new PossibleToLoadNuget(q, tmp);
-                })
-                .Where(a => a != null)
-                .OrderBy(a => a)
-                .ToArray();
-
-            switch (possible.Length)
-            {
-                case 0:
-                    return null;
-                case 1:
-                    return new Result(possible[0], new FileName(fileInfo));
-                default:
-                    return new Result(possible.Last(), new FileName(fileInfo));
+                    dlls2.Clear();
+                    dlls2[expected] = f;
+                    dlls            = f;
+                    dllsOk          = true;
+                }
+                
             }
-        }
 
-        private static DllInfo GetDllInfo(FileInfo file)
-        {
-            if (!file.Exists)
-                return new DllInfo(file, null, false);
-            try
+            if (dlls2.Count == 0)
             {
-                /*if (file.FullName.ToLower().Contains("system.io.comp"))
+                yield return new UnableToGetReferencedDllVersionProblem(package.Id, project, "no hint path to dll");
+                yield break;
+            }
+
+            
+
+            if (dlls2.Count > 1)
+            {
+                yield return new UnableToGetReferencedDllVersionProblem(package.Id, project,
+                    $"Too many hint paths to dll for {package.Id} ver {package.Version} package. Probably package contains more than one dll inside.");
+                yield break;
+            }
+
+            if (!dllsOk)
+            {
+                dlls = dlls.Where(a =>
                 {
-                    Debug.Write("");
-
-                    {
-                        AppDomain domain = AppDomain.CreateDomain("TempDomain");
-                        InstanceProxy proxy = domain.CreateInstanceAndUnwrap(Assembly.GetAssembly(
-                            typeof(InstanceProxy)).FullName, typeof(InstanceProxy).ToString()) as InstanceProxy;
-                        if (proxy != null)
-                        {
-                            proxy.LoadAssembly(file.FullName);
-                        }
-                        AppDomain.Unload(domain);
-                    }
-                }*/
-
-                var currentAssemblyName                                              = AssemblyName.GetAssemblyName(file.FullName);
-                var version                                                          = currentAssemblyName.Version;
-                var compression                                                      = @"packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll";
-                if (file.FullName.ToLower().EndsWith(compression.ToLower())) version = Version.Parse("4.2.0.0");
-
-                return new DllInfo(file, version.ToString(), true);
+                    var name = a.GetShortNameWithoutExtension();
+                    if (_removeBindingRedirect.Contains(name))
+                        return false;
+                    if (_forceBindingRedirects.ContainsKey(name))
+                        return false;
+                    return true;
+                }).ToArray();
             }
-            catch
+
+            if (dlls.Length == 0) yield break;
+
+            var versions = dlls.Select(DllVersionRepo.GetDllInfo).Distinct().ToArray();
             {
-                return new DllInfo(file, null, true);
+                var aa = versions.Where(q => q.DllVersion == null || !q.Exists).ToArray();
+                if (aa.Any())
+                {
+                    foreach (var aaa in aa)
+                        yield return
+                            new UnableToGetReferencedDllVersionProblem(package.Id, project,
+                                "Broken file " + aaa?.File);
+                    yield break;
+                }
             }
+            var vers2 = versions.Select(a => a.DllVersion).Distinct().ToArray();
+            if (vers2.Length != 1)
+            {
+                yield return new UnableToGetReferencedDllVersionProblem(package.Id, project,
+                    "Too many possible versions to compare");
+                yield break;
+            }
+
+            if (vers2.Any(a => a == redirect.NewVersion.NormalizedVersion.ToString())) yield break;
+
+            yield return new WrongBindingRedirectProblem
+            {
+                ProjectFilename = project.Location,
+                Redirect        = redirect,
+                Package         = package,
+                DllVersion      = versions[0].DllVersion
+            };
         }
 
         private IEnumerable<Problem> ScanProject(SolutionProject project)
         {
+            if (string.Equals(project.Location.FullName, @"c:\programs\conexx\conexx.total\app\_tests_\Conexx.FinishingPlates.Tests\Conexx.FinishingPlates.Tests.csproj",
+                    StringComparison.OrdinalIgnoreCase))
+                Debug.Write("");
             var assemblyBindings = project.AssemblyBindings;
             var packageVersion   = project.NugetPackages;
 
@@ -199,101 +208,37 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                     var redirects = assemblyBindings.Where(
                             a => string.Equals(a.Name, package.Id, StringComparison.OrdinalIgnoreCase))
                         .ToArray();
-                    foreach (var i in redirects)
-                        if (i.Name != package.Id)
-                            yield return new AssemblyRedirectionInvalidPackageId(package.Id, project);
-
-                    continue;
-                }
-
-                var redirect =
-                    assemblyBindings.FirstOrDefault(
-                        a => string.Equals(a.Name, package.Id, StringComparison.OrdinalIgnoreCase));
-                if (redirect == null) continue;
-                var dlls = FindDlls(project, package);
-                var dlls2 = dlls
-                    .GroupBy(a => a.Name, FileName.FileNameComparer)
-                    .ToDictionary(a => a.Key, a => a.ToArray());
-                {
-                    bool Check()
+                    foreach (var redirect1 in redirects)
                     {
-                        foreach (var i in dlls2.Keys)
+                        if (string.Equals(redirect1.Name, package.Id, StringComparison.OrdinalIgnoreCase))
                         {
-                            var n  = new FileInfo(i);
-                            var nn = i.Substring(0, i.Length - n.Extension.Length) + ".resources" + n.Extension;
-                            if (dlls2.ContainsKey(nn))
-                            {
-                                dlls2.Remove(nn);
-                                return true;
-                            }
+                            var dlls1 = _bla.GetDlls(package, project.TargetFrameworkVersion);
+                            var props = Decisions(dlls1, package, project, redirect1).ToArray();
+                            foreach (var i in props)
+                                yield return i;
                         }
-
-                        return false;
                     }
 
-                    bool next = true;
-                    while (next && dlls2.Count > 1)
-                    {
-                        next = Check();
-                    }
-                }
-                if (dlls2.Count == 0)
-                {
-                    yield return new UnableToGetReferencedDllVersionProblem(package.Id, project, "no hint path to dll");
                     continue;
                 }
 
-                if (dlls2.Count > 1)
                 {
-                    yield return new UnableToGetReferencedDllVersionProblem(package.Id, project,
-                        $"Too many hint paths to dll for {package.Id} ver {package.Version} package. Probably package contains more than one dll inside.");
-                    continue;
+                    var redirect =
+                        assemblyBindings.FirstOrDefault(
+                            a => string.Equals(a.Name, package.Id, StringComparison.OrdinalIgnoreCase));
+                    if (redirect == null) continue;
+                    var dlls = FindDlls(project, package);
+
+                    var props = Decisions(dlls, package, project, redirect).ToArray();
+                    foreach (var i in props)
+                        yield return i;
                 }
-
-                dlls = dlls.Where(a =>
-                {
-                    var name = a.GetShortNameWithoutExtension();
-                    if (_removeBindingRedirect.Contains(name))
-                        return false;
-                    if (_forceBindingRedirects.ContainsKey(name))
-                        return false;
-                    return true;
-                }).ToArray();
-                if (dlls.Length == 0) continue;
-
-                var versions = dlls.Select(GetDllInfo).Distinct().ToArray();
-                {
-                    var aa = versions.Where(q => q.DllVersion == null || !q.Exists).ToArray();
-                    if (aa.Any())
-                    {
-                        foreach (var aaa in aa)
-                            yield return
-                                new UnableToGetReferencedDllVersionProblem(package.Id, project,
-                                    "Broken file " + aaa?.File);
-                        continue;
-                    }
-                }
-                var vers2 = versions.Select(a => a.DllVersion).Distinct().ToArray();
-                if (vers2.Length != 1)
-                {
-                    yield return new UnableToGetReferencedDllVersionProblem(package.Id, project,
-                        "Too many possible versions to compare");
-                    continue;
-                }
-
-                if (vers2.Any(a => a == redirect.NewVersion.NormalizedVersion.ToString())) continue;
-
-                yield return new WrongBindingRedirectProblem
-                {
-                    ProjectFilename = project.Location,
-                    Redirect        = redirect,
-                    Package         = package,
-                    DllVersion      = versions[0].DllVersion
-                };
             }
         }
 
         #region Fields
+
+        private readonly DllVersionRepo _bla = new DllVersionRepo();
 
         private HashSet<string> _removeBindingRedirect;
         public Dictionary<string, NugetVersion> _forceBindingRedirects;
@@ -344,24 +289,23 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
                 // ...see above...
             }
         }
+    }
 
-
-        private class DllInfo
+    internal class DllInfo
+    {
+        public DllInfo(FileInfo file, string dllVersion, bool exists)
         {
-            public DllInfo(FileInfo file, string dllVersion, bool exists)
-            {
-                File       = file;
-                DllVersion = dllVersion;
-                Exists     = exists;
-            }
-
-            #region properties
-
-            public FileInfo File       { get; }
-            public string   DllVersion { get; }
-            public bool     Exists     { get; }
-
-            #endregion
+            File       = file;
+            DllVersion = dllVersion;
+            Exists     = exists;
         }
+
+        #region properties
+
+        public FileInfo File       { get; }
+        public string   DllVersion { get; }
+        public bool     Exists     { get; }
+
+        #endregion
     }
 }

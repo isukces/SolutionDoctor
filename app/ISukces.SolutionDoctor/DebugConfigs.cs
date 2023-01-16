@@ -24,11 +24,12 @@ namespace ISukces.SolutionDoctor
                     return Make(@"C:\programs\ALPEX\PipelineDesigner", "app\\solutionDoctor.json");
                 case "ct":
                     Directory.SetCurrentDirectory(@"C:\programs\conexx");
+                    Directory.SetCurrentDirectory(@"C:\programs\conexx\conexx.total\app\_tests_\Conexx.FinishingPlates.Tests");
                     return new[]
                     {
                         "-runExternalFix", "-NoWarn", "1591,1573,618", "-WarningsAsErrors",
                         "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734", "-cfg",
-                        "SolutionDoctor.json"
+                        @"C:\programs\conexx\SolutionDoctor.json"
                     };
                 case "home":
                     Directory.SetCurrentDirectory(@"C:\programs\ARDUINO");
