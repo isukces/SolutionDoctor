@@ -18,8 +18,8 @@ namespace ISukces.SolutionDoctor
             if (args.Length != 1) return args;
             switch (args[0])
             {
-                case "isukcesbase":
-                    return Make(@"C:\programs\isukces\dotnetLib\isukces.Base\src", "solutionDoctor.json");
+                case "isukcesserenity": return Make(@"C:\programs\isukces\isukces.Serenity", "solutionDoctor.json");
+                case "isukcesbase": return Make(@"C:\programs\isukces\dotnetLib\isukces.Base\src", "solutionDoctor.json");
                 case "pd":
                     return Make(@"C:\programs\ALPEX\PipelineDesigner", "app\\solutionDoctor.json");
                 case "ct":

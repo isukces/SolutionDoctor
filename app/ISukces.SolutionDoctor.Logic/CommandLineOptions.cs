@@ -25,6 +25,71 @@ namespace ISukces.SolutionDoctor.Logic
             NoWarn                = new Dictionary<string, AddRemoveOption>(StringComparer.OrdinalIgnoreCase);
         }
 
+
+        private static void AddRemove(IDictionary<string, AddRemoveOption> hs, string item)
+        {
+            if (string.IsNullOrEmpty(item))
+                return;
+            var itemArray = item.Split(',');
+            foreach (var src in itemArray)
+            {
+                var key = src.Trim();
+                if (string.IsNullOrEmpty(key))
+                    continue;
+                var minus = key[0] == '-';
+                if (minus)
+                {
+                    key = key.Substring(1).Trim();
+                    if (string.IsNullOrEmpty(key))
+                        continue;
+                }
+
+                if (minus)
+                    hs[key] = AddRemoveOption.Remove;
+                else
+                    hs[key] = AddRemoveOption.Add;
+            }
+        }
+
+        private static string ExpandPath(FileInfo baseFile, string file)
+        {
+            if (baseFile is null)
+                return file;
+            return Path.Combine(baseFile.Directory.FullName, file);
+        }
+
+        private static bool IsBoolOption(string optionName)
+        {
+            return
+                string.Equals(optionName, "fix", StringComparison.CurrentCultureIgnoreCase)
+                || string.Equals(optionName, "onlyBig", StringComparison.CurrentCultureIgnoreCase)
+                || string.Equals(optionName, "runExternalFix", StringComparison.CurrentCultureIgnoreCase);
+            ;
+        }
+
+        private static bool IsListOption(string optionName)
+        {
+            return
+                string.Equals(optionName, "exclude", StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        private static CommandLineOptions Load([NotNull] FileInfo file)
+        {
+            var x = JsonUtils.Default.Load<CommandLineOptions>(file);
+            x.ApplyPath(file);
+            return x;
+        }
+
+        private static List<string> NormalizeList(List<string> x)
+        {
+            var q = from i in x
+                let j = i?.Trim()
+                where !string.IsNullOrEmpty(j)
+                select j;
+            x = q.Distinct().ToList();
+            return x;
+        }
+
         // Public Methods 
 
         public static CommandLineOptions Parse(string[] args)
@@ -110,71 +175,6 @@ namespace ISukces.SolutionDoctor.Logic
             return result;
         }
 
-
-        private static void AddRemove(IDictionary<string, AddRemoveOption> hs, string item)
-        {
-            if (string.IsNullOrEmpty(item))
-                return;
-            var itemArray = item.Split(',');
-            foreach (var src in itemArray)
-            {
-                var key = src.Trim();
-                if (string.IsNullOrEmpty(key))
-                    continue;
-                var minus = key[0] == '-';
-                if (minus)
-                {
-                    key = key.Substring(1).Trim();
-                    if (string.IsNullOrEmpty(key))
-                        continue;
-                }
-
-                if (minus)
-                    hs[key] = AddRemoveOption.Remove;
-                else
-                    hs[key] = AddRemoveOption.Add;
-            }
-        }
-
-        private static string ExpandPath(FileInfo baseFile, string file)
-        {
-            if (baseFile is null)
-                return file;
-            return Path.Combine(baseFile.Directory.FullName, file);
-        }
-
-        private static bool IsBoolOption(string optionName)
-        {
-            return
-                string.Equals(optionName, "fix", StringComparison.CurrentCultureIgnoreCase)
-                || string.Equals(optionName, "onlyBig", StringComparison.CurrentCultureIgnoreCase)
-                || string.Equals(optionName, "runExternalFix", StringComparison.CurrentCultureIgnoreCase);
-            ;
-        }
-
-        private static bool IsListOption(string optionName)
-        {
-            return
-                string.Equals(optionName, "exclude", StringComparison.CurrentCultureIgnoreCase);
-        }
-
-        private static CommandLineOptions Load([NotNull] FileInfo file)
-        {
-            var x = JsonUtils.Default.Load<CommandLineOptions>(file);
-            x.ApplyPath(file);
-            return x;
-        }
-
-        private static List<string> NormalizeList(List<string> x)
-        {
-            var q = from i in x
-                let j = i?.Trim()
-                where !string.IsNullOrEmpty(j)
-                select j;
-            x = q.Distinct().ToList();
-            return x;
-        }
-
         private static string ReduceFilename(FileInfo baseFile, string target)
         {
             try
@@ -197,41 +197,6 @@ namespace ISukces.SolutionDoctor.Logic
                 string.Equals(optionName, "saveOptions", StringComparison.CurrentCultureIgnoreCase)
                 ||
                 string.Equals(optionName, "cfg", StringComparison.CurrentCultureIgnoreCase);
-        }
-
-        public bool IsSkipped(string rule, FileName projectLocation)
-        {
-            var currentDirectory = Directory.GetCurrentDirectory();
-            if (SkippedRules is null)
-                return false;
-
-            return SkippedRules.Any(a =>
-            {
-                var fn = Path.Combine(currentDirectory, a.Project);
-                var fi = new FileInfo(fn);
-                return a.Rule == rule &&
-                       string.Equals(fi.FullName, projectLocation.FullName, StringComparison.OrdinalIgnoreCase);
-            });
-        }
-
-        public void Normalize()
-        {
-            ScanDirectories    = NormalizeList(ScanDirectories);
-            ExcludeDirectories = NormalizeList(ExcludeDirectories);
-            ExcludeSolutions   = NormalizeList(ExcludeSolutions);
-            SkippedRules = SkippedRules?.Distinct()
-                .OrderBy(a => a.Project)
-                .ThenBy(a => a.Rule)
-                .ToList() ?? new List<SkipRule>();
-        }
-
-        public void Save([NotNull] FileInfo file)
-        {
-            Normalize();
-            if (file == null) throw new ArgumentNullException(nameof(file));
-            ReducePath(file);
-            JsonUtils.Default.Save(file, this);
-            ApplyPath(file);
         }
 
         // Private Methods 
@@ -279,6 +244,8 @@ namespace ISukces.SolutionDoctor.Logic
                 SolutionOrders = x.Distinct().ToList();
             }
 
+            if (!string.IsNullOrEmpty(other.LangVersion))
+                this.LangVersion = other.LangVersion;
             // Fix = other.ShowOnlyBigProblems;
         }
 
@@ -290,6 +257,32 @@ namespace ISukces.SolutionDoctor.Logic
                     SolutionOrders[index] = ExpandPath(file, SolutionOrders[index]);
         }
 
+        public bool IsSkipped(string rule, FileName projectLocation)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            if (SkippedRules is null)
+                return false;
+
+            return SkippedRules.Any(a =>
+            {
+                var fn = Path.Combine(currentDirectory, a.Project);
+                var fi = new FileInfo(fn);
+                return a.Rule == rule &&
+                       string.Equals(fi.FullName, projectLocation.FullName, StringComparison.OrdinalIgnoreCase);
+            });
+        }
+
+        public void Normalize()
+        {
+            ScanDirectories    = NormalizeList(ScanDirectories);
+            ExcludeDirectories = NormalizeList(ExcludeDirectories);
+            ExcludeSolutions   = NormalizeList(ExcludeSolutions);
+            SkippedRules = SkippedRules?.Distinct()
+                .OrderBy(a => a.Project)
+                .ThenBy(a => a.Rule)
+                .ToList() ?? new List<SkipRule>();
+        }
+
         private void ReducePath(FileInfo file)
         {
             if (file == null) return;
@@ -299,6 +292,15 @@ namespace ISukces.SolutionDoctor.Logic
                     SolutionOrders[index] = ReduceFilename(file, SolutionOrders[index]);
                     ;
                 }
+        }
+
+        public void Save([NotNull] FileInfo file)
+        {
+            Normalize();
+            if (file == null) throw new ArgumentNullException(nameof(file));
+            ReducePath(file);
+            JsonUtils.Default.Save(file, this);
+            ApplyPath(file);
         }
 
         private void SetOptionValue(string optionName, string value)
@@ -313,19 +315,21 @@ namespace ISukces.SolutionDoctor.Logic
             _options[optionName] = value;
         }
 
-        public Dictionary<string, string> ForceBindingRedirects { get;  }
+        #region properties
+
+        public string LangVersion
+        {
+            get => _langVersion;
+            set => _langVersion = value?.Trim();
+        }
+
+        public Dictionary<string, string> ForceBindingRedirects { get; }
 
         public HashSet<string> ExcludeDll { get; }
 
         public HashSet<string> RemoveBindingRedirect { get; }
 
-        public Dictionary<string, AddRemoveOption> NoWarn { get; }
-
-        public Dictionary<string, AddRemoveOption> WarningsAsErrors { get; }
-
         public List<string> ScanDirectories { get; private set; }
-
-        public List<string> ExcludeDirectories { get; private set; }
 
         public List<string> ExcludeSolutions { get; private set; }
 
@@ -336,7 +340,7 @@ namespace ISukces.SolutionDoctor.Logic
 
         public bool ShowOnlyBigProblems
         {
-            get { return _options.ContainsKey("onlyBig"); }
+            get => _options.ContainsKey("onlyBig");
             set
             {
                 if (value)
@@ -348,7 +352,7 @@ namespace ISukces.SolutionDoctor.Logic
 
         public bool RunExternalFix
         {
-            get { return _options.ContainsKey("runExternalFix"); }
+            get => _options.ContainsKey("runExternalFix");
             set
             {
                 if (value)
@@ -373,7 +377,7 @@ namespace ISukces.SolutionDoctor.Logic
 
         public bool Fix
         {
-            get { return _options.ContainsKey("fix"); }
+            get => _options.ContainsKey("fix");
             set
             {
                 if (value)
@@ -385,6 +389,19 @@ namespace ISukces.SolutionDoctor.Logic
 
         public Dictionary<string, NugetVersion> PackagesVersion { get; }
 
+        #endregion
+
+        public Dictionary<string, AddRemoveOption> NoWarn { get; }
+
+        public Dictionary<string, AddRemoveOption> WarningsAsErrors { get; }
+
+        public List<string> ExcludeDirectories { get; private set; }
+
+        #region Fields
+
         private readonly Dictionary<string, string> _options;
+        private string _langVersion;
+
+        #endregion
     }
 }

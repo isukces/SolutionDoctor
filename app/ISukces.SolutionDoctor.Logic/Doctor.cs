@@ -53,9 +53,8 @@ namespace ISukces.SolutionDoctor.Logic
             var groupedProjects = GetGroupedProjects();
             var uniqueProjects  = groupedProjects.Select(a => a.Projects.First().Project).ToList();
             var p1              = Task.Run(() => SolutionsInManyFoldersChecker.Check(groupedProjects));
-            var p2 = Task.Run(() =>
-                NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect,ForceBindingRedirects));
-            var p3 = Task.Run(() => NugetPackageVersionChcecker.Check(uniqueProjects));
+            var p2              = Task.Run(() => NugetPackageAssemblyBindingChecker.Check(uniqueProjects, RemoveBindingRedirect,ForceBindingRedirects));
+            var p3              = Task.Run(() => NugetPackageVersionChcecker.Check(uniqueProjects));
             var p4 = Task.Run(() => ReferencesWithoutNugetsChecker.Check(
                 uniqueProjects,
                 LocalNugetRepositiories.Values.SelectMany(a => a.Values),
@@ -63,7 +62,8 @@ namespace ISukces.SolutionDoctor.Logic
             var p5  = Task.Run(() => NugetRepositoryDependencies.Check(LocalNugetRepositiories, uniqueProjects));
             var p6  = Task.Run(() => XamlInCsProjChecker.Check(uniqueProjects, options));
             var p7  = Task.Run(() => WarningsChecker.Check(uniqueProjects, options));
-            var all = new[] {p1, p2, p3, p4, p5, p6, p7};
+            var p8  = Task.Run(() => LangVersionChecker.Check(uniqueProjects, options));
+            var all = new[] {p1, p2, p3, p4, p5, p6, p7, p8};
             Task.WaitAll(all);
             return all.SelectMany(a => a.Result).ToArray();
         }
@@ -98,7 +98,7 @@ namespace ISukces.SolutionDoctor.Logic
                             {
                                 s = new Solution(i);
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 Console.WriteLine(
                                     Thread.CurrentThread.ManagedThreadId + " solution {0} can't be parsed", i.FullName);

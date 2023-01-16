@@ -26,8 +26,7 @@ namespace ISukces.SolutionDoctor.Logic.Problems
         {
             _items = items;
         }
-
-
+        
         public static RichString operator +(RichString a, RichString b)
         {
             if (a.IsEmpty) return b;
