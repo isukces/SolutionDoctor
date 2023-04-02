@@ -48,6 +48,39 @@ public class NugetPackageChooser
                 return FindFull(m.Groups[1].Value, dirs);
             }
         }
+        var tmp =NetCoreFrameworkVersion.TryParse(ver);
+        if (tmp is not null)
+        {
+            var possible = dirs.Select(NetCoreFrameworkVersion.TryParse).Where(a=>a is not null)
+                .OrderByDescending(a=>a.CompareVersion)
+                .ToArray();
+            if ( tmp.IsPure)
+            {
+                var a = possible.Where(a => tmp.CompareVersion >= a.CompareVersion && a.IsPure).ToArray();
+                if (a.Any())
+                    return a.First().ToString();
+                a = possible.Where(a => tmp.CompareVersion >= a.CompareVersion).ToArray();
+                if (a.Any())
+                    return a.First().ToString();
+            }
+            else
+            {
+                var a = possible.Where(a => tmp.CompareVersion >= a.CompareVersion && 
+                                            (a.IsPure || tmp.Platform == a.Platform) ).ToArray();
+                if (a.Any())
+                    return a.First().ToString();
+            }
+
+            {
+                var netstandard = dirs.Select(NetStandardFrameworkVersion.TryParse).Where(a => a is not null)
+                    .OrderByDescending(a => a.CompareVersion)
+                    .ToArray();
+                
+                var a = netstandard.Where(a => tmp.CompareVersion >= a.CompareVersion).ToArray();
+                if (a.Any())
+                    return a.First().ToString();
+            }
+        }
         throw new NotSupportedException();
     }
 
@@ -62,3 +95,4 @@ public class NugetPackageChooser
 
     #endregion
 }
+

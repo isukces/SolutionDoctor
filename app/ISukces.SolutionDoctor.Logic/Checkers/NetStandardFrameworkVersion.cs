@@ -12,7 +12,7 @@ public class NetStandardFrameworkVersion
 
     public static NetStandardFrameworkVersion TryParse(string version)
     {
-        var m = NetCoreFrameworkVersionRegex.Match(version);
+        var m = NetStandardFrameworkVersionRegex.Match(version);
         if (!m.Success)
             return null;
         var major    = int.Parse(m.Groups[1].Value);
@@ -30,12 +30,12 @@ public class NetStandardFrameworkVersion
 
     public override string ToString()
     {
-        return $"net{Major}.{Minor}";
+        return $"netstandard{Major}.{Minor}";
     }
 
     #region Fields
 
-    static readonly Regex NetCoreFrameworkVersionRegex = new Regex(@"^net(\d+)\.(\d+)(?:-(.*))?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    static readonly Regex NetStandardFrameworkVersionRegex = new Regex(@"^netstandard(\d+)\.(\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     #endregion
 }

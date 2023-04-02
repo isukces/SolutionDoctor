@@ -16,7 +16,7 @@ namespace ISukces.SolutionDoctor
         {
 #if DEBUG
          //   args = new[] { "ct" };
-            // args = DebugConfigs.SetArgs(args);
+            args = DebugConfigs.SetArgs(args);
 
 #endif
             try
