@@ -146,6 +146,11 @@ namespace ISukces.SolutionDoctor.Logic.Checkers
         {
             if (file == null)
                 throw new ArgumentNullException(nameof(file));
+            if (!file.Exists)
+            {
+                Console.WriteLine("WARN File "+file.FullName+" doesn't exist");
+                return null;
+            }
             var hintToLower = file.FullName.ToLower();
             var query = from nuspec in _nuspecs
                 where hintToLower.StartsWith(nuspec.Item1, StringComparison.OrdinalIgnoreCase)

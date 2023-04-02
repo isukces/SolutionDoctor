@@ -1,4 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic
@@ -8,7 +11,7 @@ namespace ISukces.SolutionDoctor.Logic
         public static void CheckValidForRead(this FileInfo file)
         {
             if (file == null)
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException(nameof(file));
             if (!file.Exists)
                 throw new FileNotFoundException(string.Format("File {0} doesn't exist", file.FullName));
         }

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using ISukces.SolutionDoctor.Logic.Problems;
 
 namespace ISukces.SolutionDoctor.Logic

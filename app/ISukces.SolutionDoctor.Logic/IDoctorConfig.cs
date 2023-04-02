@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ISukces.SolutionDoctor.Logic
 {
     public enum AddRemoveOption

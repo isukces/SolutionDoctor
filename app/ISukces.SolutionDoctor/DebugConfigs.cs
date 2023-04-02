@@ -24,7 +24,7 @@ namespace ISukces.SolutionDoctor
                     return Make(@"C:\programs\ALPEX\PipelineDesigner", "app\\solutionDoctor.json");
                 case "ct":
                     Directory.SetCurrentDirectory(@"C:\programs\conexx");
-                    Directory.SetCurrentDirectory(@"C:\programs\conexx\conexx.total\app\_tests_\Conexx.FinishingPlates.Tests");
+                    // Directory.SetCurrentDirectory(@"C:\programs\conexx\conexx.total\app\_tests_\Conexx.FinishingPlates.Tests");
                     return new[]
                     {
                         "-runExternalFix", "-NoWarn", "1591,1573,618", "-WarningsAsErrors",

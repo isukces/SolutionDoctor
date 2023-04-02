@@ -4,7 +4,7 @@
     <ProjectGuid>{13CCABB5-157B-4DB1-9B7D-22444BB56750}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AssemblyName>SolutionDoctor</AssemblyName>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net7.0</TargetFrameworks>
     <AssemblyTitle>ISukces.SolutionDoctor</AssemblyTitle>
     <Product>ISukces.SolutionDoctor</Product>
     <Copyright>Copyright © Internet Sukces Piotr Stęclik 2015-2022</Copyright>
@@ -19,17 +19,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
-    <PackageReference Include="iSukces.Code.VsSolutions" Version="1.0.21009.13" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\dotnetLib\isukces.code\isukces.code.vssolutions\isukces.code.vssolutions.csproj" />
     <ProjectReference Include="..\ISukces.SolutionDoctor.Logic\ISukces.SolutionDoctor.Logic.csproj" />
   </ItemGroup>
 </Project>

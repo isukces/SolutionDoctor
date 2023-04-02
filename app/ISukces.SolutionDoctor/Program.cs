@@ -15,7 +15,8 @@ namespace ISukces.SolutionDoctor
         private static void Main(string[] args)
         {
 #if DEBUG
-            args = DebugConfigs.SetArgs(args);
+         //   args = new[] { "ct" };
+            // args = DebugConfigs.SetArgs(args);
 
 #endif
             try
@@ -74,8 +75,11 @@ namespace ISukces.SolutionDoctor
                         DisplayException(i);
                     break;
                 default:
-                    Console.WriteLine("Error: " + e.Message);
                     Console.WriteLine("       " + e.StackTrace);
+                    Console.Write("Error: ");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(e.Message);
+                    Console.ResetColor();
                     DisplayException(e.InnerException);
                     break;
             }

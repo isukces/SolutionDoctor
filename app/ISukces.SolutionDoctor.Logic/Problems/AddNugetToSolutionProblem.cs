@@ -1,4 +1,7 @@
-﻿using iSukces.Code.VsSolutions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using iSukces.Code.VsSolutions;
 
 namespace ISukces.SolutionDoctor.Logic.Problems
 {

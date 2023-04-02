@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+
 namespace ISukces.SolutionDoctor.Logic
 {
     public class HardCoded

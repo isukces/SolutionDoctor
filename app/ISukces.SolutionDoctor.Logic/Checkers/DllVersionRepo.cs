@@ -1,7 +1,6 @@
 using System.Reflection;
 using isukces.code.vssolutions;
 using iSukces.Code.VsSolutions;
-using Newtonsoft.Json;
 
 namespace ISukces.SolutionDoctor.Logic.Checkers;
 

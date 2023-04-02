@@ -57,8 +57,7 @@ namespace ISukces.SolutionDoctor.Logic.VsCall
         private DTE GetDTE2()
         {
             // Get the ProgID for DTE 14.0.
-            var t = Type.GetTypeFromProgID(
-                "VisualStudio.DTE." + VSVersion, true);
+            var t = Type.GetTypeFromProgID("VisualStudio.DTE." + VSVersion, true);
 
             // Create a new instance of the IDE.
             var obj = Activator.CreateInstance(t, true);
