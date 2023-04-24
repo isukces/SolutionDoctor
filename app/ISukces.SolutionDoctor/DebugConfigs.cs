@@ -21,15 +21,22 @@ namespace ISukces.SolutionDoctor
                 case "isukcesserenity": return Make(@"C:\programs\isukces\isukces.Serenity", "solutionDoctor.json");
                 case "isukcesbase": return Make(@"C:\programs\isukces\dotnetLib\isukces.Base\src", "solutionDoctor.json");
                 case "pd":
-                    return Make(@"C:\programs\ALPEX\PipelineDesigner", "app\\solutionDoctor.json");
+                    return Make(@"C:\programs\ALPEX\PipelineDesigner", "solutionDoctor.json");
                 case "ct":
                     Directory.SetCurrentDirectory(@"C:\programs\conexx");
-                    // Directory.SetCurrentDirectory(@"C:\programs\conexx\conexx.total\app\_tests_\Conexx.FinishingPlates.Tests");
                     return new[]
                     {
                         "-runExternalFix", "-NoWarn", "1591,1573,618", "-WarningsAsErrors",
                         "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734", "-cfg",
                         @"C:\programs\conexx\SolutionDoctor.json"
+                    };
+                case "ct7":
+                    Directory.SetCurrentDirectory(@"C:\programs\conexx");
+                    return new[]
+                    {
+                        "-runExternalFix", "-NoWarn", "1591,1573,618", "-WarningsAsErrors",
+                        "108,414,162,168,169,219,628,649,693,1570,1587,1572,1574,1718,1734", "-cfg",
+                        @"C:\programs\conexx\SolutionDoctor70.json"
                     };
                 case "home":
                     Directory.SetCurrentDirectory(@"C:\programs\ARDUINO");

@@ -30,6 +30,13 @@ public class DllVersionRepo
 
     private static FileInfo[] FindDlls(string path, string projectTarget)
     {
+        if (!Directory.Exists(path))
+        {
+            Console.WriteLine("Directory not found: " + path);
+            Console.WriteLine("Run nuget restore");
+            return Array.Empty<FileInfo>();
+        }
+
         if (!string.IsNullOrEmpty(projectTarget))
         {
             var dirs   = new DirectoryInfo(path).GetDirectories().Select(a => a.Name).ToArray();

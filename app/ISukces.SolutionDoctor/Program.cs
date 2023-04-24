@@ -15,7 +15,7 @@ namespace ISukces.SolutionDoctor
         private static void Main(string[] args)
         {
 #if DEBUG
-         //   args = new[] { "ct" };
+            // args = new[] { "pd" };
             args = DebugConfigs.SetArgs(args);
 
 #endif
@@ -47,7 +47,7 @@ namespace ISukces.SolutionDoctor
                     var directory = new DirectoryInfo(i);
                     if (!directory.Exists)
                     {
-                        Console.WriteLine("Directory {0} doesn't exist", directory.FullName);
+                        Console.WriteLine("WARN Directory {0} doesn't exist", directory.FullName);
                         ShowHelp();
                         return;
                     }

@@ -71,7 +71,10 @@ namespace ISukces.SolutionDoctor.Logic
 
         private static CommandLineOptions Load([NotNull] FileInfo file)
         {
+            if (!file.Exists)
+                throw new FileNotFoundException(file.FullName); 
             var x = JsonUtils.Default.Load<CommandLineOptions>(file);
+            
             x.ApplyPath(file);
             return x;
         }
