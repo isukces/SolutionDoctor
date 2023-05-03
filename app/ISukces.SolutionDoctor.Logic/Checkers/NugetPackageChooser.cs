@@ -80,8 +80,19 @@ public class NugetPackageChooser
                 if (a.Any())
                     return a.First().ToString();
             }
+            if (!tmp.IsPure)
+            {
+                if (ver == "net7.0-windows")
+                {
+                    var candidate = "net7.0-windows7.0";
+                    if (dirs.Contains(candidate))
+                        return candidate;
+                }
+            }
+            throw new NotSupportedException("Unable to choose target framework " + ver);
         }
-        throw new NotSupportedException();
+
+        throw new NotSupportedException("Unable to choose target framework " + ver);
     }
 
     #region Fields
