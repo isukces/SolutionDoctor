@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <ProjectGuid>{C554BFD4-5F6C-4974-858D-EB8EC5DF5652}</ProjectGuid>
-        <TargetFrameworks>net48;net7.0</TargetFrameworks>
+        <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <AssemblyTitle>ISukces.SolutionDoctor.Logic</AssemblyTitle>
         <Product>ISukces.SolutionDoctor.Logic</Product>
         <Copyright>Copyright © 2015</Copyright>

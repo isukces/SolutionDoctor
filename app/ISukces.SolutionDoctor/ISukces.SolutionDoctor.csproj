@@ -4,7 +4,7 @@
     <ProjectGuid>{13CCABB5-157B-4DB1-9B7D-22444BB56750}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AssemblyName>SolutionDoctor</AssemblyName>
-    <TargetFrameworks>net48;net7.0</TargetFrameworks>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
     <AssemblyTitle>ISukces.SolutionDoctor</AssemblyTitle>
     <Product>ISukces.SolutionDoctor</Product>
     <Copyright>Copyright © Internet Sukces Piotr Stęclik 2015-2022</Copyright>
@@ -18,7 +18,7 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
+    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
   </ItemGroup>
